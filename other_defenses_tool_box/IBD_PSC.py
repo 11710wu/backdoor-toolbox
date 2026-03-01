@@ -138,25 +138,38 @@ class IBD_PSC(BackdoorDefense):
     
     def count_BN_layers(self):
         layer_num = 0
+        print(f"[DEBUG] Counting BN layers in model: {type(self.model).__name__}")
         for (name1, module1) in self.model.named_modules():
             if isinstance(module1, torch.nn.BatchNorm2d):
             # if isinstance(module1, torch.nn.Conv2d):
                 layer_num += 1
+                # print(f"[DEBUG] Found BN layer [{layer_num}]: {name1}")
+        print(f"[DEBUG] Total BN layers found: {layer_num}")
         return layer_num
     
 
     def scale_var_index(self, index_bn, scale=1.5):
+        # copy_model = copy.deepcopy(self.model)
+        # 优化：不进行完整深拷贝，只在需要时修改参数，并在之后恢复（或者这里仅用于评估，深拷贝可能太慢）
+        # 但原始逻辑是 deepcopy，为了保持一致性先不动。
+        # 实际上 deepcopy 整个模型可能很耗时。
+        
         copy_model = copy.deepcopy(self.model)
         index  = -1
+        scaled_layers = []
         for (name1, module1) in copy_model.named_modules():
             if isinstance(module1, torch.nn.BatchNorm2d):
                 index += 1
                 if index in index_bn:
                     module1.weight.data *= scale
                     module1.bias.data *= scale
+                    scaled_layers.append(name1)
+        # if len(scaled_layers) > 0:
+        #     print(f"[DEBUG] Scaled {len(scaled_layers)} layers: {scaled_layers}")
         return copy_model  
     
     def prob_start(self, scale, sorted_indices):
+        print(f"[DEBUG] Starting prob_start search with scale={scale}, sorted_indices length={len(sorted_indices)}")
         layer_num = len(sorted_indices)
         # layer_index: k
         for layer_index in range(1, layer_num):            
@@ -180,9 +193,11 @@ class IBD_PSC(BackdoorDefense):
                     clean_wrong += torch.sum(labels != clean_pred)
                     total_num += labels.shape[0]
                 wrong_acc = clean_wrong / total_num
-                # print(f'wrong_acc: {wrong_acc}')
+                print(f'[DEBUG] layer_index={layer_index}, affected_layers={len(layers)}, wrong_acc: {wrong_acc:.4f} (threshold xi={self.xi})')
                 if wrong_acc > self.xi:
+                    print(f"[DEBUG] Found start_index: {layer_index}")
                     return layer_index
+
         
         # ========== [修复] 如果没有找到满足条件的层，返回默认值 ==========
         # 问题：MNIST 数据集简单，模型对参数变化不敏感，可能所有层的错误率都低于 xi
