@@ -1,25 +1,17 @@
 # This is the test code of IBD-PSC defense.
 # IBD-PSC: Input-level Backdoor Detection via Parameter-oriented Scaling Consistency [ICML, 2024] (https://arxiv.org/abs/2405.09786) 
 import os
-import pdb
+import json
+import copy
 import torch
 import config
-import torchvision
 from sklearn import metrics
 from tqdm import tqdm
-import copy
-import numpy as np
-import torch.nn.functional as F
-import matplotlib.pyplot as plt
-from collections import Counter
-import torch.nn as nn
-import numpy as np
-import json
 
 from other_defenses_tool_box.backdoor_defense import BackdoorDefense
+
 from other_defenses_tool_box.tools import generate_dataloader
-from utils.supervisor import get_transforms
-from utils import supervisor, tools
+from utils import supervisor
 
 '''
 python other_defense.py -dataset cifar10 -poison_type badnet -poison_rate 0.1 -defense IBD_PSC
@@ -37,19 +29,19 @@ class IBD_PSC(BackdoorDefense):
     """
     
     name: str = 'IBD_PSC'
-    def __init__(self, args, n=5, xi=0.6, T = 0.9, scale=1.5, override_mnist_params=False):  # ========== [Tiny ImageNet 支持] 降低阈值 T 从 0.9 到 0.5，因为 200 类别的数据集 softmax 概率分布更分散 ==========
+    def __init__(self, args, n=5, xi=0.6, T=None, scale=1.5):
         super().__init__(args)
         self.model.eval()
         self.args =  args
-        
-        # ========== [MNIST/MNIST-M 支持已移除] ==========
-        # 移除对 MNIST/MNIST-M 的特殊参数调整，使用默认参数
-        # 之前的调整：xi=0.3, scale=3.0，现在使用默认值：xi=0.6, scale=1.5
-        # ========== [MNIST/MNIST-M 支持已移除] ==========
-        
         self.n = n
         self.xi = xi
-        self.T = T
+        # T: PSC 阈值，>=T 判为后门。None 时默认 0.9；Tiny ImageNet 用 0.5（200 类 softmax 更分散）
+        if T is not None:
+            self.T = T
+        elif self.dataset == 'tiny_imagenet':
+            self.T = 0.5
+        else:
+            self.T = 0.9
         self.scale = scale
         
         # ========== [Tiny ImageNet 支持] 根据数据集调整 batch_size ==========
@@ -87,7 +79,7 @@ class IBD_PSC(BackdoorDefense):
         sorted_indices = list(range(layer_num))
         sorted_indices = list(reversed(sorted_indices))
         self.sorted_indices = sorted_indices
-        self.start_index = self.prob_start(self.scale, self.sorted_indices)
+        self.start_index, self.used_fallback = self.prob_start(self.scale, self.sorted_indices)
         
         total_num = 0 
         clean_correct = 0
@@ -104,12 +96,7 @@ class IBD_PSC(BackdoorDefense):
             total_num += labels.shape[0]
             clean_img = clean_img.cuda()  # batch * channels * hight * width
             labels = labels.cuda()  # batch
-            # ========== [IBD-PSC修复] 修复 target_flag 逻辑 ==========
-            # 问题：原始代码硬编码 target_flag = labels != 0，假设目标类为 0。
-            #      但实际目标类由 config.target_class[args.dataset] 决定。
-            # 解决：使用 self.target_class 来正确识别非目标类别的样本。
-            target_flag = labels != self.target_class
-            # ========== [IBD-PSC修复] 结束 ==========
+            target_flag = labels != self.target_class  # 使用 config 中的 target_class，非硬编码 0
             poison_imgs, poison_labels = self.poison_transform.transform(clean_img[target_flag], labels[target_flag])
             bd_logits = self.model(poison_imgs)
             clean_logits = self.model(clean_img)
@@ -138,75 +125,45 @@ class IBD_PSC(BackdoorDefense):
     
     def count_BN_layers(self):
         layer_num = 0
-        print(f"[DEBUG] Counting BN layers in model: {type(self.model).__name__}")
         for (name1, module1) in self.model.named_modules():
             if isinstance(module1, torch.nn.BatchNorm2d):
-            # if isinstance(module1, torch.nn.Conv2d):
                 layer_num += 1
-                # print(f"[DEBUG] Found BN layer [{layer_num}]: {name1}")
-        print(f"[DEBUG] Total BN layers found: {layer_num}")
         return layer_num
     
 
     def scale_var_index(self, index_bn, scale=1.5):
-        # copy_model = copy.deepcopy(self.model)
-        # 优化：不进行完整深拷贝，只在需要时修改参数，并在之后恢复（或者这里仅用于评估，深拷贝可能太慢）
-        # 但原始逻辑是 deepcopy，为了保持一致性先不动。
-        # 实际上 deepcopy 整个模型可能很耗时。
-        
         copy_model = copy.deepcopy(self.model)
-        index  = -1
-        scaled_layers = []
+        index = -1
         for (name1, module1) in copy_model.named_modules():
             if isinstance(module1, torch.nn.BatchNorm2d):
                 index += 1
                 if index in index_bn:
                     module1.weight.data *= scale
                     module1.bias.data *= scale
-                    scaled_layers.append(name1)
-        # if len(scaled_layers) > 0:
-        #     print(f"[DEBUG] Scaled {len(scaled_layers)} layers: {scaled_layers}")
         return copy_model  
     
     def prob_start(self, scale, sorted_indices):
-        print(f"[DEBUG] Starting prob_start search with scale={scale}, sorted_indices length={len(sorted_indices)}")
         layer_num = len(sorted_indices)
-        # layer_index: k
-        for layer_index in range(1, layer_num):            
+        for layer_index in range(1, layer_num):
             layers = sorted_indices[:layer_index]
-            # print(layers)
             smodel = self.scale_var_index(layers, scale=scale)
             smodel.cuda()
             smodel.eval()
-            
-            total_num = 0 
+            total_num = 0
             clean_wrong = 0
             with torch.no_grad():
                 for idx, batch in enumerate(self.val_loader):
                     clean_img = batch[0]
                     labels = batch[1]
-                    clean_img = clean_img.cuda()  # batch * channels * hight * width
-                    # labels = labels.cuda()  # batch
+                    clean_img = clean_img.cuda()
                     clean_logits = smodel(clean_img).detach().cpu()
-                    clean_pred = torch.argmax(clean_logits, dim=1)# model prediction
-                    
+                    clean_pred = torch.argmax(clean_logits, dim=1)
                     clean_wrong += torch.sum(labels != clean_pred)
                     total_num += labels.shape[0]
                 wrong_acc = clean_wrong / total_num
-                print(f'[DEBUG] layer_index={layer_index}, affected_layers={len(layers)}, wrong_acc: {wrong_acc:.4f} (threshold xi={self.xi})')
                 if wrong_acc > self.xi:
-                    print(f"[DEBUG] Found start_index: {layer_index}")
-                    return layer_index
-
-        
-        # ========== [修复] 如果没有找到满足条件的层，返回默认值 ==========
-        # 问题：MNIST 数据集简单，模型对参数变化不敏感，可能所有层的错误率都低于 xi
-        # 解决：返回一个安全的默认值，确保有足够的层用于后续处理
-        if layer_num > 0:
-            return max(1, layer_num - self.n)
-        else:
-            return 1  # 默认返回 1
-        # ========== [修复结束] ==========
+                    return layer_index, False
+        return max(1, layer_num - self.n) if layer_num > 0 else 1, True
 
     
     def test(self, inspect_correct_predition_only=False):
@@ -226,16 +183,8 @@ class IBD_PSC(BackdoorDefense):
                 clean_img = clean_img.cuda()  # batch * channels * hight * width
                 labels = labels.cuda()  # batch
                 poison_imgs, poison_labels = self.poison_transform.transform(clean_img, labels)
-                    
-                # ========== [设备不匹配修复] 开始 ==========
-                # 问题：logits 已经搬到 CPU（通过 .detach().cpu()），但 clean_pred/poison_pred 仍在 GPU，
-                #       后续使用这些索引 CPU 张量时会触发设备不一致错误。
-                # 解决：在索引前将预测张量迁移到 CPU，保持张量所在设备一致。
-                # ========== [设备不匹配修复] 结束 ==========
-                poison_pred = torch.argmax(self.model(poison_imgs), dim=1).cpu() # model prediction
-                clean_pred = torch.argmax(self.model(clean_img), dim=1).cpu() # model prediction
-                oclean_logits = torch.nn.functional.softmax(self.model(clean_img).cpu(), dim=1)
-                obd_logits = torch.nn.functional.softmax(self.model(poison_imgs).cpu(), dim=1)
+                poison_pred = torch.argmax(self.model(poison_imgs), dim=1).cpu()
+                clean_pred = torch.argmax(self.model(clean_img), dim=1).cpu()
                         
                     
                 spc_poison = torch.zeros(labels.shape)
@@ -245,6 +194,7 @@ class IBD_PSC(BackdoorDefense):
                 for layer_index in range(self.start_index, self.start_index + self.n):
                     layers = self.sorted_indices[:layer_index+1]
                     smodel = self.scale_var_index(layers, scale=self.scale)
+                    smodel.cuda()
                     scale_count += 1
                     smodel.eval()
 
@@ -272,34 +222,7 @@ class IBD_PSC(BackdoorDefense):
         auc = metrics.auc(fpr, tpr)
         tn, fp, fn, tp = metrics.confusion_matrix(y_true, y_pred).ravel()
         myf1 = metrics.f1_score(y_true, y_pred)
-        
-        # ========== [FPR 计算检查] 添加调试信息以检查 FPR 超过 100% 的问题 ==========
-        # 检查数据长度是否一致
-        assert len(y_true) == len(y_pred), f"y_true 和 y_pred 长度不一致: {len(y_true)} vs {len(y_pred)}"
-        assert len(y_true) == len(y_score), f"y_true 和 y_score 长度不一致: {len(y_true)} vs {len(y_score)}"
-        
-        # 检查 confusion_matrix 的结果是否合理
-        total_samples = tn + fp + fn + tp
-        assert total_samples == len(y_true), f"confusion_matrix 总数与样本数不一致: {total_samples} vs {len(y_true)}"
-        
-        # 检查 FPR 计算
-        if (tn + fp) == 0:
-            fpr_value = 0.0
-            print(f"[警告] tn + fp = 0，无法计算 FPR")
-        else:
-            fpr_value = fp / (tn + fp) * 100
-            if fpr_value > 100:
-                print(f"[错误] FPR 超过 100%: {fpr_value:.2f}%")
-                print(f"  tn={tn}, fp={fp}, fn={fn}, tp={tp}")
-                print(f"  y_true 中 0 的数量: {(y_true == 0).sum().item()}")
-                print(f"  y_true 中 1 的数量: {(y_true == 1).sum().item()}")
-                print(f"  y_pred 中 True 的数量: {y_pred.sum().item()}")
-                print(f"  y_pred 中 False 的数量: {(~y_pred).sum().item()}")
-                # 强制限制 FPR 在 100% 以内
-                fpr_value = min(fpr_value, 100.0)
-        # ========== [FPR 计算检查] 结束 ==========
-        
-        # 计算指标
+        fpr_value = fp / (tn + fp) * 100 if (tn + fp) > 0 else 0.0
         auc_value = float(auc)
         
         print("")
@@ -308,20 +231,8 @@ class IBD_PSC(BackdoorDefense):
         print("AUC: {:.4f}".format(auc_value))
         print(f"f1 score: {myf1}")
         
-        # ========== [IBD-PSC检测结果保存修改] 开始 ==========
-        # 将IBD-PSC检测结果保存到中毒数据集文件夹
-        # 目的: 方便后续统一评估不同防御方法的效果
-        # ========== [修改] 优先使用 test_poison_dir ==========
-        # 如果存在 test_poison_dir（由 other_defense.py 设置），使用它以确保保存到正确的目录
-        # 否则使用默认的 get_poison_set_dir
         poison_set_dir = getattr(args, 'test_poison_dir', None) or supervisor.get_poison_set_dir(args)
-        # ========== [修改结束] ==========
-        # ========== [指标计算修改] 开始 ==========
-        # 计算TPR和FPR：添加TPR和FPR的计算，用于保存到结果文件
-        tpr_value = tp / (tp + fn) * 100 if (tp + fn) > 0 else 0.0  # 中毒样本检测准确率（TPR）
-        # 使用上面计算好的 fpr_value（已经处理了超过 100% 的情况）
-        # fpr_value 在上面已经计算并限制在 100% 以内
-        # ========== [指标计算修改] 结束 ==========
+        tpr_value = tp / (tp + fn) * 100 if (tp + fn) > 0 else 0.0
         
         ibd_psc_results = {
             'defense_method': 'IBD-PSC (Input-level Backdoor Detection via Parameter-oriented Scaling Consistency)',
@@ -330,32 +241,18 @@ class IBD_PSC(BackdoorDefense):
             'T': self.T,  # PSC阈值
             'scale': self.scale,  # BN层参数放大倍数
             'start_index': int(self.start_index),  # 起始BN层索引
+            'used_fallback': getattr(self, 'used_fallback', False),  # prob_start 是否触发了 fallback
             'tpr': float(tpr_value),  # True Positive Rate
             'fpr': float(fpr_value),  # False Positive Rate
             'auc': auc_value,  # Area Under Curve (ROC曲线下面积)
         }
         
-        # 保存结果到JSON文件
-        # ========== [修复] 确保目录存在 ==========
-        # 现在默认都会有 _arch 后缀，如果目录不存在则创建它
         os.makedirs(poison_set_dir, exist_ok=True)
-        # ========== [修复结束] ==========
-        # 注意：文件名使用默认名称，other_defense.py 中的 annotate_defense_results 会自动创建带 test_alpha 后缀的副本
         ibd_psc_results_path = os.path.join(poison_set_dir, 'ibd_psc_defense_results.json')
         with open(ibd_psc_results_path, 'w') as f:
             json.dump(ibd_psc_results, f, indent=4)
         
-        # 打印IBD-PSC检测结果摘要
-        print(f"\n{'='*50}")
-        print(f"[IBD-PSC Detection Results]")
-        print(f"Start Index: {self.start_index}")
-        print(f"Scale: {self.scale}")
-        print(f"TPR (中毒样本检测准确率): {tpr_value:.2f}%")
-        print(f"FPR (假阳性率): {fpr_value:.2f}%")
-        print(f"AUC: {auc_value:.4f}")
-        print(f"Results saved to: {ibd_psc_results_path}")
-        print(f"{'='*50}\n")
-        # ========== [IBD-PSC检测结果保存修改] 结束 ==========
+        print(f"\n[IBD-PSC] TPR: {tpr_value:.2f}% FPR: {fpr_value:.2f}% AUC: {auc_value:.4f} -> {ibd_psc_results_path}")
         
         if inspect_correct_predition_only:
                 # Only consider:
@@ -402,11 +299,7 @@ class IBD_PSC(BackdoorDefense):
                     clean_pred_correct_mask[torch.sum(poison_attack_success_mask).item(): ] = False
                     # print(clean_pred_correct_mask)
 
-                # ========== [设备不匹配修复] 开始 ==========
-                # 问题：mask 在 GPU 上（由 cuda() 创建），而 y_true, y_pred, y_score 在 CPU 上
-                # 解决：将 mask 移到 CPU 后再进行索引操作
-                # ========== [设备不匹配修复] 结束 ==========
-                mask = torch.cat((clean_pred_correct_mask, poison_attack_success_mask), dim=0)
+                mask = torch.cat((clean_pred_correct_mask, poison_attack_success_mask), dim=0).cpu()
 
                 y_true = y_true[mask]
                 # print(y_true.size())
