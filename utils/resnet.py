@@ -258,10 +258,9 @@ def ResNet152(num_classes=10):
 
 def ResNet18_tiny_imagenet(num_classes=200):
     """
-    ResNet-18 for Tiny ImageNet (32x32 input, 200 classes)
+    ResNet-18 for Tiny ImageNet (64x64 input, 200 classes)
 
-    Note: Tiny ImageNet images are resized to 32×32 before training/testing,
-    so this model uses the same architecture as CIFAR-10 version.
+    Note: Tiny ImageNet uses 64×64 images; architecture supports arbitrary input size via AdaptiveAvgPool2d.
     """
     print(f"[MODEL] Creating ResNet18_TinyImageNet with {num_classes} classes")
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)

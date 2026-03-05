@@ -270,10 +270,9 @@ def mobilenetv2_cifar10(num_classes=10):
 
 def mobilenetv2_tiny_imagenet(num_classes=200):
     """
-    MobileNetV2 for Tiny ImageNet (32x32 input, 200 classes)
+    MobileNetV2 for Tiny ImageNet (64x64 input, 200 classes)
 
-    Note: Tiny ImageNet images are resized to 32×32 before training/testing,
-    so this model uses the same architecture as CIFAR-10 version.
+    Note: Tiny ImageNet uses 64×64 images; architecture supports arbitrary input size via adaptive average pooling.
     """
     print(f"[MODEL] Creating MobileNetV2_TinyImageNet with {num_classes} classes")
     return MobileNetV2(class_num=num_classes)

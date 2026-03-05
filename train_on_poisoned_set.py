@@ -3,7 +3,8 @@ import os, sys
 import time
 from tqdm import tqdm
 from utils import default_args, imagenet
-from torch.cuda.amp import autocast, GradScaler
+from torch.cuda.amp import autocast
+from torch.amp import GradScaler
 import json
 import datetime
 
@@ -519,7 +520,7 @@ if args.dataset == 'imagenet':
     print('<time : %f minutes>' % ( (time.time() - st) / 60 ))
 """
 
-scaler = GradScaler()
+scaler = GradScaler('cuda')
 for epoch in range(1, epochs+1):  # train backdoored base model
     start_time = time.perf_counter()
 

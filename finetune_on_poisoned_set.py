@@ -8,7 +8,8 @@ import os, sys
 import time
 from tqdm import tqdm
 from utils import default_args, imagenet
-from torch.cuda.amp import autocast, GradScaler
+from torch.cuda.amp import autocast
+from torch.amp import GradScaler
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-dataset', type=str, required=False,
