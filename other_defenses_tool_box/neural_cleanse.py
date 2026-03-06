@@ -105,10 +105,27 @@ class NC(BackdoorDefense):
             'max_anomaly_index': max_anomaly_index, # 这里的最大值就是判断中毒的核心指标
             'is_poisoned': is_poisoned
         }
+
+        # ======== [test-alpha / test_s / test_delta 支持] 检测阶段结果标注 ========
+        test_param_type, test_param_value, test_suffix = self._get_test_param_info()
+        if test_param_type is not None and test_param_value is not None:
+            # 在结果中写入测试参数信息，便于后续统计
+            results['test_param_type'] = test_param_type
+            results['test_param_value'] = float(test_param_value)
+            results[test_param_type] = float(test_param_value)
         
-        save_path = os.path.join(self.detection_dir, 'nc_detection_%s.json' % supervisor.get_dir_core(self.args, include_model_name=True, include_poison_seed=config.record_poison_seed))
+        base_name = 'nc_detection_%s.json' % supervisor.get_dir_core(self.args, include_model_name=True, include_poison_seed=config.record_poison_seed)
+        save_path = os.path.join(self.detection_dir, base_name)
         with open(save_path, 'w') as f:
             json.dump(results, f, indent=4)
+
+        # 如果存在测试强度(test-alpha / test_s / test_delta)，额外保存带后缀的文件
+        if test_suffix is not None:
+            suffixed_name = base_name.replace('.json', f'_{test_suffix}.json')
+            suffixed_path = os.path.join(self.detection_dir, suffixed_name)
+            with open(suffixed_path, 'w') as f:
+                json.dump(results, f, indent=4)
+
         print(f"[{'POISONED' if is_poisoned else 'CLEAN'}] Max Anomaly Index: {max_anomaly_index:.4f}")
         print(f"Detection results saved to {save_path}")
 
@@ -433,11 +450,26 @@ class NC(BackdoorDefense):
             'asr_reduction': float(asr_before - asr_after),  # ASR绝对降低值
             'asr_reduction_rate': float((asr_before - asr_after) / asr_before * 100) if asr_before > 0 else 0.0,  # ASR相对降低率
         }
+
+        # ======== [test-alpha / test_s / test_delta 支持] 防御阶段结果标注 ========
+        test_param_type, test_param_value, test_suffix = self._get_test_param_info()
+        if test_param_type is not None and test_param_value is not None:
+            nc_results['test_param_type'] = test_param_type
+            nc_results['test_param_value'] = float(test_param_value)
+            nc_results[test_param_type] = float(test_param_value)
         
         # 保存结果到JSON文件
-        nc_results_path = os.path.join(poison_set_dir, 'nc_defense_results.json')
+        base_name = 'nc_defense_results.json'
+        nc_results_path = os.path.join(poison_set_dir, base_name)
         with open(nc_results_path, 'w') as f:
             json.dump(nc_results, f, indent=4)
+
+        # 如果存在测试强度(test-alpha / test_s / test_delta)，额外保存带后缀的文件
+        if test_suffix is not None:
+            suffixed_name = base_name.replace('.json', f'_{test_suffix}.json')
+            suffixed_path = os.path.join(poison_set_dir, suffixed_name)
+            with open(suffixed_path, 'w') as f:
+                json.dump(nc_results, f, indent=4)
         
         # 打印NC防御结果摘要
         print(f"\n{'='*50}")
@@ -455,6 +487,38 @@ class NC(BackdoorDefense):
         # 如果需要保存,取消下面两行的注释
         # torch.save(self.model.module.state_dict(), supervisor.get_model_dir(self.args, defense=True))
         # print("Saved repaired model to {}".format(supervisor.get_model_dir(self.args, defense=True)))
+
+    # ========== [test-alpha / test_s / test_delta 辅助函数] ==========
+    def _get_test_param_info(self):
+        """
+        返回 (param_type, param_value, suffix_str)
+        param_type ∈ { 'test_alpha', 'test_s', 'test_delta' } 或 None
+        suffix_str 形如 'test_alpha=0.2'，用于结果文件名后缀。
+        """
+        # 仅支持一次测试改变一个参数，优先级：alpha > s > delta
+        args = self.args
+        test_alpha = getattr(args, 'test_alpha', None)
+        test_s = getattr(args, 'test_s', None)
+        test_delta = getattr(args, 'test_delta', None)
+
+        if test_alpha is not None:
+            return 'test_alpha', test_alpha, f"test_alpha={self._format_numeric(test_alpha)}"
+        if test_s is not None:
+            return 'test_s', test_s, f"test_s={self._format_numeric(test_s)}"
+        if test_delta is not None:
+            return 'test_delta', test_delta, f"test_delta={self._format_numeric(test_delta)}"
+        return None, None, None
+
+    @staticmethod
+    def _format_numeric(value: float) -> str:
+        """格式化数值为紧凑字符串，用于文件名。"""
+        try:
+            v = float(value)
+        except Exception:
+            return str(value)
+        if v.is_integer():
+            return str(int(v))
+        return f"{v:.6f}".rstrip('0').rstrip('.')
 
 class DatasetCL(Dataset):
     def __init__(self, ratio, full_dataset=None, transform=None, poison_ratio=0, mark=None, mask=None):

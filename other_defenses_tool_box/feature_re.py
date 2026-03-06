@@ -14,6 +14,7 @@ from utils.tools import test
 import numpy as np
 from functools import reduce
 from tqdm import tqdm
+import json
 
 
 class FeatureRE(BackdoorDefense):
@@ -256,17 +257,30 @@ class FeatureRE(BackdoorDefense):
             'threshold': mixed_value_threshold,
             'is_poisoned': is_poisoned
         }
+
+        # ======== [test-alpha / test_s / test_delta 支持] 检测阶段结果标注 ========
+        test_param_type, test_param_value, test_suffix = self._get_test_param_info()
+        if test_param_type is not None and test_param_value is not None:
+            results['test_param_type'] = test_param_type
+            results['test_param_value'] = float(test_param_value)
+            results[test_param_type] = float(test_param_value)
         
         save_folder = supervisor.get_poison_set_dir(self.args)
         if not os.path.exists(save_folder):
              os.makedirs(save_folder, exist_ok=True)
              
-        save_file_name = 'featurere_defense_results.json'
-        save_path = os.path.join(save_folder, save_file_name)
+        base_name = 'featurere_defense_results.json'
+        save_path = os.path.join(save_folder, base_name)
 
-        import json
         with open(save_path, 'w') as f:
             json.dump(results, f, indent=4)
+
+        # 如果存在测试强度(test-alpha / test_s / test_delta)，额外保存带后缀的文件
+        if test_suffix is not None:
+            suffixed_name = base_name.replace('.json', f'_{test_suffix}.json')
+            suffixed_path = os.path.join(save_folder, suffixed_name)
+            with open(suffixed_path, 'w') as f:
+                json.dump(results, f, indent=4)
             
         print(f"Final Mixed Value Best: {mv_best:.6f}")
         print(f"Threshold: {mixed_value_threshold}")
@@ -347,3 +361,35 @@ class FeatureRE(BackdoorDefense):
         out = self.classifier.from_features_to_output(features)
 
         return out, features, x_before_ae, x_after_ae, features_ori
+
+    # ========== [test-alpha / test_s / test_delta 辅助函数] ==========
+    def _get_test_param_info(self):
+        """
+        返回 (param_type, param_value, suffix_str)
+        param_type ∈ { 'test_alpha', 'test_s', 'test_delta' } 或 None
+        suffix_str 形如 'test_alpha=0.2'，用于结果文件名后缀。
+        """
+        # 仅支持一次测试改变一个参数，优先级：alpha > s > delta
+        args = self.args
+        test_alpha = getattr(args, 'test_alpha', None)
+        test_s = getattr(args, 'test_s', None)
+        test_delta = getattr(args, 'test_delta', None)
+
+        if test_alpha is not None:
+            return 'test_alpha', test_alpha, f"test_alpha={self._format_numeric(test_alpha)}"
+        if test_s is not None:
+            return 'test_s', test_s, f"test_s={self._format_numeric(test_s)}"
+        if test_delta is not None:
+            return 'test_delta', test_delta, f"test_delta={self._format_numeric(test_delta)}"
+        return None, None, None
+
+    @staticmethod
+    def _format_numeric(value: float) -> str:
+        """格式化数值为紧凑字符串，用于文件名。"""
+        try:
+            v = float(value)
+        except Exception:
+            return str(value)
+        if v.is_integer():
+            return str(int(v))
+        return f"{v:.6f}".rstrip('0').rstrip('.')

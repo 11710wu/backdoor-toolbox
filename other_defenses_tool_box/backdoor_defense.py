@@ -123,7 +123,10 @@ class BackdoorDefense():
             self.trigger_mask = torch.logical_or(torch.logical_or(self.trigger_mark[0] > 0, self.trigger_mark[1] > 0), self.trigger_mark[2] > 0).cuda()
 
         self.poison_set_dir = supervisor.get_poison_set_dir(args)
-        model_path = supervisor.get_model_dir(args)
+        # 当使用 test_s / test_delta 时，args 已被覆盖，get_poison_set_dir 会返回测试目录；
+        # 模型是用训练参数训练的，必须从 train_poison_dir 加载
+        model_dir_for_load = getattr(args, 'train_poison_dir', None) or self.poison_set_dir
+        model_path = os.path.join(model_dir_for_load, supervisor.get_model_name(args))
         
         # BELT特殊处理：使用增强模型
         if args.poison_type == 'belt':
