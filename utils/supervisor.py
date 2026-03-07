@@ -94,17 +94,10 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
         args.dataset, args.poison_type, ratio, blend_alpha, cover_rate, args.trigger)
     elif args.poison_type == 'adaptive_patch':
         # ========== [Adaptive Patch Alpha参数修改] 开始 ==========
-        # 修改：在目录名中包含alpha偏移量参数，避免不同偏移量的数据集互相覆盖
-        # 说明：alpha参数表示在默认alpha列表基础上的偏移量
-        # 如果用户指定了-alpha参数（不等于默认值0.2），则在目录名中包含alpha信息
+        # 修改：始终在目录名中包含alpha参数，便于区分不同配置
         blend_alpha = '%.3f' % args.alpha
         cover_rate = '%.3f' % args.cover_rate
-        if args.alpha != default_args.parser_default['alpha']:
-            # 用户指定了alpha偏移量，在目录名中包含
-            dir_core = '%s_%s_%s_alpha=%s_cover=%s' % (args.dataset, args.poison_type, ratio, blend_alpha, cover_rate)
-        else:
-            # 用户未指定alpha偏移量，使用默认列表，目录名不包含alpha
-            dir_core = '%s_%s_%s_cover=%s' % (args.dataset, args.poison_type, ratio, cover_rate)
+        dir_core = '%s_%s_%s_alpha=%s_cover=%s' % (args.dataset, args.poison_type, ratio, blend_alpha, cover_rate)
         # ========== [Adaptive Patch Alpha参数修改] 结束 ==========
     elif args.poison_type == 'TaCT' or args.poison_type == 'WaNet':
         cover_rate = '%.3f' % args.cover_rate
@@ -169,18 +162,11 @@ def get_poison_set_dir(args):
         args.dataset, args.poison_type, ratio, blend_alpha, cover_rate, args.trigger)
     elif args.poison_type == 'adaptive_patch':
         # ========== [Adaptive Patch Alpha参数修改] 开始 ==========
-        # 修改：在目录路径中包含alpha偏移量参数，避免不同偏移量的数据集互相覆盖
-        # alpha参数表示在默认alpha列表基础上的偏移量
+        # 修改：始终在目录路径中包含alpha参数，便于区分不同配置
         blend_alpha = '%.3f' % args.alpha
         cover_rate = '%.3f' % args.cover_rate
-        if args.alpha != default_args.parser_default['alpha']:
-            # 用户指定了alpha偏移量，在目录路径中包含
-            poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s_cover=%s' % (
-                args.dataset, args.poison_type, ratio, blend_alpha, cover_rate)
-        else:
-            # 用户未指定alpha偏移量，使用默认列表，目录路径不包含alpha
-            poison_set_dir = 'poisoned_train_set/%s/%s_%s_cover=%s' % (
-                args.dataset, args.poison_type, ratio, cover_rate)
+        poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s_cover=%s' % (
+            args.dataset, args.poison_type, ratio, blend_alpha, cover_rate)
         # ========== [Adaptive Patch Alpha参数修改] 结束 ==========
     elif args.poison_type == 'TaCT':
         cover_rate = '%.3f' % args.cover_rate
