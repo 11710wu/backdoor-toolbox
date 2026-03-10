@@ -219,10 +219,6 @@ def get_poison_set_dir(args):
     else:
         poison_set_dir = 'poisoned_train_set/%s/%s_%s' % (args.dataset, args.poison_type, ratio)
 
-    # 噪声类型：传入 -noise_type 时在保存目录名中体现，便于区分有无噪声的数据集
-    if getattr(args, 'noise_type', None) is not None:
-        poison_set_dir = f'{poison_set_dir}_noise={args.noise_type}'
-
     if config.record_poison_seed: poison_set_dir = f'{poison_set_dir}_poison_seed={config.poison_seed}'  # debug
     if config.record_model_arch:
         # 获取实际使用的模型架构名称

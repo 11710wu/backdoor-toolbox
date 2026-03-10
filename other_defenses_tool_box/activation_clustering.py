@@ -69,12 +69,12 @@ class AC(BackdoorDefense):
         super().__init__(args)
         self.args = args
     
-    def detect(self, inspect_correct_predition_only=True, noisy_test=False):
+    def detect(self, inspect_correct_predition_only=True):
         args = self.args
         
         from sklearn.cluster import KMeans
         
-        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=self.data_transform, shuffle=False, noisy_test=noisy_test)
+        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=self.data_transform, shuffle=False)
         # loader = generate_dataloader(dataset=self.dataset, dataset_path=config.data_dir, batch_size=100, split='valid', shuffle=False, drop_last=False)
 
         suspicious_indices = []

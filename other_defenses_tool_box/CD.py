@@ -45,7 +45,7 @@ class CognitiveDistillation(BackdoorDefense):
                                                )
 
 
-    def detect(self, inspect_correct_predition_only=True, noisy_test=False):
+    def detect(self, inspect_correct_predition_only=True):
         self.model.eval()
         args = self.args
         

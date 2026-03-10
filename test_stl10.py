@@ -344,12 +344,6 @@ def main():
     parser.add_argument('-upgd_steps_multiplier', type=int, required=False, default=5,
                         help='UPGD steps_multiplier（与 create_poisoned_set.py 保持一致，用于定位数据/模型目录）')
     # ========== [UPGD 参数] 结束 ==========
-    # ========== [噪声增强参数] 与 create_poisoned_set.py 一致，用于定位带噪声的模型目录 ==========
-    parser.add_argument('-noise_type', type=str, required=False, default=None,
-                        choices=['gaussian', 'salt_pepper', 'uniform'],
-                        help='噪声类型；与创建投毒集时一致则定位到对应目录，不传则使用无噪声目录')
-    # ========== [噪声增强参数] 结束 ==========
-    
     # 解析命令行参数
     args = parser.parse_args()
     

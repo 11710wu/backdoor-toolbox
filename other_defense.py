@@ -30,7 +30,6 @@ parser.add_argument('-test_delta', type=float, required=False, default=None,
 parser.add_argument('-trigger', type=str, required=False,
                     default=None)
 parser.add_argument('-no_aug', default=False, action='store_true')
-parser.add_argument('-noisy_test', default=False, action='store_true')
 parser.add_argument('-model', type=str, required=False, default=None)
 parser.add_argument('-model_path', required=False, default=None)
 parser.add_argument('-no_normalize', default=False, action='store_true')
@@ -54,11 +53,6 @@ parser.add_argument('-upgd_steps', type=int, required=False, default=100,
                     help='UPGD steps (same as create_poisoned_set.py; used to locate poison dir)')
 parser.add_argument('-upgd_steps_multiplier', type=int, required=False, default=5,
                     help='UPGD steps_multiplier (same as create_poisoned_set.py; used to locate poison dir)')
-# 噪声类型：与 create_poisoned_set.py 一致，用于定位带噪声的数据/模型目录
-parser.add_argument('-noise_type', type=str, required=False, default=None,
-                    choices=['gaussian', 'salt_pepper', 'uniform'],
-                    help='噪声类型；与创建投毒集时一致则定位到对应目录，不传则使用无噪声目录')
-
 args = parser.parse_args()
 # ===== 修改开始（新增辅助函数与结果标注） =====
 
@@ -192,12 +186,7 @@ if args.log:
     if not os.path.exists(out_path): os.mkdir(out_path)
     out_path = os.path.join(out_path, 'other_defense')
     if not os.path.exists(out_path): os.mkdir(out_path)
-    if args.noisy_test:
-        out_path = os.path.join(out_path, '%s_noisy_test_%s.out' % (args.defense,
-                                                     supervisor.get_dir_core(args, include_model_name=True,
-                                                                             include_poison_seed=config.record_poison_seed)))
-    else:
-        out_path = os.path.join(out_path, '%s_%s.out' % (args.defense,
+    out_path = os.path.join(out_path, '%s_%s.out' % (args.defense,
                                                      supervisor.get_dir_core(args, include_model_name=True,
                                                                              include_poison_seed=config.record_poison_seed)))
     # fout = open(out_path, 'w')
@@ -225,7 +214,7 @@ elif args.defense == 'AC':
     defense = AC(
         args,
     )
-    defense.detect(noisy_test=args.noisy_test)
+    defense.detect()
 elif args.defense == 'STRIP':
     from other_defenses_tool_box.strip import STRIP
     defense = STRIP(
@@ -235,7 +224,7 @@ elif args.defense == 'STRIP':
         defense_fpr=0.05,  # 5%分位数
         batch_size=128,
     )
-    defense.detect(noisy_test=args.noisy_test)
+    defense.detect()
 elif args.defense == 'FP':
     from other_defenses_tool_box.fine_pruning import FP
     if args.dataset == 'cifar10':
@@ -338,8 +327,8 @@ elif args.defense == 'SentiNet':
     defense.detect()
 elif args.defense == 'ScaleUp':
     from other_defenses_tool_box.scale_up import ScaleUp
-    defense = ScaleUp(args, with_clean_data=True)
-    defense.detect(noisy_test=args.noisy_test)
+    defense = ScaleUp(args, with_clean_data=False)
+    defense.detect()
 elif  args.defense == 'IBD_PSC':
     from other_defenses_tool_box.IBD_PSC import IBD_PSC
     defense = IBD_PSC(args)
@@ -365,7 +354,7 @@ elif args.defense == 'NONE':
 elif args.defense == 'Frequency':
     from other_defenses_tool_box.frequency import Frequency
     defense = Frequency(args)
-    defense.detect(noisy_test=args.noisy_test)
+    defense.detect()
 elif args.defense == 'moth':
     from other_defenses_tool_box.moth import moth
     if args.poison_type == 'SRA':

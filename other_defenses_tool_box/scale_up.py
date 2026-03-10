@@ -42,7 +42,7 @@ class ScaleUp(BackdoorDefense):
         self.std = None
         self.init_spc_norm()
 
-    def detect(self, inspect_correct_predition_only=True, noisy_test=False):
+    def detect(self, inspect_correct_predition_only=True):
         args = self.args
         
         self.test_loader = generate_dataloader(dataset=self.dataset,
@@ -52,7 +52,6 @@ class ScaleUp(BackdoorDefense):
                                                data_transform=self.data_transform,
                                                shuffle=False,
                                                drop_last=False,
-                                               noisy_test=noisy_test
                                                )
         
         total_num = 0

@@ -47,7 +47,7 @@ def to_numpy(x, **kwargs) -> np.ndarray:
 def tanh_func(x: torch.Tensor) -> torch.Tensor:
     return (x.tanh() + 1) * 0.5
 
-def generate_dataloader(dataset='cifar10', dataset_path='./data/', batch_size=128, split='train', shuffle=True, drop_last=False, data_transform=None, noisy_test=False):
+def generate_dataloader(dataset='cifar10', dataset_path='./data/', batch_size=128, split='train', shuffle=True, drop_last=False, data_transform=None):
     if dataset == 'cifar10':
         if data_transform is None:
             data_transform = transforms.Compose([
@@ -56,14 +56,6 @@ def generate_dataloader(dataset='cifar10', dataset_path='./data/', batch_size=12
             ])
         dataset_path = os.path.join(dataset_path, 'cifar10')
         
-        if noisy_test:
-            from torch.utils.data import ConcatDataset
-            noisy_test_set_dir = os.path.join('clean_set', 'cifar10', 'noisy_test_split')
-            noisy_test_set_img_dir = os.path.join(noisy_test_set_dir, 'data')
-            noisy_test_set_label_path = os.path.join(noisy_test_set_dir, 'labels')
-            noisy_test_set = IMG_Dataset(data_dir=noisy_test_set_img_dir, label_path=noisy_test_set_label_path, transforms=data_transform)
-            noisy_test_loader = torch.utils.data.DataLoader(noisy_test_set, batch_size=batch_size, shuffle=True, drop_last=drop_last, num_workers=4, pin_memory=True)
-            return noisy_test_loader
         if split == 'train':
             train_data = datasets.CIFAR10(root=dataset_path, train=True, download=False, transform=data_transform)
             train_data_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=4, pin_memory=True)
@@ -95,14 +87,6 @@ def generate_dataloader(dataset='cifar10', dataset_path='./data/', batch_size=12
             ])
         dataset_path = os.path.join(dataset_path, 'gtsrb')
         
-        if noisy_test:
-            from torch.utils.data import ConcatDataset
-            noisy_test_set_dir = os.path.join('clean_set', 'gtsrb', 'noisy_test_split')
-            noisy_test_set_img_dir = os.path.join(noisy_test_set_dir, 'data')
-            noisy_test_set_label_path = os.path.join(noisy_test_set_dir, 'labels')
-            noisy_test_set = IMG_Dataset(data_dir=noisy_test_set_img_dir, label_path=noisy_test_set_label_path, transforms=data_transform)
-            noisy_test_loader = torch.utils.data.DataLoader(noisy_test_set, batch_size=batch_size, shuffle=True, drop_last=drop_last, num_workers=4, pin_memory=True)
-            return noisy_test_loader
         if split == 'train':
             train_data = datasets.GTSRB(root=dataset_path, split='train', download=False, transform=data_transform)
             train_data_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=4, pin_memory=True)
@@ -301,14 +285,6 @@ def generate_dataloader(dataset='cifar10', dataset_path='./data/', batch_size=12
             ])
         dataset_path = os.path.join(dataset_path, 'mnist')
         
-        if noisy_test:
-            from torch.utils.data import ConcatDataset
-            noisy_test_set_dir = os.path.join('clean_set', 'mnist', 'noisy_test_split')
-            noisy_test_set_img_dir = os.path.join(noisy_test_set_dir, 'data')
-            noisy_test_set_label_path = os.path.join(noisy_test_set_dir, 'labels')
-            noisy_test_set = IMG_Dataset(data_dir=noisy_test_set_img_dir, label_path=noisy_test_set_label_path, transforms=data_transform)
-            noisy_test_loader = torch.utils.data.DataLoader(noisy_test_set, batch_size=batch_size, shuffle=True, drop_last=drop_last, num_workers=4, pin_memory=True)
-            return noisy_test_loader
         if split == 'train':
             train_data = datasets.MNIST(root=dataset_path, train=True, download=False, transform=data_transform)
             train_data_loader = DataLoader(dataset=train_data, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last, num_workers=4, pin_memory=True)

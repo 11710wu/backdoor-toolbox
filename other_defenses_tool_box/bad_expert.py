@@ -47,10 +47,7 @@ class BaDExpert(BackdoorDefense):
             if not os.path.exists(out_path): os.mkdir(out_path)
             out_path = os.path.join(out_path, 'unlearn')
             if not os.path.exists(out_path): os.mkdir(out_path)
-            if args.noisy_test:
-                out_path = os.path.join(out_path, 'noisy_test_%s.out' % (supervisor.get_dir_core(args, include_poison_seed=config.record_poison_seed, include_model_name=True)))
-            else:
-                out_path = os.path.join(out_path, '%s.out' % (supervisor.get_dir_core(args, include_poison_seed=config.record_poison_seed, include_model_name=True)))
+            out_path = os.path.join(out_path, '%s.out' % (supervisor.get_dir_core(args, include_poison_seed=config.record_poison_seed, include_model_name=True)))
             fout = open(out_path, 'w')
             ferr = open('/dev/null', 'a')
             sys.stdout = fout
@@ -92,10 +89,7 @@ class BaDExpert(BackdoorDefense):
                                                         is_normalized_input=is_normalized,
                                                         alpha=args.alpha if args.test_alpha is None else args.test_alpha,
                                                         trigger_name=args.trigger, args=args)
-            if args.noisy_test:
-                test_set_dir = os.path.join('clean_set', args.dataset, 'noisy_test_split')
-            else:
-                test_set_dir = os.path.join('clean_set', args.dataset, 'test_split')
+            test_set_dir = os.path.join('clean_set', args.dataset, 'test_split')
             test_set_img_dir = os.path.join(test_set_dir, 'data')
             test_set_label_path = os.path.join(test_set_dir, 'labels')
             test_set = tools.IMG_Dataset(data_dir=test_set_img_dir,

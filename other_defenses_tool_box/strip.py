@@ -44,12 +44,12 @@ class STRIP(BackdoorDefense):
                                                 shuffle=True,
                                                 drop_last=True)
 
-    def detect(self, inspect_correct_predition_only=True, noisy_test=False):
+    def detect(self, inspect_correct_predition_only=True):
         args = self.args
         
         # ========== [修改] 先用验证集计算阈值 ==========
         # 使用验证集（2000张）计算阈值
-        val_set_loader = generate_dataloader(dataset=self.dataset, dataset_path=config.data_dir, batch_size=100, split='valid', data_transform=self.data_transform, shuffle=False, drop_last=False, noisy_test=noisy_test)
+        val_set_loader = generate_dataloader(dataset=self.dataset, dataset_path=config.data_dir, batch_size=100, split='valid', data_transform=self.data_transform, shuffle=False, drop_last=False)
         
         val_clean_entropy = []
         for _input, _label in tqdm(val_set_loader, desc="计算验证集熵值"):
@@ -63,7 +63,7 @@ class STRIP(BackdoorDefense):
         # ========== [修改结束] ==========
         
         # 使用测试集（8000张）进行检测
-        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=self.data_transform, shuffle=False, noisy_test=noisy_test)
+        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=self.data_transform, shuffle=False)
         test_set_loader_no_normalize = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=torchvision.transforms.ToTensor(), shuffle=False)
 
         clean_entropy = []

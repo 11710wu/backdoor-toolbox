@@ -15,20 +15,20 @@ ALPHA="0.15"
 # ==============================================================================
 # 1. 创建投毒数据集
 # ==============================================================================
-echo "===== 1. 创建投毒数据集 ====="
+# echo "===== 1. 创建投毒数据集 ====="
 
-python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=resnet18
-python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=vgg19_bn
-python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=mobilenetv2
+# python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=resnet18
+# python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=vgg19_bn
+# python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=mobilenetv2
 
-# ==============================================================================
-# 2. 训练后门模型
-# ==============================================================================
-echo "===== 2. 训练后门模型 ====="
+# # ==============================================================================
+# # 2. 训练后门模型
+# # ==============================================================================
+# echo "===== 2. 训练后门模型 ====="
 
-python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=resnet18
-python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=vgg19_bn
-python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=mobilenetv2
+# python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=resnet18
+# python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=vgg19_bn
+# python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.15 -model=mobilenetv2
 
 # ==============================================================================
 # 3. 本地测试（干净 Tiny ImageNet）

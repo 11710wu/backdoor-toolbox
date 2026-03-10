@@ -62,7 +62,6 @@ class IBD_PSC(BackdoorDefense):
                                                data_transform=self.data_transform,
                                                shuffle=False,
                                                drop_last=False,
-                                               noisy_test=False
                                                )
 
         self.val_loader = generate_dataloader(dataset=self.dataset,
@@ -72,7 +71,6 @@ class IBD_PSC(BackdoorDefense):
                                         data_transform=self.data_transform,
                                         shuffle=True,
                                         drop_last=False,
-                                        noisy_test=False
                                         )
         
         layer_num = self.count_BN_layers()

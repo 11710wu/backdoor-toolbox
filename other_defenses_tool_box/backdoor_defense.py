@@ -146,7 +146,7 @@ class BackdoorDefense():
         
         if os.path.exists(model_path):
             state_dict = torch.load(model_path)
-            self.model.load_state_dict(state_dict, strict=False)
+            self.model.load_state_dict(state_dict, strict=True)
             print("Evaluating model '{}'...".format(model_path))
         else:
             print("Model '{}' not found.".format(model_path))

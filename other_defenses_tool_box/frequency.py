@@ -88,14 +88,14 @@ class Frequency(BackdoorDefense):
         
         self.freq_model = model
         
-    def detect(self, inspect_correct_predition_only=True, noisy_test=False):
+    def detect(self, inspect_correct_predition_only=True):
         args = self.args
         args.no_normalize = True
         data_transform_aug_no_normalize, data_transform_no_normalize, trigger_transform_no_normalize, _, _ = supervisor.get_transforms(args)
         
         
-        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=self.data_transform, shuffle=False, noisy_test=noisy_test)
-        test_set_loader_no_normalize = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=torchvision.transforms.ToTensor(), shuffle=False, noisy_test=noisy_test)
+        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=self.data_transform, shuffle=False)
+        test_set_loader_no_normalize = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=torchvision.transforms.ToTensor(), shuffle=False)
         
         # ========== [UPGD/BELT 特殊处理] 强制不使用归一化（与原始代码一致）==========
         # UPGD: 原始代码（parameter_backdoor）全程不使用 Normalize

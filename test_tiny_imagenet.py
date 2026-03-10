@@ -684,29 +684,31 @@ def main():
         test_delta=args.test_delta
     )
     
-    # ========== [修改] 根据不同的测试参数，保存到不同的结果文件 ==========
-    # 保存测试结果
+    # ========== 按损坏类型、强度及攻击参数，单独保存结果文件 ==========
+    # 文件名始终包含 corruption_type 和 severity，便于不同损坏/强度单独保存
+    suffix = f"corruption={args.corruption_type}_severity={args.severity}"
     if args.poison_type == 'SIG':
         if args.test_delta is not None:
             delta_value = args.test_delta
-            test_result_path = os.path.join(model_dir, f'test_tiny_imagenet_results_test_delta={delta_value}.txt')
+            base_name = f'test_tiny_imagenet_results_test_delta={delta_value}_{suffix}.txt'
         else:
             delta_value = args.delta if hasattr(args, 'delta') else 30
-            test_result_path = os.path.join(model_dir, f'test_tiny_imagenet_results_delta={delta_value}.txt')
+            base_name = f'test_tiny_imagenet_results_delta={delta_value}_{suffix}.txt'
     elif args.poison_type == 'WaNet':
         if args.test_s is not None:
             s_value = args.test_s
-            test_result_path = os.path.join(model_dir, f'test_tiny_imagenet_results_test_s={s_value}.txt')
+            base_name = f'test_tiny_imagenet_results_test_s={s_value}_{suffix}.txt'
         else:
             s_value = args.s if hasattr(args, 's') else 0.5
-            test_result_path = os.path.join(model_dir, f'test_tiny_imagenet_results_s={s_value}.txt')
+            base_name = f'test_tiny_imagenet_results_s={s_value}_{suffix}.txt'
     elif args.poison_type in ['blend', 'adaptive_blend', 'adaptive_patch', 'basic', 'clean_label']:
         if args.test_alpha is not None:
-            test_result_path = os.path.join(model_dir, f'test_tiny_imagenet_results_test_alpha={args.test_alpha}.txt')
+            base_name = f'test_tiny_imagenet_results_test_alpha={args.test_alpha}_{suffix}.txt'
         else:
-            test_result_path = os.path.join(model_dir, 'test_tiny_imagenet_results.txt')
+            base_name = f'test_tiny_imagenet_results_{suffix}.txt'
     else:
-        test_result_path = os.path.join(model_dir, 'test_tiny_imagenet_results.txt')
+        base_name = f'test_tiny_imagenet_results_{suffix}.txt'
+    test_result_path = os.path.join(model_dir, base_name)
     # ========== [修改结束] ==========
     
     with open(test_result_path, 'w', encoding='utf-8') as f:

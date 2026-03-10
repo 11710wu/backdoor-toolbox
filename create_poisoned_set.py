@@ -67,96 +67,6 @@ args = parser.parse_args()
 
 tools.setup_seed(2333)
 
-# ========== [噪声增强固定参数] 开始 ==========
-# 固定噪声参数，只对中毒图片添加噪声
-ENABLE_NOISE = False  # 是否启用噪声增强（True表示启用，False表示不启用）
-NOISE_RATIO = 0.5  # 对中毒图片添加噪声的比例 (0.0-1.0)，0.5表示对一半的中毒图片添加噪声
-NOISE_TYPE = 'gaussian'  # 噪声类型: 'gaussian', 'salt_pepper', 'uniform'
-NOISE_STRENGTH = 25.0  # 噪声强度: 高斯噪声的标准差（像素值），建议15-30
-NOISE_SEED = config.poison_seed  # 随机种子，使用与poison_seed一致的种子
-# ========== [噪声增强固定参数] 结束 ==========
-
-# ========== [噪声增强函数] 开始 ==========
-def apply_noise_to_poisoned_images(img_set, poison_indices, noise_ratio=0.5, noise_type='gaussian', noise_strength=25.0, noise_seed=None):
-    """
-    对中毒图片按比例添加噪声
-    
-    Args:
-        img_set: torch.Tensor, shape [N, C, H, W], 值范围 [0, 1]
-        poison_indices: list/array/tensor，中毒图片的索引列表
-        noise_ratio: 对中毒图片添加噪声的比例 (0.0-1.0)，0.5表示对一半的中毒图片添加噪声
-        noise_type: 噪声类型 ('gaussian', 'salt_pepper', 'uniform')
-        noise_strength: 噪声强度
-            - gaussian: 标准差（像素值，需要除以255转换为[0,1]范围）
-            - salt_pepper: 噪声比例 (0-100)
-            - uniform: 噪声幅度（像素值，需要除以255转换为[0,1]范围）
-        noise_seed: 随机种子
-    
-    Returns:
-        noisy_img_set: 添加噪声后的tensor
-    """
-    # 转换为list格式
-    if isinstance(poison_indices, torch.Tensor):
-        poison_indices = poison_indices.tolist()
-    elif isinstance(poison_indices, np.ndarray):
-        poison_indices = poison_indices.tolist()
-    
-    if len(poison_indices) == 0 or noise_ratio <= 0:
-        return img_set
-    
-    # 设置随机种子
-    if noise_seed is not None:
-        np.random.seed(noise_seed)
-        torch.manual_seed(noise_seed)
-    
-    # 从中毒图片中随机选择一部分来添加噪声
-    num_poisoned = len(poison_indices)
-    num_noisy = int(num_poisoned * noise_ratio)
-    if num_noisy == 0:
-        return img_set
-    
-    # 随机选择要添加噪声的中毒图片索引
-    selected_indices = np.random.choice(poison_indices, size=num_noisy, replace=False)
-    
-    # 只对选中的中毒图片添加噪声
-    noisy_img_set = img_set.clone()
-    
-    for idx in selected_indices:
-        img = noisy_img_set[idx]  # [C, H, W]
-        
-        if noise_type == 'gaussian':
-            # 高斯噪声：将noise_strength从像素值转换为[0,1]范围
-            noise_std = noise_strength / 255.0
-            noise = torch.randn_like(img) * noise_std
-            noisy_img = img + noise
-            noisy_img = torch.clamp(noisy_img, 0.0, 1.0)
-            
-        elif noise_type == 'salt_pepper':
-            # 椒盐噪声：noise_strength是噪声比例(0-100)
-            noise_prob = noise_strength / 100.0
-            # 生成随机mask
-            salt_mask = torch.rand(1, img.shape[1], img.shape[2]) < noise_prob
-            pepper_mask = torch.rand(1, img.shape[1], img.shape[2]) < noise_prob
-            
-            # 椒噪声（黑色点，设为0）
-            noisy_img = img * (~salt_mask.expand_as(img))
-            # 盐噪声（白色点，设为1）
-            noisy_img = torch.where(pepper_mask.expand_as(img), torch.ones_like(img), noisy_img)
-            
-        elif noise_type == 'uniform':
-            # 均匀噪声：将noise_strength从像素值转换为[0,1]范围
-            noise_range = noise_strength / 255.0
-            noise = torch.rand_like(img) * 2 * noise_range - noise_range
-            noisy_img = img + noise
-            noisy_img = torch.clamp(noisy_img, 0.0, 1.0)
-        else:
-            noisy_img = img
-        
-        noisy_img_set[idx] = noisy_img
-    
-    return noisy_img_set
-# ========== [噪声增强函数] 结束 ==========
-
 # =============================================================================
 # 随机种子 / 可复现性（工程说明）
 # -----------------------------------------------------------------------------
@@ -758,20 +668,6 @@ if args.poison_type in ['basic', 'badnet', 'blend', 'clean_label', 'refool',
         torch.save(cover_indices, cover_indices_path)
         print('[Generate Poisoned Set] Save %s' % cover_indices_path)
 
-    # ========== [噪声增强] 对中毒图片按比例添加噪声 ==========
-    if ENABLE_NOISE and len(poison_indices) > 0:
-        num_noisy = int(len(poison_indices) * NOISE_RATIO)
-        print(f'[噪声增强] 对 {num_noisy}/{len(poison_indices)} 个中毒图片添加 {NOISE_TYPE} 噪声 (比例: {NOISE_RATIO*100:.1f}%, 强度: {NOISE_STRENGTH}, 种子: {NOISE_SEED})')
-        img_set = apply_noise_to_poisoned_images(
-            img_set, 
-            poison_indices=poison_indices,
-            noise_ratio=NOISE_RATIO,
-            noise_type=NOISE_TYPE,
-            noise_strength=NOISE_STRENGTH,
-            noise_seed=NOISE_SEED
-        )
-    # ========== [噪声增强] 结束 ==========
-
     # 只有 Tiny-ImageNet 使用 'imgs' 目录，其他数据集使用 'data' 目录
     if args.dataset == 'tiny_imagenet':
         img_path = os.path.join(poison_set_dir, 'imgs')
@@ -918,20 +814,6 @@ elif args.poison_type == 'upgd':
     print('[Generate Poisoned Set] Save %d Images (poisoned: %d; sampled from full dataset)' % (len(label_set), len(poison_indices)), flush=True)
     sys.stdout.flush()
 
-    # ========== [噪声增强] 对中毒图片按比例添加噪声 ==========
-    if ENABLE_NOISE and len(poison_indices) > 0:
-        num_noisy = int(len(poison_indices) * NOISE_RATIO)
-        print(f'[噪声增强] 对 {num_noisy}/{len(poison_indices)} 个中毒图片添加 {NOISE_TYPE} 噪声 (比例: {NOISE_RATIO*100:.1f}%, 强度: {NOISE_STRENGTH}, 种子: {NOISE_SEED})')
-        img_set = apply_noise_to_poisoned_images(
-            img_set, 
-            poison_indices=poison_indices,
-            noise_ratio=NOISE_RATIO,
-            noise_type=NOISE_TYPE,
-            noise_strength=NOISE_STRENGTH,
-            noise_seed=NOISE_SEED
-        )
-    # ========== [噪声增强] 结束 ==========
-
     # 只有 Tiny-ImageNet 使用 'imgs' 目录，其他数据集使用 'data' 目录
     if args.dataset == 'tiny_imagenet':
         img_path = os.path.join(poison_set_dir, 'imgs')
@@ -973,20 +855,6 @@ elif args.poison_type == 'dynamic':
     if args.dataset == 'mnist':
         img_set = torch.clamp(img_set, 0.0, 1.0)
 
-    # ========== [噪声增强] 对中毒图片按比例添加噪声 ==========
-    if ENABLE_NOISE and len(poison_indices) > 0:
-        num_noisy = int(len(poison_indices) * NOISE_RATIO)
-        print(f'[噪声增强] 对 {num_noisy}/{len(poison_indices)} 个中毒图片添加 {NOISE_TYPE} 噪声 (比例: {NOISE_RATIO*100:.1f}%, 强度: {NOISE_STRENGTH}, 种子: {NOISE_SEED})')
-        img_set = apply_noise_to_poisoned_images(
-            img_set, 
-            poison_indices=poison_indices,
-            noise_ratio=NOISE_RATIO,
-            noise_type=NOISE_TYPE,
-            noise_strength=NOISE_STRENGTH,
-            noise_seed=NOISE_SEED
-        )
-    # ========== [噪声增强] 结束 ==========
-
     # 只有 Tiny-ImageNet 使用 'imgs' 目录，其他数据集使用 'data' 目录
     if args.dataset == 'tiny_imagenet':
         img_path = os.path.join(poison_set_dir, 'imgs')
@@ -1027,20 +895,6 @@ elif args.poison_type == 'ISSBA':
     # 确保数据在 [0, 1] 范围内，避免数值不稳定（特别是对于 MNIST）
     if args.dataset == 'mnist':
         img_set = torch.clamp(img_set, 0.0, 1.0)
-
-    # ========== [噪声增强] 对中毒图片按比例添加噪声 ==========
-    if ENABLE_NOISE and len(poison_indices) > 0:
-        num_noisy = int(len(poison_indices) * NOISE_RATIO)
-        print(f'[噪声增强] 对 {num_noisy}/{len(poison_indices)} 个中毒图片添加 {NOISE_TYPE} 噪声 (比例: {NOISE_RATIO*100:.1f}%, 强度: {NOISE_STRENGTH}, 种子: {NOISE_SEED})')
-        img_set = apply_noise_to_poisoned_images(
-            img_set, 
-            poison_indices=poison_indices,
-            noise_ratio=NOISE_RATIO,
-            noise_type=NOISE_TYPE,
-            noise_strength=NOISE_STRENGTH,
-            noise_seed=NOISE_SEED
-        )
-    # ========== [噪声增强] 结束 ==========
 
     # 只有 Tiny-ImageNet 使用 'imgs' 目录，其他数据集使用 'data' 目录
     if args.dataset == 'tiny_imagenet':
