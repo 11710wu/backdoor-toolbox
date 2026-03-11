@@ -24,7 +24,7 @@ mnistm_dir = './data/MNIST-M' # MNIST-M dataset directory (contains train.npy an
 # ========== [MNIST 支持] 结束 ==========
 
 target_class = {
-    'cifar10' : 2,
+    'cifar10' : 0,
     'gtsrb' : 2,
     # 'gtsrb' : 12, # BadEncoder
     'imagenette': 0,

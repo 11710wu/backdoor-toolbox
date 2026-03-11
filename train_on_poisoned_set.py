@@ -3,8 +3,6 @@ import os, sys
 import time
 from tqdm import tqdm
 from utils import default_args, imagenet
-from torch.cuda.amp import autocast
-from torch.amp import GradScaler
 import json
 import datetime
 
@@ -520,7 +518,6 @@ if args.dataset == 'imagenet':
     print('<time : %f minutes>' % ( (time.time() - st) / 60 ))
 """
 
-scaler = GradScaler('cuda')
 for epoch in range(1, epochs+1):  # train backdoored base model
     start_time = time.perf_counter()
 
@@ -539,18 +536,12 @@ for epoch in range(1, epochs+1):  # train backdoored base model
 
         optimizer.zero_grad()
         data, target = data.cuda(non_blocking=True), target.cuda(non_blocking=True)
-        
-        # ========== [修复] 启用混合精度训练（与 parameter_backdoor 一致）==========
-        # 使用 autocast 和 GradScaler 进行混合精度训练，可能影响梯度更新的数值精度
-        # 这可能是导致 ASR 异常高（1.0）的主要原因
-        with autocast():
-            output = model(data)
-            loss = criterion(output, target)
-        
-        scaler.scale(loss).backward()
-        scaler.step(optimizer)
-        scaler.update()
-        # ========== [修复] 结束 ==========
+
+        output = model(data)
+        loss = criterion(output, target)
+
+        loss.backward()
+        optimizer.step()
 
         # 计算总损失用于统计
         batch_size = target.size(0)
