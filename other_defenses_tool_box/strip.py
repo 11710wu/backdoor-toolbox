@@ -339,10 +339,10 @@ class STRIP(BackdoorDefense):
         # 注意：Tiny ImageNet 现在使用原始 64×64 尺寸，但如果出现尺寸不匹配（例如不同数据源），
         # 需要自动检测并将 _input2 resize 到 _input1 的尺寸，以避免 RuntimeError
         # 这样可以确保 STRIP 防御方法在 Tiny ImageNet 上正常工作
-        if _input1.shape[-2:] != _input2.shape[-2:]:
-            import torch.nn.functional as F
-            # 使用双线性插值将 _input2 resize 到 _input1 的尺寸
-            _input2 = F.interpolate(_input2, size=_input1.shape[-2:], mode='bilinear', align_corners=False)
+        # if _input1.shape[-2:] != _input2.shape[-2:]:
+        #     import torch.nn.functional as F
+        #     # 使用双线性插值将 _input2 resize 到 _input1 的尺寸
+        #     _input2 = F.interpolate(_input2, size=_input1.shape[-2:], mode='bilinear', align_corners=False)
         # ========== [Tiny ImageNet 支持] 结束 ==========
 
         # 叠加公式：result = denormalize(_input1) + alpha * denormalize(_input2)

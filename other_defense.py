@@ -219,9 +219,9 @@ elif args.defense == 'STRIP':
     from other_defenses_tool_box.strip import STRIP
     defense = STRIP(
         args,
-        strip_alpha=0.5,
+        strip_alpha=1.0,
         N=100,
-        defense_fpr=0.05,  # 5%分位数
+        defense_fpr=0.1,  # 5%分位数
         batch_size=128,
     )
     defense.detect()
