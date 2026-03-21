@@ -29,7 +29,7 @@ target_class = {
     # 'gtsrb' : 12, # BadEncoder
     'imagenette': 0,
     'imagenet' : 0,
-    'tiny_imagenet': 2,  # [Tiny ImageNet 支持] 默认目标类为 0
+    'tiny_imagenet': 0,  # [Tiny ImageNet 支持] 默认目标类为 0
     'mnist': 0,  # [MNIST 支持] 默认目标类为 0
     'mnistm': 2,  # [MNIST-M 支持] 默认目标类为 0
 }

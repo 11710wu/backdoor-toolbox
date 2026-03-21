@@ -1,379 +1,222 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-读取 CSV 文件，计算攻击率/隐蔽率/迁移率的两两相关矩阵，并做PCA主成分分析。
+分析隐蔽性（TPR平均、AUC平均）与迁移性，按三种模型（resnet18, mobilenet, vgg）分别分析。
 
-用法：
-  python /workspace/backdoor-toolbox-new/analysis/analyze_stats.py \
-  --data-csv /workspace/backdoor-toolbox-new/analysis/data_cifar10.csv \
-  --fit-plane \
-  --plane-model z \
-  --plane-color orange \
-  --static-plot \
-  --output-dir /workspace/backdoor-toolbox-new/analysis/analysis_outputs \
-  --static-out scatter3d.png \
-  --interactive-out scatter3d_interactive.html \
-  --correlation-analysis \
-  --corr-heatmap-out correlation_heatmap.png \
-  --corr-scatter-prefix corr_scatter \
-  --pareto-front \
-  --pareto-out pareto_front.png \
-  --pareto-front-attack-stealth \
-  --pareto-attack-stealth-out pareto_front_attack_stealth.png \
-  --pareto-front-attack-transfer \
-  --pareto-attack-transfer-out pareto_front_attack_transfer.png \
-  --pareto-front-3d \
-  --pareto3d-out pareto_front_3d.png \
-  --violin-plot \
-  --violin-out violin_by_attack_type.png
+# 1. no_nc 数据：所有图
+python analysis/analyze_stats.py --data-dir analysis --data-suffix _no_nc --all-plots --output-dir analysis_outputs_no_nc
+# 2. nc 数据：所有图（含 S_stealth）
+python analysis/analyze_stats.py --data-dir analysis --data-suffix _nc --all-plots --output-dir analysis_outputs_nc
 
-说明：
-  - 只支持 CSV 文件输入（不再支持 JSON）
-  - 默认将所有组的数据合并后计算。
-  - 若加 --standardize，会在做PCA前对三列做标准化(均值0/方差1)。
+# 分析 nc 数据（含 S_stealth）
+python analysis/analyze_stats.py --data-dir analysis --data-suffix _nc --all-plots
+
+# 只生成整体散点图
+python analysis/analyze_stats.py --data-dir analysis --data-suffix _nc --combined-scatter --output-dir analysis_outputs_nc
+
+# 指定输出目录
+python analysis/analyze_stats.py --data-dir analysis --data-suffix _nc --output-dir analysis_outputs_nc
+
+# 只分析某个 arch
+python analysis/analyze_stats.py --data-dir analysis --arch mobilenet --all-plots
+
+# 指定部分图类型
+python analysis/analyze_stats.py --data-dir analysis --violin-plot --box-plot --combined-scatter
+
+图表类型：
+  - 原有：violin, correlation(热力图+散点), pareto
+  - 新增：box(箱线图), bar(柱状图),
+         scatter-3d(三维散点),
+         box-poison(按poison_rate), box-trigger(按trigger_type),
+         line-plot(折线图，每个方法一张),
+         combined-scatter(整体散点图：合并所有arch，形状=arch，颜色=ASR)
 """
 
 import argparse
 import os
-from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
-import plotly.graph_objects as go
-import plotly.express as px
+
+ARCHS = ['resnet18', 'mobilenet', 'vgg']
+STEALTH_COLS = ['stealth_tpr_avg', 'stealth_auc_avg']
+METRIC_COLS = STEALTH_COLS + ['transfer_rate']
 
 
-def load_all_points_from_csv(csv_path: str) -> pd.DataFrame:
-    """从 CSV 文件加载数据点"""
+def load_from_csv(csv_path: str) -> pd.DataFrame:
+    """从 CSV 加载数据，要求含 stealth_tpr_avg, stealth_auc_avg, transfer_rate。
+    若含 S_stealth 列则保留，供 nc 模式分析使用。
+    """
     if not os.path.exists(csv_path):
-        raise FileNotFoundError(f"CSV 文件不存在: {csv_path}")
-    
-    if os.path.getsize(csv_path) == 0:
-        raise ValueError(f"CSV 文件为空: {csv_path}")
-    
-    try:
-        df = pd.read_csv(csv_path, encoding='utf-8')
-    except Exception as e:
-        raise ValueError(f"读取 CSV 文件时出错: {csv_path}\n错误信息: {e}")
-    
-    # 检查必需的列
-    required_cols = ['attack_type', 'attack_rate', 'stealth_rate', 'transfer_rate']
-    missing_cols = [col for col in required_cols if col not in df.columns]
-    if missing_cols:
-        raise ValueError(f"CSV 文件缺少必需的列: {missing_cols}\n可用列: {list(df.columns)}")
-    
-    # 确保数值列为浮点数类型
-    for col in ['attack_rate', 'stealth_rate', 'transfer_rate']:
+        raise FileNotFoundError(f"CSV 不存在: {csv_path}")
+    df = pd.read_csv(csv_path, encoding='utf-8')
+    missing = [c for c in METRIC_COLS if c not in df.columns]
+    if missing:
+        raise ValueError(f"CSV 缺少列: {missing}")
+    extra = ['asr', 'S_stealth', 'nc_max_anomaly_index', 'nc_is_poisoned']
+    for col in METRIC_COLS + [c for c in extra if c in df.columns]:
         df[col] = pd.to_numeric(df[col], errors='coerce')
-    
-    # 移除包含 NaN 的行
-    df = df.dropna(subset=['attack_rate', 'stealth_rate', 'transfer_rate'])
-    
-    # 添加 group_id（如果不存在）
+    df = df.dropna(subset=METRIC_COLS)
+    if 'attack_type' in df.columns:
+        df = df[~df['attack_type'].isin(['none', ''])]
     if 'group_id' not in df.columns:
         df['group_id'] = range(1, len(df) + 1)
-    
-    print(f"成功从 CSV 加载 {len(df)} 个数据点")
     return df
 
 
+def discover_arch_csvs(data_dir: str, suffix: str = '') -> dict:
+    """发现各 arch 的 CSV 文件，返回 {arch: path}。
+    suffix: '' 表示 data_cifar10_{arch}.csv；'_no_nc' / '_nc' 表示带后缀的文件。
+    """
+    found = {}
+    for arch in ARCHS:
+        path = os.path.join(data_dir, f'data_cifar10_{arch}{suffix}.csv')
+        if os.path.exists(path):
+            found[arch] = path
+    return found
 
 
-
-
-
-def run_pca(df: pd.DataFrame, standardize: bool = False) -> tuple[PCA, np.ndarray, pd.DataFrame]:
-    cols = ['attack_rate', 'stealth_rate', 'transfer_rate']
-    X = df[cols].to_numpy(dtype=float)
-    if standardize:
-        X = StandardScaler().fit_transform(X)
-    pca = PCA(n_components=3, random_state=42)
-    X_pca = pca.fit_transform(X)
-    comps = pd.DataFrame(pca.components_, columns=cols, index=[f'PC{i+1}' for i in range(3)])
-    return pca, X_pca, comps
-
-
-def calculate_point_to_plane_distance(points: np.ndarray, plane_coeffs: tuple) -> np.ndarray:
-    """计算各点到平面的距离"""
-    a, b, c, d = plane_coeffs
-    # 点到平面距离公式: |ax + by + cz + d| / sqrt(a^2 + b^2 + c^2)
-    numerator = np.abs(a * points[:, 0] + b * points[:, 1] + c * points[:, 2] + d)
-    denominator = np.sqrt(a**2 + b**2 + c**2)
-    return numerator / denominator
-
-
-def plot_violin_by_attack_type(df: pd.DataFrame, output_path: str) -> None:
-    """生成三个小提琴图子图，分别显示 attack_rate, stealth_rate, transfer_rate 在不同攻击类型上的分布"""
-    if df.empty:
-        print("小提琴图绘制跳过：数据为空")
+def plot_violin_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> None:
+    """按攻击类型绘制三种指标的小提琴图：stealth_tpr_avg, stealth_auc_avg, transfer_rate"""
+    if df.empty or 'attack_type' not in df.columns:
         return
-    
-    # 检查是否有 attack_type 列
-    if 'attack_type' not in df.columns:
-        print("警告: 数据中没有 'attack_type' 列，无法按攻击类型分组")
-        return
-    
-    # 获取所有攻击类型并排序
     attack_types = sorted(df['attack_type'].unique())
-    
-    # 定义三个指标
     metrics = [
-        ('attack_rate', 'Attack Rate'),
-        ('stealth_rate', 'Stealth Rate'),
-        ('transfer_rate', 'Transfer Rate')
+        ('stealth_tpr_avg', 'Stealth TPR Avg'),
+        ('stealth_auc_avg', 'Stealth AUC Avg'),
+        ('transfer_rate', 'Transfer Rate'),
     ]
-    
-    # 使用 1x3 布局，更符合参考图片的样式
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-    fig.suptitle('Distribution of Metrics by Attack Type', fontsize=18, fontweight='bold', y=1.02)
-    
-    # 使用统一的配色方案（所有小提琴使用相同颜色，更简洁）
-    # 也可以使用不同颜色：colors = plt.cm.Set3(np.linspace(0, 1, len(attack_types)))
-    base_color = '#4A90E2'  # 蓝色系，更专业
-    
-    # 绘制三个指标的小提琴图
-    for idx, (metric_col, metric_name) in enumerate(metrics):
+    fig.suptitle(f'Metrics by Attack Type ({arch})', fontsize=16, fontweight='bold', y=1.02)
+    base_color = '#4A90E2'
+    for idx, (col, name) in enumerate(metrics):
         ax = axes[idx]
-        
-        # 准备数据：按攻击类型分组
-        data_by_type = [df[df['attack_type'] == at][metric_col].dropna().values 
-                       for at in attack_types]
-        
-        # 绘制小提琴图
-        # showmeans=True: 显示均值线（细线或点），表示数据的平均值
-        # showmedians=True: 显示中位数线（粗线），表示数据的中位数（50%分位数）
-        # 中位数线将数据分成两半，均值线显示数据的平均水平
-        parts = ax.violinplot(data_by_type, positions=range(len(attack_types)), 
-                              showmeans=True, showmedians=True,
-                              widths=0.7)  # 设置小提琴图的宽度
-        
-        # 为每个攻击类型设置颜色（统一颜色或不同颜色）
-        for i, pc in enumerate(parts['bodies']):
-            # 选项1：统一颜色（更简洁）
+        data_by_type = [df[df['attack_type'] == at][col].dropna().values for at in attack_types]
+        parts = ax.violinplot(data_by_type, positions=range(len(attack_types)),
+                              showmeans=True, showmedians=True, widths=0.7)
+        for pc in parts['bodies']:
             pc.set_facecolor(base_color)
-            # 选项2：不同颜色（取消注释下面这行，注释掉上面这行）
-            # pc.set_facecolor(colors[i])
             pc.set_alpha(0.7)
             pc.set_edgecolor('black')
-            pc.set_linewidth(1.5)
-        
-        # 优化中位数线和均值线的样式
         parts['cmedians'].set_color('white')
-        parts['cmedians'].set_linewidth(3.0)  # 中位数线更粗，更明显
+        parts['cmedians'].set_linewidth(3.0)
         parts['cmeans'].set_color('darkred')
-        parts['cmeans'].set_linewidth(2.5)
-        parts['cmeans'].set_linestyle('--')
-        parts['cbars'].set_color('black')
-        parts['cbars'].set_linewidth(1.5)
-        parts['cmins'].set_color('black')
-        parts['cmins'].set_linewidth(1.5)
-        parts['cmaxes'].set_color('black')
-        parts['cmaxes'].set_linewidth(1.5)
-        
-        # 设置标签和标题
         ax.set_xticks(range(len(attack_types)))
-        ax.set_xticklabels(attack_types, rotation=45, ha='right', fontsize=11)
-        ax.set_ylabel(metric_name, fontsize=13, fontweight='bold')
-        ax.set_title(f'{metric_name} by Attack Type', fontsize=14, fontweight='bold', pad=15)
-        
-        # 优化网格线
-        ax.grid(True, alpha=0.3, axis='y', linestyle='--', linewidth=0.8)
-        ax.set_axisbelow(True)  # 将网格线放在图形下方
-        
-        # 设置y轴范围，留出一些边距
-        y_min = min([np.min(vals) for vals in data_by_type if len(vals) > 0])
-        y_max = max([np.max(vals) for vals in data_by_type if len(vals) > 0])
-        y_range = y_max - y_min
-        ax.set_ylim(y_min - 0.05 * y_range, y_max + 0.15 * y_range)
-        
-        # 可选：添加统计信息（中位数和均值）
-        # 如果数据点较多，可以注释掉这部分以避免图表过于拥挤
-        show_stats = True  # 设置为 False 可以隐藏统计信息
-        if show_stats:
-            for i, at in enumerate(attack_types):
-                values = df[df['attack_type'] == at][metric_col].dropna().values
-                if len(values) > 0:
-                    median_val = np.median(values)
-                    mean_val = np.mean(values)
-                    # 在顶部显示中位数（更重要的统计量）
-                    y_top = ax.get_ylim()[1]
-                    ax.text(i, y_top * 0.95, f'{median_val:.3f}', 
-                           ha='center', va='top', fontsize=9, fontweight='bold',
-                           bbox=dict(boxstyle='round,pad=0.3', facecolor='white', 
-                                   edgecolor='black', alpha=0.85, linewidth=1))
-        
-        # 设置边框样式
-        for spine in ax.spines.values():
-            spine.set_linewidth(1.2)
-            spine.set_color('gray')
-    
-    # 调整子图间距
+        ax.set_xticklabels(attack_types, rotation=45, ha='right')
+        ax.set_ylabel(name, fontsize=12)
+        ax.set_title(f'{name} by Attack Type', fontsize=13)
+        ax.grid(True, alpha=0.3, axis='y')
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
-    print(f"Violin plots saved to: {os.path.abspath(output_path)}")
+    print(f"  小提琴图: {output_path}")
 
 
-def run_correlation_analysis(
-    df: pd.DataFrame,
-    heatmap_path: str,
-    scatter_prefix: str,
-) -> None:
-    """生成相关性热力图以及成对散点 + 拟合直线"""
-    cols = ['attack_rate', 'stealth_rate', 'transfer_rate']
+def run_correlation_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> None:
+    """相关性热力图 + 成对散点图"""
     if df.empty:
-        print("相关性分析跳过：数据为空")
         return
-
-    corr = df[cols].corr()
-    plt.figure(figsize=(6, 5))
-    im = plt.imshow(corr, cmap='coolwarm', vmin=-1, vmax=1)
-    plt.colorbar(im, fraction=0.046, pad=0.04)
-    tick_labels = [label.replace('_', ' ').title() for label in cols]
-    plt.xticks(range(len(cols)), tick_labels, rotation=45, ha='right')
-    plt.yticks(range(len(cols)), tick_labels)
-    for i in range(len(cols)):
-        for j in range(len(cols)):
-            plt.text(
-                j,
-                i,
-                f"{corr.iloc[i, j]:.3f}",
-                ha='center',
-                va='center',
-                color='black',
-            )
-    plt.title('Attack / Stealth / Transfer Correlation Heatmap')
+    corr = df[METRIC_COLS].corr()
+    fig, ax = plt.subplots(figsize=(6, 5))
+    im = ax.imshow(corr, cmap='coolwarm', vmin=-1, vmax=1)
+    plt.colorbar(im, ax=ax)
+    labels = ['Stealth TPR', 'Stealth AUC', 'Transfer Rate']
+    ax.set_xticks(range(3))
+    ax.set_yticks(range(3))
+    ax.set_xticklabels(labels, rotation=45, ha='right')
+    ax.set_yticklabels(labels)
+    for i in range(3):
+        for j in range(3):
+            ax.text(j, i, f'{corr.iloc[i, j]:.3f}', ha='center', va='center')
+    ax.set_title(f'Correlation ({arch})')
     plt.tight_layout()
-    plt.savefig(heatmap_path, dpi=300)
+    path = os.path.join(output_dir, f'correlation_heatmap_{arch}.png')
+    plt.savefig(path, dpi=300)
     plt.close()
-    print(f"Correlation heatmap saved to: {os.path.abspath(heatmap_path)}")
+    print(f"  相关性热力图: {path}")
 
-    scatter_pairs = [
-        ('attack_rate', 'stealth_rate', 'Attack vs Stealth', 'transfer_rate', 'Transfer Rate'),
-        ('attack_rate', 'transfer_rate', 'Attack vs Transfer', 'stealth_rate', 'Stealth Rate'),
-        ('stealth_rate', 'transfer_rate', 'Stealth vs Transfer', 'attack_rate', 'Attack Rate'),
-    ]
-    
-    for x_col, y_col, title, color_col, color_label in scatter_pairs:
-        x = df[x_col].to_numpy()
-        y = df[y_col].to_numpy()
-        color_values = df[color_col].to_numpy()
-        
-        if len(x) < 2:
-            print(f"散点拟合跳过 {title}：数据点不足")
+    # 成对散点：stealth_tpr vs transfer, stealth_auc vs transfer；颜色=ASR(0=白)，形状=attack_type
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize
+    from matplotlib.lines import Line2D
+
+    attack_markers = {'SIG': '^', 'WaNet': 'o', 'adaptive_blend': 's', 'adaptive_patch': 'D',
+                     'basic': 'p', 'belt': 'h', 'blend': 'v', 'badnet': '*', 'upgd': 'X'}
+    for stealth_col, name in [('stealth_tpr_avg', 'TPR'), ('stealth_auc_avg', 'AUC')]:
+        sub = df.dropna(subset=[stealth_col, 'transfer_rate'])
+        if len(sub) < 2:
             continue
-
-        try:
-            slope, intercept = np.polyfit(x, y, 1)
-            line_x = np.linspace(x.min(), x.max(), 100)
-            line_y = slope * line_x + intercept
-        except np.linalg.LinAlgError:
-            print(f"散点拟合失败（奇异矩阵）：{title}")
-            continue
-
-        # 创建图形，稍微增大以容纳colorbar
-        fig, ax = plt.subplots(figsize=(7, 5))
-        
-        # 使用第三个指标的颜色映射（颜色越深，值越高）
-        scatter = ax.scatter(x, y, c=color_values, cmap='viridis', 
-                           alpha=0.7, edgecolors='black', linewidths=0.5, 
-                           s=50, vmin=color_values.min(), vmax=color_values.max())
-        
-        # 添加colorbar
-        cbar = plt.colorbar(scatter, ax=ax, pad=0.02)
-        cbar.set_label(color_label, rotation=270, labelpad=15, fontsize=11, fontweight='bold')
-        
-        # 绘制拟合线
-        ax.plot(line_x, line_y, color='red', linewidth=2, 
-               label=f'Fit: y={slope:.3f}x+{intercept:.3f}')
-        
-        ax.set_xlabel(x_col.replace('_', ' ').title(), fontsize=12, fontweight='bold')
-        ax.set_ylabel(y_col.replace('_', ' ').title(), fontsize=12, fontweight='bold')
-        ax.set_title(title, fontsize=13, fontweight='bold', pad=10)
-        ax.legend(fontsize=10)
-        ax.grid(True, alpha=0.3, linestyle='--')
-        
+        x, y = sub[stealth_col].to_numpy(), sub['transfer_rate'].to_numpy()
+        asr_vals = sub['asr'].fillna(0) if 'asr' in sub.columns else pd.Series([0] * len(sub))
+        asr_min, asr_max = 0, max(asr_vals.max(), 0.01)
+        slope, intercept = np.polyfit(x, y, 1)
+        lx = np.linspace(x.min(), x.max(), 100)
+        ly = slope * lx + intercept
+        fig, ax = plt.subplots(figsize=(6, 5))
+        for at in sub['attack_type'].unique():
+            mask = sub['attack_type'] == at
+            if mask.sum() == 0:
+                continue
+            ax.scatter(sub.loc[mask, stealth_col], sub.loc[mask, 'transfer_rate'],
+                       c=asr_vals[mask], cmap='Blues', vmin=asr_min, vmax=asr_max,
+                       marker=attack_markers.get(at, 'o'), s=60, edgecolors='none')
+        ax.plot(lx, ly, 'gray', lw=1.5, alpha=0.7)
+        ax.set_xlabel(f'Stealth {name} Avg')
+        ax.set_ylabel('Transfer Rate')
+        ax.set_title(f'Stealth {name} vs Transfer ({arch})')
+        sm = ScalarMappable(cmap='Blues', norm=Normalize(vmin=asr_min, vmax=asr_max))
+        sm.set_array([])
+        cbar = plt.colorbar(sm, ax=ax)
+        cbar.set_label('ASR')
+        leg_handles = [Line2D([0], [0], marker=attack_markers.get(a, 'o'), color='w',
+                              markerfacecolor='#4A90E2', markersize=10, label=a, markeredgecolor='none')
+                      for a in sorted(sub['attack_type'].unique())]
+        leg_handles.append(Line2D([0], [0], color='gray', lw=2, label=f'y={slope:.3f}x+{intercept:.3f}'))
+        ax.legend(handles=leg_handles, fontsize=8)
+        ax.grid(True, alpha=0.3)
         plt.tight_layout()
-
-        output_name = f"{scatter_prefix}_{x_col}_vs_{y_col}.png"
-        plt.savefig(output_name, dpi=300, bbox_inches='tight')
+        path = os.path.join(output_dir, f'scatter_stealth_{name.lower()}_vs_transfer_{arch}.png')
+        plt.savefig(path, dpi=300)
         plt.close()
-        print(f"Scatter with regression saved to: {os.path.abspath(output_name)}")
+        print(f"  散点图: {path}")
 
 
-def compute_pareto_front_2d(df: pd.DataFrame, x_col: str, y_col: str, tol: float = 1e-9) -> pd.DataFrame:
-    """
-    计算二维帕累托前沿（默认值越大越优）。
-    x_col 作为主排序列，y_col 作为次排序列。
-    """
+def compute_pareto_2d(df: pd.DataFrame, x_col: str, y_col: str,
+                      x_ascending: bool = False, y_ascending: bool = False) -> pd.DataFrame:
+    """二维帕累托前沿。默认两者越大越优；x_ascending=True 表示 x 越小越优"""
     if df.empty:
-        return pd.DataFrame(columns=df.columns)
-
+        return pd.DataFrame()
     working = df.copy()
-    working = working.sort_values(
-        by=[x_col, y_col],
-        ascending=[False, False],
-        ignore_index=True,
-    )
-
+    working = working.sort_values(by=[x_col, y_col], ascending=[x_ascending, y_ascending], ignore_index=True)
     front_rows = []
-    best_secondary = -np.inf
+    best_y = -np.inf if not y_ascending else np.inf
     for _, row in working.iterrows():
-        secondary_val = row[y_col]
-        if secondary_val >= best_secondary - tol:
-            if secondary_val > best_secondary + tol:
-                best_secondary = secondary_val
+        yv = row[y_col]
+        if y_ascending:
+            better = yv <= best_y
+            if better:
+                best_y = min(best_y, yv) if best_y != np.inf else yv
+        else:
+            better = yv >= best_y
+            if better:
+                best_y = max(best_y, yv)
+        if better:
             front_rows.append(row)
-
     if not front_rows:
-        return pd.DataFrame(columns=df.columns)
-
-    front_df = pd.DataFrame(front_rows).drop_duplicates(
-        subset=[x_col, y_col], keep='first'
-    )
-    front_df = front_df.sort_values(by=x_col, ascending=True).reset_index(drop=True)
-    return front_df
+        return pd.DataFrame()
+    return pd.DataFrame(front_rows).drop_duplicates(subset=[x_col, y_col]).reset_index(drop=True)
 
 
-def plot_pareto_front_2d(
-    df: pd.DataFrame,
-    pareto_df: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    output_path: str,
-    title: str,
-) -> None:
-    """二维帕累托前沿可视化"""
+def plot_pareto_2d(df: pd.DataFrame, pareto_df: pd.DataFrame, x_col: str, y_col: str,
+                   output_path: str, title: str) -> None:
     if df.empty or pareto_df.empty:
-        print(f"{title} 绘制跳过：数据为空或无最优点")
         return
-
     plt.figure(figsize=(8, 6))
-    plt.scatter(
-        df[x_col],
-        df[y_col],
-        alpha=0.4,
-        label='All Points',
-        edgecolors='black',
-        linewidths=0.3,
-    )
-    plt.scatter(
-        pareto_df[x_col],
-        pareto_df[y_col],
-        color='red',
-        label='Pareto Front Points',
-        s=60,
-    )
-    plt.plot(
-        pareto_df[x_col],
-        pareto_df[y_col],
-        color='red',
-        linewidth=2,
-    )
+    plt.scatter(df[x_col], df[y_col], alpha=0.4, label='All', edgecolors='black', linewidths=0.3)
+    plt.scatter(pareto_df[x_col], pareto_df[y_col], color='red', s=60, label='Pareto Front')
+    sorted_df = pareto_df.sort_values(x_col)
+    plt.plot(sorted_df[x_col], sorted_df[y_col], 'r-', lw=2)
     plt.xlabel(x_col.replace('_', ' ').title())
     plt.ylabel(y_col.replace('_', ' ').title())
     plt.title(title)
@@ -382,446 +225,582 @@ def plot_pareto_front_2d(
     plt.tight_layout()
     plt.savefig(output_path, dpi=300)
     plt.close()
-    print(f"{title} saved to: {os.path.abspath(output_path)}")
+    print(f"  帕累托图: {output_path}")
 
 
-def compute_pareto_front_multi(df: pd.DataFrame, columns: List[str], tol: float = 1e-9) -> pd.DataFrame:
-    """通用多目标帕累托前沿计算，columns 中的值越大越优"""
-    if df.empty:
-        return pd.DataFrame(columns=df.columns)
-
-    values = df[columns].to_numpy()
-    keep_indices = []
-
-    for i in range(len(values)):
-        dominated = False
-        for j in range(len(values)):
-            if i == j:
-                continue
-            better_or_equal = np.all(values[j] >= values[i] - tol)
-            strictly_better = np.any(values[j] > values[i] + tol)
-            if better_or_equal and strictly_better:
-                dominated = True
-                break
-        if not dominated:
-            keep_indices.append(i)
-
-    if not keep_indices:
-        return pd.DataFrame(columns=df.columns)
-
-    front_df = df.iloc[keep_indices].drop_duplicates(subset=columns, keep='first')
-    front_df = front_df.sort_values(by=columns, ascending=[False] * len(columns)).reset_index(drop=True)
-    return front_df
-
-
-def plot_pareto_front_3d(df: pd.DataFrame, pareto_df: pd.DataFrame, output_path: str) -> None:
-    """三目标帕累托前沿可视化：Attack / Stealth / Transfer"""
-    if df.empty or pareto_df.empty:
-        print("三目标帕累托前沿绘制跳过：数据为空或无最优点")
+def plot_box_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> None:
+    """按攻击类型绘制三种指标的箱线图"""
+    if df.empty or 'attack_type' not in df.columns:
         return
+    attack_types = sorted(df['attack_type'].unique())
+    metrics = [
+        ('stealth_tpr_avg', 'Stealth TPR Avg'),
+        ('stealth_auc_avg', 'Stealth AUC Avg'),
+        ('transfer_rate', 'Transfer Rate'),
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.suptitle(f'Box Plot by Attack Type ({arch})', fontsize=16, fontweight='bold', y=1.02)
+    for idx, (col, name) in enumerate(metrics):
+        ax = axes[idx]
+        data_by_type = [df[df['attack_type'] == at][col].dropna().values for at in attack_types]
+        bp = ax.boxplot(data_by_type, positions=range(len(attack_types)), patch_artist=True, widths=0.6)
+        for patch in bp['boxes']:
+            patch.set_facecolor('#4A90E2')
+            patch.set_alpha(0.7)
+        ax.set_xticks(range(len(attack_types)))
+        ax.set_xticklabels(attack_types, rotation=45, ha='right')
+        ax.set_ylabel(name, fontsize=12)
+        ax.set_title(f'{name} by Attack Type', fontsize=13)
+        ax.grid(True, alpha=0.3, axis='y')
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+    print(f"  箱线图: {output_path}")
 
-    fig = plt.figure(figsize=(9, 7))
-    ax = fig.add_subplot(projection='3d')
 
-    ax.scatter(
-        df['attack_rate'],
-        df['stealth_rate'],
-        df['transfer_rate'],
-        alpha=0.3,
-        label='All Points',
-        edgecolors='black',
-        linewidths=0.3,
-    )
-
-    ax.scatter(
-        pareto_df['attack_rate'],
-        pareto_df['stealth_rate'],
-        pareto_df['transfer_rate'],
-        color='red',
-        s=80,
-        label='Pareto Front (3D)',
-    )
-
-    ax.set_xlabel('Attack Rate')
-    ax.set_ylabel('Stealth Rate')
-    ax.set_zlabel('Transfer Rate')
-    ax.set_title('3D Pareto Front (Attack, Stealth, Transfer)')
+def plot_bar_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> None:
+    """按攻击类型的均值柱状图（带误差条）"""
+    if df.empty or 'attack_type' not in df.columns:
+        return
+    agg = df.groupby('attack_type')[METRIC_COLS].agg(['mean', 'std']).reset_index()
+    attack_types = agg['attack_type'].tolist()
+    x = np.arange(len(attack_types))
+    width = 0.25
+    fig, ax = plt.subplots(figsize=(12, 6))
+    for i, col in enumerate(METRIC_COLS):
+        means = agg[(col, 'mean')].values
+        stds = agg[(col, 'std')].fillna(0).values
+        ax.bar(x + i * width, means, width, label=col.replace('_', ' ').title(), yerr=stds, capsize=3)
+    ax.set_xticks(x + width)
+    ax.set_xticklabels(attack_types, rotation=45, ha='right')
+    ax.set_ylabel('Value')
+    ax.set_title(f'Mean Metrics by Attack Type ({arch})')
     ax.legend()
+    ax.grid(True, alpha=0.3, axis='y')
     plt.tight_layout()
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
-    print(f"3D Pareto front plot saved to: {os.path.abspath(output_path)}")
+    print(f"  柱状图: {output_path}")
 
 
-def create_static_3d_plot(df: pd.DataFrame, plane_coeffs: tuple = None, 
-                         plane_model: str = 'z', plane_color: str = 'orange',
-                         output_path: str = 'scatter3d.png',
-                         figsize: tuple = (15, 12), elev: int = 20, azim: int = 45) -> None:
-    """创建静态3D散点图并保存为PNG"""
-    fig = plt.figure(figsize=figsize)  # 使用传入的图片尺寸
-    ax = fig.add_subplot(projection='3d')
-    
-    # 为不同组分配不同颜色
-    colors = plt.cm.tab10(np.linspace(0, 1, len(df['group_id'].unique())))
-    
-    # 绘制散点
-    for i, group_id in enumerate(df['group_id'].unique()):
-        group_data = df[df['group_id'] == group_id]
-        ax.scatter(group_data['attack_rate'], 
-                  group_data['stealth_rate'], 
-                  group_data['transfer_rate'],
-                  c=[colors[i]], 
-                  label=f'Group {group_id}',
-                  s=60, alpha=0.8, edgecolors='black', linewidth=0.5)
-    
-    # 添加拟合平面
-    if plane_coeffs is not None:
-        a, b, _, c = plane_coeffs
-        xs = df['attack_rate'].to_numpy()
-        ys = df['stealth_rate'].to_numpy()
-        zs = df['transfer_rate'].to_numpy()
-        
-        # 创建网格用于绘制平面
-        x_range = np.linspace(xs.min(), xs.max(), 20)
-        y_range = np.linspace(ys.min(), ys.max(), 20)
-        Xg, Yg = np.meshgrid(x_range, y_range)
-        Zg = a * Xg + b * Yg + c
-        
-        ax.plot_surface(Xg, Yg, Zg, alpha=0.3, color=plane_color)
-    
-    
-    
-    ax.set_xlabel('Attack Rate', fontsize=12)
-    ax.set_ylabel('Stealth Rate', fontsize=12)
-    ax.set_zlabel('Transfer Rate', fontsize=12)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-    plt.title('3D Scatter Plot (Attack, Stealth, Transfer)', fontsize=14, pad=20)
-    
-    # 设置观察视角
-    ax.view_init(elev=elev, azim=azim)  # elev=仰角(0-90度), azim=方位角(0-360度)
-    
-    # 保存图片
+def plot_3d_scatter(df: pd.DataFrame, output_path: str, arch: str) -> None:
+    """三维散点图：stealth_tpr, stealth_auc, transfer_rate"""
+    if df.empty or len(df) < 3:
+        return
+    from mpl_toolkits.mplot3d import Axes3D
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    scatter = ax.scatter(df['stealth_tpr_avg'], df['stealth_auc_avg'], df['transfer_rate'],
+                         c=df['transfer_rate'], cmap='viridis', alpha=0.6, s=30)
+    ax.set_xlabel('Stealth TPR')
+    ax.set_ylabel('Stealth AUC')
+    ax.set_zlabel('Transfer Rate')
+    ax.set_title(f'3D: Stealth TPR vs AUC vs Transfer ({arch})')
+    plt.colorbar(scatter, ax=ax, shrink=0.6)
     plt.tight_layout()
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"Saved static 3D scatter plot to: {output_path}")
+    plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
+    print(f"  三维散点图: {output_path}")
 
 
-def create_interactive_3d_plot(df: pd.DataFrame, plane_coeffs: tuple = None, 
-                              plane_model: str = 'z', plane_color: str = 'orange') -> go.Figure:
-    """创建交互式3D散点图"""
-    fig = go.Figure()
-    
-    # 添加散点
-    for group_id in df['group_id'].unique():
-        group_data = df[df['group_id'] == group_id]
-        fig.add_trace(go.Scatter3d(
-            x=group_data['attack_rate'],
-            y=group_data['stealth_rate'],
-            z=group_data['transfer_rate'],
-            mode='markers',
-            marker=dict(
-                size=5,
-                opacity=0.8,
-                line=dict(width=1, color='black')
-            ),
-            name=f'Group {group_id}',
-            text=[f'Group: {group_id}<br>Attack: {x:.3f}<br>Stealth: {y:.3f}<br>Transfer: {z:.3f}' 
-                  for x, y, z in zip(group_data['attack_rate'], group_data['stealth_rate'], group_data['transfer_rate'])],
-            hovertemplate='%{text}<extra></extra>'
-        ))
-    
-    # 添加拟合平面
-    if plane_coeffs is not None:
-        # plane_coeffs 是 (a, b, -1, c) 格式，需要转换为 (a, b, c) 格式用于绘制
-        a, b, _, c = plane_coeffs  # 忽略第三个参数（-1），使用第四个参数作为常数项
-        xs = df['attack_rate'].to_numpy()
-        ys = df['stealth_rate'].to_numpy()
-        zs = df['transfer_rate'].to_numpy()
-        
-        # 创建网格用于绘制平面
-        x_range = np.linspace(xs.min(), xs.max(), 20)
-        y_range = np.linspace(ys.min(), ys.max(), 20)
-        Xg, Yg = np.meshgrid(x_range, y_range)
-        
-        # 最小二乘拟合：z = ax + by + c
-        Zg = a * Xg + b * Yg + c
-        
-        fig.add_trace(go.Surface(
-            x=Xg, y=Yg, z=Zg,
-            colorscale=[[0, plane_color], [1, plane_color]],
-            opacity=0.6,
-            name='Linear Fitted Plane',
-            showscale=False
-        ))
-    
-    fig.update_layout(
-        title='3D Interactive Scatter Plot (Attack, Stealth, Transfer)',
-        scene=dict(
-            xaxis_title='Attack Rate',
-            yaxis_title='Stealth Rate',
-            zaxis_title='Transfer Rate',
-            camera=dict(
-                eye=dict(x=1.5, y=1.5, z=1.5)
-            )
-        ),
-        width=1000,
-        height=800
-    )
-    
-    return fig
+def plot_box_by_poison_rate(df: pd.DataFrame, output_path: str, arch: str) -> None:
+    """按 poison_rate 分组的箱线图"""
+    if df.empty or 'poison_rate' not in df.columns:
+        return
+    df_plot = df.copy()
+    df_plot['poison_rate'] = df_plot['poison_rate'].astype(str)
+    try:
+        rates = sorted(df_plot['poison_rate'].unique(), key=lambda x: float(x))
+    except (ValueError, TypeError):
+        rates = sorted(df_plot['poison_rate'].unique())
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.suptitle(f'Box Plot by Poison Rate ({arch})', fontsize=16, fontweight='bold', y=1.02)
+    for idx, col in enumerate(METRIC_COLS):
+        ax = axes[idx]
+        data_by_rate = [df_plot[df_plot['poison_rate'] == r][col].dropna().values for r in rates]
+        bp = ax.boxplot(data_by_rate, positions=range(len(rates)), patch_artist=True, widths=0.6)
+        for patch in bp['boxes']:
+            patch.set_facecolor('#E27D60')
+            patch.set_alpha(0.7)
+        ax.set_xticks(range(len(rates)))
+        ax.set_xticklabels(rates, rotation=45, ha='right')
+        ax.set_ylabel(col.replace('_', ' ').title())
+        ax.grid(True, alpha=0.3, axis='y')
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+    print(f"  箱线图(按poison_rate): {output_path}")
 
 
+def plot_box_by_trigger_type(df: pd.DataFrame, output_path: str, arch: str) -> None:
+    """按 trigger_type 分组的箱线图"""
+    if df.empty or 'trigger_type' not in df.columns:
+        return
+    trigger_types = sorted(df['trigger_type'].dropna().unique())
+    if not trigger_types:
+        return
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.suptitle(f'Box Plot by Trigger Type ({arch})', fontsize=16, fontweight='bold', y=1.02)
+    for idx, col in enumerate(METRIC_COLS):
+        ax = axes[idx]
+        data_by_type = [df[df['trigger_type'] == t][col].dropna().values for t in trigger_types]
+        bp = ax.boxplot(data_by_type, positions=range(len(trigger_types)), patch_artist=True, widths=0.6)
+        for patch in bp['boxes']:
+            patch.set_facecolor('#85CDCA')
+            patch.set_alpha(0.7)
+        ax.set_xticks(range(len(trigger_types)))
+        ax.set_xticklabels(trigger_types, rotation=45, ha='right')
+        ax.set_ylabel(col.replace('_', ' ').title())
+        ax.grid(True, alpha=0.3, axis='y')
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+    print(f"  箱线图(按trigger_type): {output_path}")
+
+
+# 各攻击类型的触发器强度参数名（用于折线图横坐标）
+TRIGGER_PARAM_LABEL = {
+    'WaNet': 's', 'SIG': 'delta', 'basic': 'alpha', 'blend': 'alpha',
+    'adaptive_blend': 'alpha', 'adaptive_patch': 'alpha', 'badnet': 'alpha',
+    'upgd': 'eps', 'belt': 'mask_rate',
+}
+
+
+# 折线图：不同 poison_rate 用不同色系，点颜色=ASR(0=白)
+POISON_RATE_CMAPS = ['Blues', 'Greens', 'Oranges', 'Reds', 'Purples', 'YlOrBr', 'YlGnBu', 'PuBu']
+POISON_RATE_MARKERS = ['o', 's', '^', 'D', 'v', 'p', 'h', '*']
+
+
+def plot_line_by_attack_type(df: pd.DataFrame, output_dir: str, arch: str) -> None:
+    """每个攻击类型单独画折线图：X=触发器强度，不同中毒率不同色系+形状，点颜色=ASR(0=白)"""
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize
+    from matplotlib.lines import Line2D
+
+    if df.empty or 'attack_type' not in df.columns:
+        return
+    df = df.copy()
+    for col in ['poison_rate', 'train_param_value', 'asr']:
+        if col not in df.columns:
+            df[col] = np.nan if col == 'asr' else 0
+    df['asr'] = pd.to_numeric(df['asr'], errors='coerce').fillna(0)
+    attack_types = sorted(df['attack_type'].unique())
+    for at in attack_types:
+        sub = df[df['attack_type'] == at].copy()
+        if sub.empty:
+            continue
+        sub = sub.dropna(subset=['train_param_value'])
+        if sub.empty:
+            continue
+        x_param = TRIGGER_PARAM_LABEL.get(at, 'param')
+        poison_rates = sorted(sub['poison_rate'].dropna().unique(), key=lambda x: float(x) if pd.notna(x) else 0)
+        asr_max = max(sub['asr'].max(), 0.01)
+        fig, axes = plt.subplots(1, 3, figsize=(14, 5))
+        fig.suptitle(f'Line Chart: {at} ({arch}) — X={x_param} (Trigger Strength)', fontsize=16, fontweight='bold', y=1.02)
+        metrics = [
+            ('stealth_tpr_avg', 'Stealth TPR Avg'),
+            ('stealth_auc_avg', 'Stealth AUC Avg'),
+            ('transfer_rate', 'Transfer Rate'),
+        ]
+        for idx, (col, name) in enumerate(metrics):
+            ax = axes[idx]
+            for pr_idx, pr in enumerate(poison_rates):
+                pr_sub = sub[sub['poison_rate'] == pr].sort_values('train_param_value')
+                if pr_sub.empty:
+                    continue
+                x_vals = pr_sub['train_param_value'].values
+                y_vals = pr_sub[col].values
+                asr_vals = pr_sub['asr'].values
+                cmap_name = POISON_RATE_CMAPS[pr_idx % len(POISON_RATE_CMAPS)]
+                marker = POISON_RATE_MARKERS[pr_idx % len(POISON_RATE_MARKERS)]
+                ax.scatter(x_vals, y_vals, c=asr_vals, cmap=cmap_name, vmin=0, vmax=asr_max,
+                           marker=marker, s=70, edgecolors='none')
+                ax.plot(x_vals, y_vals, '-', color='gray', linewidth=1.5, alpha=0.5)
+            ax.set_xlabel(f'{x_param} (Trigger Strength)')
+            ax.set_ylabel(name)
+            ax.set_title(name)
+            sm = ScalarMappable(cmap='Blues', norm=Normalize(vmin=0, vmax=asr_max))
+            sm.set_array([])
+            cbar = plt.colorbar(sm, ax=ax)
+            cbar.set_label('ASR')
+            leg_handles = [Line2D([0], [0], marker=POISON_RATE_MARKERS[i % len(POISON_RATE_MARKERS)],
+                                  color='w', markerfacecolor='#4A90E2', markersize=10, label=f'poison_rate={pr}',
+                                  markeredgecolor='none') for i, pr in enumerate(poison_rates)]
+            ax.legend(handles=leg_handles, loc='best', fontsize=8)
+            ax.grid(True, alpha=0.3)
+        plt.tight_layout(rect=[0, 0, 1, 0.95])
+        path = os.path.join(output_dir, f'line_{at}_{arch}.png')
+        plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.close()
+        print(f"  折线图({at}): {path}")
+
+
+def run_pareto_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> None:
+    """隐蔽性 vs 迁移性 帕累托分析。隐蔽性：TPR 越低越好，AUC 越接近 0.5 越好"""
+    if df.empty:
+        return
+    # Stealth TPR vs Transfer: TPR 越低越隐蔽，Transfer 越高越好
+    # 用 1 - stealth_tpr 作为“隐蔽得分”（越高越隐蔽），与 transfer 一起做帕累托
+    df_temp = df.copy()
+    df_temp['stealth_score_tpr'] = 1 - df_temp['stealth_tpr_avg']
+    pareto_tpr = compute_pareto_2d(df_temp, 'stealth_score_tpr', 'transfer_rate')
+    if not pareto_tpr.empty:
+        plot_pareto_2d(
+            df_temp, pareto_tpr,
+            'stealth_score_tpr', 'transfer_rate',
+            os.path.join(output_dir, f'pareto_stealth_tpr_vs_transfer_{arch}.png'),
+            f'Pareto: Stealth(1-TPR) vs Transfer ({arch})'
+        )
+    # Stealth AUC: 0.5 最理想，用 1 - 2*|auc-0.5| 作为隐蔽得分
+    df_temp['stealth_score_auc'] = 1 - 2 * np.abs(df_temp['stealth_auc_avg'] - 0.5)
+    pareto_auc = compute_pareto_2d(df_temp, 'stealth_score_auc', 'transfer_rate')
+    if not pareto_auc.empty:
+        plot_pareto_2d(
+            df_temp, pareto_auc,
+            'stealth_score_auc', 'transfer_rate',
+            os.path.join(output_dir, f'pareto_stealth_auc_vs_transfer_{arch}.png'),
+            f'Pareto: Stealth(AUC) vs Transfer ({arch})'
+        )
+
+
+# 整体图：arch 对应标记形状与图例颜色（统一蓝色）
+ARCH_MARKERS = {'resnet18': '^', 'mobilenet': 'o', 'vgg': 's'}
+ARCH_LEGEND_COLOR = '#4A90E2'
+
+# 攻击方法编号说明（8种方法，用于总图）
+ATTACK_TYPE_ORDER = [
+    'blend', 'basic', 'SIG', 'WaNet', 'adaptive_blend', 'adaptive_patch', 'belt', 'upgd'
+]
+
+
+def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str = '') -> None:
+    """合并 cifar10 所有 arch 数据：stealth_auc/stealth_tpr vs transfer，形状区分 arch，颜色表示 ASR"""
+    from matplotlib.lines import Line2D
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize
+
+    found = discover_arch_csvs(data_dir, suffix=suffix)
+    if len(found) < 2:
+        return
+    dfs = []
+    for arch, path in found.items():
+        df = pd.read_csv(path, encoding='utf-8')
+        for col in ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'asr', 'S_stealth']:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+        df['arch'] = arch
+        dfs.append(df)
+    combined = pd.concat(dfs, ignore_index=True)
+    if combined.empty:
+        return
+    if 'attack_type' in combined.columns:
+        combined = combined[~combined['attack_type'].isin(['none', ''])]
+    if combined.empty:
+        return
+    asr_vals = combined['asr']
+    asr_valid = asr_vals.dropna()
+    asr_min = asr_valid.min() if len(asr_valid) > 0 else 0
+    asr_max = asr_valid.max() if len(asr_valid) > 0 else 1
+    if asr_max <= asr_min:
+        asr_min, asr_max = 0, 1
+
+    plot_cols = [
+        ('stealth_auc_avg', 'Stealth AUC Avg', 'auc'),
+        ('stealth_tpr_avg', 'Stealth TPR Avg', 'tpr'),
+    ]
+    if 'S_stealth' in combined.columns:
+        plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
+    # 方法编号映射
+    method_to_num = {at: i + 1 for i, at in enumerate(ATTACK_TYPE_ORDER)}
+
+    for x_col, x_label, file_suffix in plot_cols:
+        sub_combined = combined.dropna(subset=[x_col, 'transfer_rate'])
+        if sub_combined.empty:
+            continue
+        fig, ax = plt.subplots(figsize=(11, 8))
+        fig.subplots_adjust(left=0.1, right=0.65, top=0.92, bottom=0.1)
+        for arch in ARCHS:
+            if arch not in found:
+                continue
+            sub = sub_combined[sub_combined['arch'] == arch]
+            if sub.empty:
+                continue
+            x = sub[x_col].values
+            y = sub['transfer_rate'].values
+            c = sub['asr'].fillna(asr_min + (asr_max - asr_min) / 2).values
+            attack_types = sub['attack_type'].values if 'attack_type' in sub.columns else [''] * len(x)
+            sc = ax.scatter(x, y, c=c, cmap='Blues', vmin=asr_min, vmax=asr_max,
+                            marker=ARCH_MARKERS.get(arch, 'o'), s=80, edgecolors='none')
+            for xi, yi, at in zip(x, y, attack_types):
+                num = method_to_num.get(at, '')
+                if num:
+                    ax.annotate(str(num), (xi, yi), fontsize=5, ha='center', va='center',
+                               color='gray', alpha=0.8)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel('Transfer Rate')
+        ax.set_title(f'CIFAR-10: {x_label} vs Transfer (shape=arch, color=ASR)')
+        legend_elements = [Line2D([0], [0], marker=ARCH_MARKERS.get(a, 'o'), color='w',
+                                  markerfacecolor=ARCH_LEGEND_COLOR, markersize=12, label=a,
+                                  markeredgecolor='none') for a in ARCHS if a in found]
+        ax.legend(handles=legend_elements, loc='upper right', frameon=False)
+
+        # colorbar 与 方法说明 放在图外右侧
+        sm = ScalarMappable(cmap='Blues', norm=Normalize(vmin=asr_min, vmax=asr_max))
+        sm.set_array([])
+        cbar_ax = fig.add_axes([0.72, 0.15, 0.02, 0.7])
+        cbar = fig.colorbar(sm, cax=cbar_ax)
+        cbar.set_label('ASR')
+        method_lines = [f"{i+1}={at}" for i, at in enumerate(ATTACK_TYPE_ORDER)]
+        method_text = 'Method:\n' + '\n'.join(method_lines)
+        fig.text(0.78, 0.5, method_text, fontsize=8, va='center', ha='left',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+        ax.grid(True, alpha=0.3)
+        path = os.path.join(output_dir, f'scatter_stealth_{file_suffix}_vs_transfer_combined.png')
+        plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.close()
+        print(f"  整体散点图(Stealth {file_suffix.upper()}): {path}")
+
+    # 额外：按方法分图，每个方法一张，形状=arch
+    _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max)
+
+    # 额外：气泡图，大小=ASR，颜色=方法，形状=arch
+    _plot_scatter_combined_bubble(combined, found, output_dir)
+
+
+def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
+    """按方法分图：每个方法一张，形状=arch，颜色=ASR"""
+    from matplotlib.lines import Line2D
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.colors import Normalize
+
+    plot_cols = [
+        ('stealth_auc_avg', 'Stealth AUC Avg', 'auc'),
+        ('stealth_tpr_avg', 'Stealth TPR Avg', 'tpr'),
+    ]
+    if 'S_stealth' in combined.columns:
+        plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
+
+    for at in ATTACK_TYPE_ORDER:
+        sub = combined[combined['attack_type'] == at]
+        if sub.empty:
+            continue
+        for x_col, x_label, file_suffix in plot_cols:
+            sub2 = sub.dropna(subset=[x_col, 'transfer_rate'])
+            if sub2.empty:
+                continue
+            fig, ax = plt.subplots(figsize=(8, 6))
+            for arch in ARCHS:
+                if arch not in found:
+                    continue
+                s = sub2[sub2['arch'] == arch]
+                if s.empty:
+                    continue
+                c = s['asr'].fillna(asr_min + (asr_max - asr_min) / 2).values
+                ax.scatter(s[x_col], s['transfer_rate'], c=c, cmap='Blues',
+                           vmin=asr_min, vmax=asr_max, marker=ARCH_MARKERS.get(arch, 'o'),
+                           s=80, edgecolors='none')
+            ax.set_xlabel(x_label)
+            ax.set_ylabel('Transfer Rate')
+            ax.set_title(f'{at}: {x_label} vs Transfer (shape=arch, color=ASR)')
+            leg = [Line2D([0], [0], marker=ARCH_MARKERS.get(a, 'o'), color='w',
+                          markerfacecolor=ARCH_LEGEND_COLOR, markersize=10, label=a, markeredgecolor='none')
+                   for a in ARCHS if a in found]
+            ax.legend(handles=leg, loc='upper right', frameon=False)
+            sm = ScalarMappable(cmap='Blues', norm=Normalize(vmin=asr_min, vmax=asr_max))
+            sm.set_array([])
+            plt.colorbar(sm, ax=ax, label='ASR')
+            ax.grid(True, alpha=0.3)
+            path = os.path.join(output_dir, f'scatter_stealth_{file_suffix}_vs_transfer_by_method_{at}.png')
+            plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
+            plt.close()
+            print(f"  按方法散点图({at}): {path}")
+
+
+def _plot_scatter_combined_bubble(combined, found, output_dir):
+    """气泡图：大小=ASR，颜色=方法，形状=arch"""
+    from matplotlib.lines import Line2D
+    from matplotlib.patches import Patch
+
+    # 方法颜色映射（8种）
+    METHOD_COLORS = plt.cm.tab10(np.linspace(0, 1, 10))[:8]
+    method_to_color = {at: METHOD_COLORS[i] for i, at in enumerate(ATTACK_TYPE_ORDER)}
+
+    plot_cols = [
+        ('stealth_auc_avg', 'Stealth AUC Avg', 'auc'),
+        ('stealth_tpr_avg', 'Stealth TPR Avg', 'tpr'),
+    ]
+    if 'S_stealth' in combined.columns:
+        plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
+
+    asr_vals = combined['asr'].fillna(0)
+    s_min, s_max = 50, 300
+    asr_min, asr_max = asr_vals.min(), max(asr_vals.max(), 0.01)
+    if asr_max <= asr_min:
+        asr_min, asr_max = 0, 1
+
+    def size_from_asr(a):
+        if pd.isna(a) or a <= 0:
+            return s_min
+        t = (float(a) - asr_min) / (asr_max - asr_min) if asr_max > asr_min else 0
+        return s_min + (s_max - s_min) * t
+
+    for x_col, x_label, file_suffix in plot_cols:
+        sub = combined.dropna(subset=[x_col, 'transfer_rate'])
+        if sub.empty:
+            continue
+        fig, ax = plt.subplots(figsize=(11, 8))
+        fig.subplots_adjust(right=0.75)
+        for at in ATTACK_TYPE_ORDER:
+            for arch in ARCHS:
+                if arch not in found:
+                    continue
+                s = sub[(sub['attack_type'] == at) & (sub['arch'] == arch)]
+                if s.empty:
+                    continue
+                sizes = s['asr'].apply(size_from_asr).values
+                n = len(s)
+                ax.scatter(s[x_col], s['transfer_rate'],
+                           c=[method_to_color[at]] * n, marker=ARCH_MARKERS.get(arch, 'o'),
+                           s=sizes, alpha=0.7, edgecolors='gray', linewidths=0.5)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel('Transfer Rate')
+        ax.set_title(f'CIFAR-10: {x_label} vs Transfer (size=ASR, color=method, shape=arch)')
+        leg1 = [Patch(facecolor=method_to_color[at], label=at, edgecolor='gray') for at in ATTACK_TYPE_ORDER]
+        leg2 = [Line2D([0], [0], marker=ARCH_MARKERS.get(a, 'o'), color='w', markerfacecolor='gray',
+                       markersize=10, label=a, markeredgecolor='none') for a in ARCHS if a in found]
+        ax.legend(handles=leg1 + leg2, loc='upper right', ncol=2, fontsize=7)
+        ax.grid(True, alpha=0.3)
+        path = os.path.join(output_dir, f'scatter_stealth_{file_suffix}_vs_transfer_combined_bubble.png')
+        plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
+        plt.close()
+        print(f"  气泡图(Stealth {file_suffix.upper()}): {path}")
+
+
+def analyze_single_arch(arch: str, csv_path: str, output_dir: str,
+                       do_corr: bool, do_violin: bool, do_pareto: bool,
+                       do_box: bool, do_bar: bool,
+                       do_3d: bool, do_box_poison: bool, do_box_trigger: bool,
+                       do_line: bool) -> None:
+    """对单个 arch 执行分析"""
+    df = load_from_csv(csv_path)
+    print(f"\n[{arch}] 加载 {len(df)} 条数据")
+    os.makedirs(output_dir, exist_ok=True)
+    if do_corr:
+        run_correlation_analysis(df, output_dir, arch)
+    if do_violin:
+        path = os.path.join(output_dir, f'violin_by_attack_type_{arch}.png')
+        plot_violin_by_attack_type(df, path, arch)
+    if do_pareto:
+        run_pareto_analysis(df, output_dir, arch)
+    if do_box:
+        path = os.path.join(output_dir, f'box_by_attack_type_{arch}.png')
+        plot_box_by_attack_type(df, path, arch)
+    if do_bar:
+        path = os.path.join(output_dir, f'bar_by_attack_type_{arch}.png')
+        plot_bar_by_attack_type(df, path, arch)
+    if do_3d:
+        path = os.path.join(output_dir, f'scatter_3d_{arch}.png')
+        plot_3d_scatter(df, path, arch)
+    if do_box_poison:
+        path = os.path.join(output_dir, f'box_by_poison_rate_{arch}.png')
+        plot_box_by_poison_rate(df, path, arch)
+    if do_box_trigger:
+        path = os.path.join(output_dir, f'box_by_trigger_type_{arch}.png')
+        plot_box_by_trigger_type(df, path, arch)
+    if do_line:
+        plot_line_by_attack_type(df, output_dir, arch)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description='相关性与PCA分析')
-    parser.add_argument('--data-csv', type=str, required=True, help='CSV 数据文件路径（如 data_cifar10.csv）')
-    parser.add_argument('--standardize', action='store_true', help='在PCA前进行标准化')
-    parser.add_argument('--min-attack', type=float, default=0.3, help='筛选阈值：中毒率(attack_rate)低于此值将被剔除')
-    parser.add_argument('--group-avg', action='store_true', help='按组平均：先对每组内三列求均值，再基于组均值进行分析')
-    parser.add_argument('--output-dir', type=str, default='analysis_outputs', help='所有图表输出目录')
-    parser.add_argument('--interactive-out', type=str, default='scatter3d_interactive.html', help='交互式3D散点图输出路径（默认自动生成）')
-    parser.add_argument('--static-out', type=str, default='scatter3d.png', help='静态3D散点图输出路径（PNG格式）')
-    parser.add_argument('--static-plot', action='store_true', help='生成静态PNG格式的3D散点图')
-    parser.add_argument('--fit-plane', action='store_true', help='拟合平面并画在散点图上')
-    parser.add_argument('--plane-model', type=str, choices=['z'], default='z',
-                        help="平面模型：'z' 表示 z=ax+by+c (最小二乘拟合)")
-    parser.add_argument('--plane-color', type=str, default='orange', help='拟合平面颜色')
-    parser.add_argument('--plane-alpha', type=float, default=0.35, help='拟合平面透明度')
-    parser.add_argument('--correlation-analysis', action='store_true',
-                        help='生成相关性热力图与成对散点图（含拟合直线）')
-    parser.add_argument('--corr-heatmap-out', type=str, default='correlation_heatmap.png',
-                        help='相关性热力图输出路径')
-    parser.add_argument('--corr-scatter-prefix', type=str, default='corr_scatter',
-                        help='成对散点图文件名前缀')
-    parser.add_argument('--pareto-front', action='store_true',
-                        help='执行隐蔽性-迁移性帕累托前沿分析')
-    parser.add_argument('--pareto-out', type=str, default='pareto_front.png',
-                        help='帕累托前沿图输出路径')
-    parser.add_argument('--pareto-front-3d', action='store_true',
-                        help='同时在攻击/隐蔽/迁移三目标上计算帕累托前沿')
-    parser.add_argument('--pareto3d-out', type=str, default='pareto_front_3d.png',
-                        help='三目标帕累托前沿图输出路径')
-    parser.add_argument('--pareto-front-attack-stealth', action='store_true',
-                        help='执行攻击性 vs 隐蔽性的帕累托前沿分析')
-    parser.add_argument('--pareto-attack-stealth-out', type=str, default='pareto_front_attack_stealth.png',
-                        help='攻击性-隐蔽性帕累托前沿图输出路径')
-    parser.add_argument('--pareto-front-attack-transfer', action='store_true',
-                        help='执行攻击性 vs 迁移性的帕累托前沿分析')
-    parser.add_argument('--pareto-attack-transfer-out', type=str, default='pareto_front_attack_transfer.png',
-                        help='攻击性-迁移性帕累托前沿图输出路径')
-    parser.add_argument('--violin-plot', action='store_true',
-                        help='生成按攻击类型分组的小提琴图（三个子图：attack_rate, stealth_rate, transfer_rate）')
-    parser.add_argument('--violin-out', type=str, default='violin_by_attack_type.png',
-                        help='小提琴图输出路径')
+    parser = argparse.ArgumentParser(description='隐蔽性与迁移性分析（按模型分开）')
+    parser.add_argument('--data-dir', type=str, default=None,
+                        help='数据目录，包含 data_cifar10_{arch}.csv')
+    parser.add_argument('--data-suffix', type=str, default='_no_nc',
+                        choices=['', '_no_nc', '_nc'],
+                        help='数据文件后缀："" 旧格式；"_no_nc" 无 NC；"_nc" 含 S_stealth（默认 _no_nc）')
+    parser.add_argument('--data-csv', type=str, default=None,
+                        help='单个 CSV 路径（用于指定 arch 时）')
+    parser.add_argument('--arch', type=str, choices=ARCHS, default=None,
+                        help='仅分析指定 arch（需配合 --data-csv 或 --data-dir）')
+    parser.add_argument('--output-dir', type=str, default='analysis_outputs')
+    parser.add_argument('--correlation-analysis', action='store_true')
+    parser.add_argument('--violin-plot', action='store_true')
+    parser.add_argument('--pareto-front', action='store_true')
+    parser.add_argument('--box-plot', action='store_true', help='箱线图(按attack_type)')
+    parser.add_argument('--bar-plot', action='store_true', help='柱状图(按attack_type均值)')
+    parser.add_argument('--scatter-3d', action='store_true', help='三维散点图')
+    parser.add_argument('--box-poison', action='store_true', help='箱线图(按poison_rate)')
+    parser.add_argument('--box-trigger', action='store_true', help='箱线图(按trigger_type)')
+    parser.add_argument('--line-plot', action='store_true', help='折线图(每个方法一张)')
+    parser.add_argument('--combined-scatter', action='store_true',
+                        help='整体散点图：合并所有arch，形状=arch，颜色=ASR')
+    parser.add_argument('--all-plots', action='store_true', help='生成所有类型的图')
     args = parser.parse_args()
 
-    # 获取脚本所在目录（analysis文件夹）
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # 从 CSV 文件加载数据
-    data_path = args.data_csv
-    # 如果路径是相对路径，尝试相对于脚本目录
-    if not os.path.isabs(data_path) and not os.path.exists(data_path):
-        data_path = os.path.join(script_dir, data_path)
-    df = load_all_points_from_csv(data_path)
+    project_root = os.path.dirname(script_dir)
+    data_dir = args.data_dir or script_dir
+    if not os.path.isabs(data_dir):
+        # 相对路径相对于项目根目录，便于 --data-dir analysis 正确解析
+        data_dir = os.path.join(project_root, data_dir)
+    output_dir = os.path.join(script_dir, args.output_dir) if not os.path.isabs(args.output_dir) else args.output_dir
+    suffix = args.data_suffix
 
-    # 按中毒率(attack_rate)筛选，剔除低于阈值的数据
-    before_n = len(df)
-    df = df[df['attack_rate'] >= args.min_attack].reset_index(drop=True)
-    after_n = len(df)
-    removed_n = before_n - after_n
-    print(f"Filter: attack_rate < {args.min_attack:.3f} 被剔除 {removed_n} 条，保留 {after_n}/{before_n} 条。")
-
-    # 对迁移率进行处理：迁移率 = 迁移率 / 攻击率
-    # df['transfer_rate'] = df['transfer_rate'] / df['attack_rate']
-
-    # 可选：按组平均
-    if args.group_avg:
-        print('Note: 按组平均模式，每组内三列取均值后进行分析')
-        df = df.groupby('group_id', as_index=False).agg({
-            'attack_rate': 'mean',
-            'stealth_rate': 'mean',
-            'transfer_rate': 'mean',
-        }).reset_index(drop=True)
-        print(f'Group averages: {len(df)} groups')
-
-    # 打印用于分析的数据
-    with pd.option_context('display.max_rows', None, 'display.max_columns', None):
-        print('Data used for analysis (filtered): group_id, attack_rate, stealth_rate, transfer_rate')
-        print(df[['group_id', 'attack_rate', 'stealth_rate', 'transfer_rate']]
-              .to_string(index=False, float_format=lambda x: f'{x:.6f}'))
-
-
-    # PCA
-    pca, X_pca, comps = run_pca(df, standardize=args.standardize)
-    explained = [f'{v:.6f}' for v in pca.explained_variance_ratio_]
-    print('\nPCA explained_variance_ratio_ (PC1, PC2, PC3):')
-    print(', '.join(explained))
-    print('\nPCA components (rows=PC, cols=features):')
-    print(comps.to_string(float_format=lambda x: f'{x:.6f}'))
-    # 获取脚本所在目录（analysis文件夹）
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    # 如果输出目录是相对路径，则相对于脚本目录
-    if not os.path.isabs(args.output_dir):
-        output_dir = os.path.join(script_dir, args.output_dir)
+    # 确定要分析的 (arch, csv_path) 列表
+    to_analyze = []
+    if args.data_csv:
+        path = args.data_csv if os.path.isabs(args.data_csv) else os.path.join(script_dir, args.data_csv)
+        if os.path.exists(path):
+            arch = args.arch or 'unknown'
+            if arch == 'unknown':
+                for a in ARCHS:
+                    if a in path.lower():
+                        arch = a
+                        break
+            to_analyze = [(arch, path)]
     else:
-        output_dir = args.output_dir
-    output_dir = os.path.abspath(output_dir)
-    os.makedirs(output_dir, exist_ok=True)
+        found = discover_arch_csvs(data_dir, suffix=suffix)
+        if not found:
+            print(f"未在 {data_dir} 找到 data_cifar10_{{arch}}{suffix}.csv")
+            return
+        for arch, path in found.items():
+            if args.arch is None or args.arch == arch:
+                to_analyze.append((arch, path))
 
-    def resolve_output_path(path: str) -> str:
-        return os.path.join(output_dir, os.path.basename(path))
+    if not to_analyze:
+        print("无待分析数据")
+        return
 
-    heatmap_path = resolve_output_path(args.corr_heatmap_out)
-    scatter_prefix = os.path.join(output_dir, os.path.basename(args.corr_scatter_prefix))
-    interactive_out_path = resolve_output_path(args.interactive_out)
-    static_out_path = resolve_output_path(args.static_out)
-    pareto_out_path = resolve_output_path(args.pareto_out)
-    pareto3d_out_path = resolve_output_path(args.pareto3d_out)
-    pareto_attack_stealth_out_path = resolve_output_path(args.pareto_attack_stealth_out)
-    pareto_attack_transfer_out_path = resolve_output_path(args.pareto_attack_transfer_out)
-    violin_out_path = resolve_output_path(args.violin_out)
+    do_corr = args.correlation_analysis
+    do_violin = args.violin_plot
+    do_pareto = args.pareto_front
+    do_box = args.box_plot
+    do_bar = args.bar_plot
+    do_3d = args.scatter_3d
+    do_box_poison = args.box_poison
+    do_box_trigger = args.box_trigger
+    do_line = args.line_plot
+    do_combined = args.combined_scatter
 
-    # 平面拟合参数存储
-    plane_coeffs = None
-    
-    # 最小二乘拟合平面：z = a*x + b*y + c
-    if args.fit_plane:
-        xs = df['attack_rate'].to_numpy()
-        ys = df['stealth_rate'].to_numpy()
-        zs = df['transfer_rate'].to_numpy()
-        
-        # 普通最小二乘：z = a*x + b*y + c
-        A = np.c_[xs, ys, np.ones_like(xs)]
-        coeffs, *_ = np.linalg.lstsq(A, zs, rcond=None)
-        a, b, c = [float(v) for v in coeffs]
-        z_pred = A @ coeffs
-        ss_res = float(np.sum((zs - z_pred) ** 2))
-        ss_tot = float(np.sum((zs - np.mean(zs)) ** 2))
-        r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else 1.0
+    if args.all_plots:
+        do_corr = do_violin = do_pareto = do_box = do_bar = True
+        do_3d = do_box_poison = do_box_trigger = do_line = do_combined = True
+    elif not any([do_corr, do_violin, do_pareto, do_box, do_bar, do_3d, do_box_poison, do_box_trigger, do_line, do_combined]):
+        do_corr = do_violin = do_pareto = do_box = do_bar = True
+        do_3d = do_box_poison = do_box_trigger = do_line = do_combined = True
 
-        print(f"\nFitted plane (z=ax+by+c): z = {a:.6f} * x + {b:.6f} * y + {c:.6f} (R^2={r2:.6f})")
-        # 存储平面系数用于距离计算
-        plane_coeffs = (a, b, -1, c)  # 转换为 ax + by + cz + d = 0 形式
+    if do_combined and len(discover_arch_csvs(data_dir, suffix=suffix)) >= 2:
+        os.makedirs(output_dir, exist_ok=True)
+        plot_scatter_combined_all_archs(data_dir, output_dir, suffix=suffix)
 
-        # 计算各点到拟合平面的距离
-        points = np.c_[xs, ys, zs]
-        distances = calculate_point_to_plane_distance(points, plane_coeffs)
-        avg_distance = np.mean(distances)
-        print(f"\n各点到拟合平面的距离:")
-        print(f"平均距离: {avg_distance:.6f}")
-        print(f"最大距离: {np.max(distances):.6f}")
-        print(f"最小距离: {np.min(distances):.6f}")
-        print(f"距离标准差: {np.std(distances):.6f}")
-        
-        # 将距离信息添加到DataFrame
-        df['distance_to_plane'] = distances
-    
-    # 生成交互式3D散点图
-    interactive_fig = create_interactive_3d_plot(df, plane_coeffs, args.plane_model, args.plane_color)
-    interactive_fig.write_html(interactive_out_path)
-    print(f"Saved interactive 3D scatter to: {interactive_out_path}")
-    print(f"💡 提示：在VSCode中右键点击HTML文件，选择'Open with Live Server'或'在浏览器中打开'来查看交互式图表")
-    
-    # 生成静态3D散点图
-    if args.static_plot:
-        print(f"\n生成静态3D散点图...")
-        create_static_3d_plot(df, plane_coeffs, args.plane_model, args.plane_color, static_out_path)
-        print(f"静态图片已保存到: {static_out_path}")
-
-    if args.correlation_analysis:
-        print(f"\n{'='*60}")
-        print("开始相关性分析")
-        print(f"{'='*60}")
-        run_correlation_analysis(df, heatmap_path, scatter_prefix)
-
-    if args.pareto_front:
-        print(f"\n{'='*60}")
-        print("开始帕累托前沿分析（隐蔽性 vs 迁移性）")
-        print(f"{'='*60}")
-        pareto_df = compute_pareto_front_2d(df, 'stealth_rate', 'transfer_rate')
-        if pareto_df.empty:
-            print("未找到任何帕累托最优点。")
-        else:
-            print(f"检测到 {len(pareto_df)} 个帕累托最优点：")
-            print(pareto_df[['group_id', 'attack_rate', 'stealth_rate', 'transfer_rate']]
-                  .to_string(index=False, float_format=lambda x: f'{x:.6f}'))
-            plot_pareto_front_2d(
-                df,
-                pareto_df,
-                'stealth_rate',
-                'transfer_rate',
-                pareto_out_path,
-                'Pareto Front (Stealth vs Transfer)',
-            )
-
-    if args.pareto_front_3d:
-        print(f"\n{'='*60}")
-        print("开始三目标帕累托前沿分析（Attack / Stealth / Transfer）")
-        print(f"{'='*60}")
-        columns = ['attack_rate', 'stealth_rate', 'transfer_rate']
-        pareto3d_df = compute_pareto_front_multi(df, columns)
-        if pareto3d_df.empty:
-            print("未找到任何三目标帕累托最优点。")
-        else:
-            print(f"检测到 {len(pareto3d_df)} 个三目标帕累托最优点：")
-            print(pareto3d_df[['group_id', 'attack_rate', 'stealth_rate', 'transfer_rate']]
-                  .to_string(index=False, float_format=lambda x: f'{x:.6f}'))
-            plot_pareto_front_3d(df, pareto3d_df, pareto3d_out_path)
-
-    if args.pareto_front_attack_stealth:
-        print(f"\n{'='*60}")
-        print("开始帕累托前沿分析（攻击性 vs 隐蔽性）")
-        print(f"{'='*60}")
-        pareto_as_df = compute_pareto_front_2d(df, 'attack_rate', 'stealth_rate')
-        if pareto_as_df.empty:
-            print("未找到任何攻击性-隐蔽性帕累托最优点。")
-        else:
-            print(f"检测到 {len(pareto_as_df)} 个攻击性-隐蔽性帕累托最优点：")
-            print(pareto_as_df[['group_id', 'attack_rate', 'stealth_rate', 'transfer_rate']]
-                  .to_string(index=False, float_format=lambda x: f'{x:.6f}'))
-            plot_pareto_front_2d(
-                df,
-                pareto_as_df,
-                'attack_rate',
-                'stealth_rate',
-                pareto_attack_stealth_out_path,
-                'Pareto Front (Attack vs Stealth)',
-            )
-
-    if args.pareto_front_attack_transfer:
-        print(f"\n{'='*60}")
-        print("开始帕累托前沿分析（攻击性 vs 迁移性）")
-        print(f"{'='*60}")
-        pareto_at_df = compute_pareto_front_2d(df, 'attack_rate', 'transfer_rate')
-        if pareto_at_df.empty:
-            print("未找到任何攻击性-迁移性帕累托最优点。")
-        else:
-            print(f"检测到 {len(pareto_at_df)} 个攻击性-迁移性帕累托最优点：")
-            print(pareto_at_df[['group_id', 'attack_rate', 'stealth_rate', 'transfer_rate']]
-                  .to_string(index=False, float_format=lambda x: f'{x:.6f}'))
-            plot_pareto_front_2d(
-                df,
-                pareto_at_df,
-                'attack_rate',
-                'transfer_rate',
-                pareto_attack_transfer_out_path,
-                'Pareto Front (Attack vs Transfer)',
-            )
-
-    if args.violin_plot:
-        print(f"\n{'='*60}")
-        print("开始生成按攻击类型分组的小提琴图")
-        print(f"{'='*60}")
-        # 需要确保数据包含 attack_type 列
-        if 'attack_type' not in df.columns:
-            print("警告: 数据中没有 'attack_type' 列，无法生成小提琴图")
-        else:
-            plot_violin_by_attack_type(df, violin_out_path)
+    print(f"将分析 {len(to_analyze)} 个模型: {[a for a, _ in to_analyze]}")
+    for arch, csv_path in to_analyze:
+        analyze_single_arch(arch, csv_path, output_dir,
+                            do_corr, do_violin, do_pareto,
+                            do_box, do_bar, do_3d, do_box_poison, do_box_trigger, do_line)
+    print(f"\n输出目录: {output_dir}")
 
 
 if __name__ == '__main__':
     main()
-

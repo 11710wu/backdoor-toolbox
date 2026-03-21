@@ -1,629 +1,362 @@
 #!/usr/bin/env python3
-"""从 cifar10 文件夹下提取所有攻击方法的结果：
-   - 只提取包含 densenet 的文件夹
-   - 只提取中毒率为 0.03 的数据
-   - 只提取原始攻击成功率（test_model_asr）大于50%的数据点
-   
-   输出：只生成 CSV 文件（data_cifar10.csv），不再生成 JSON 文件
+"""从 poisoned_train_set 提取隐蔽性和迁移性，按数据集和模型分别输出。
+
+两种模式 (--mode)：
+  no_nc: 仅提取隐蔽性(TPR/AUC)、迁移性、ASR，不提取 NC
+  nc:    提取隐蔽性、迁移性、ASR、NC，并计算 S_stealth 综合隐蔽性
+         S_stealth = 0.8 * (1/4)*Σ(1-AUC_i) + 0.2 * norm(MaxNorm)
+         is_poisoned=False 时 NC 加权项为 0
+
+输出：data_{dataset}_{arch}_{suffix}.csv/json
+  no_nc -> _no_nc,  nc -> _nc
 """
 
+import argparse
 import csv
 import json
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
-from collections import defaultdict
 import numpy as np
 
-DEFENSE_METHODS = ["AC", "STRIP", "SCaLe-Up", "SentiNet", "IBD_PSC"]
-# 不再跳过任何攻击类型，包括 SIG 和 WaNet
-# SKIP_ATTACK_TYPES = {"SIG", "WaNet"}
+DEFENSE_METHODS = ["STRIP", "SCaLe-Up", "SentiNet", "IBD_PSC"]
+DEFENSE_PREFIX = {"STRIP": "strip", "SCaLe-Up": "scaleup", "SentiNet": "sentinet", "IBD_PSC": "ibd_psc"}
 
-
-def format_param_value(value: float) -> str:
-    """格式化数字，去除多余的零"""
-    if value is None:
-        return ""
-    if isinstance(value, int) or (isinstance(value, float) and value.is_integer()):
-        return str(int(value))
-    return f"{value:.6f}".rstrip('0').rstrip('.')
+# 数据集与模型（arch）映射：文件夹中的 arch 名 -> 输出文件名
+DATASETS = ["cifar10", "tiny_imagenet"]
+ARCH_TO_OUTPUT = {"ResNet18": "resnet18", "mobilenetv2": "mobilenet", "vgg19_bn": "vgg"}
 
 
 def get_training_param_type(attack_type: str) -> Optional[str]:
-    """根据攻击类型确定训练参数类型"""
     attack_lower = (attack_type or '').lower()
+    if 'upgd' in attack_lower:
+        return 'eps'
     if 'wanet' in attack_lower:
         return 's'
     if 'sig' in attack_lower:
         return 'delta'
-    if any(term in attack_lower for term in ['blend', 'badnet', 'basic', 'patch']):
+    if 'belt' in attack_lower:
+        return 'mask_rate'
+    if any(t in attack_lower for t in ['blend', 'badnet', 'basic', 'patch']):
         return 'alpha'
     return None
 
 
-def get_test_param_type_from_train_type(train_param_type: str) -> Optional[str]:
-    """根据训练参数类型获取对应的测试参数类型"""
-    mapping = {
-        'alpha': 'test_alpha',
-        's': 'test_s',
-        'delta': 'test_delta'
-    }
-    return mapping.get(train_param_type)
-
-
-def is_train_test_param_matched(train_param_type: Optional[str], 
-                                 train_param_value: Optional[float],
-                                 test_param_type: Optional[str],
-                                 test_param_value: Optional[float]) -> bool:
-    """检查训练参数和测试参数是否匹配（类型和值都一致）"""
-    # 如果训练参数类型或值为 None，无法匹配
-    if train_param_type is None or train_param_value is None:
-        return False
-    
-    # 如果测试参数类型或值为 None，无法匹配
-    if test_param_type is None or test_param_value is None:
-        return False
-    
-    # 检查测试参数类型是否与训练参数类型对应
-    expected_test_type = get_test_param_type_from_train_type(train_param_type)
-    if expected_test_type != test_param_type:
-        return False
-    
-    # 检查参数值是否相等（考虑浮点数精度）
-    return abs(train_param_value - test_param_value) < 1e-6
-
-
-def parse_test_stl10_file(file_path: Path) -> Optional[Dict[str, Any]]:
-    """解析 test_stl10 结果文件"""
-    try:
-        content = file_path.read_text(encoding='utf-8')
-    except Exception:
-        return None
-    
-    # 提取 ASR
-    asr = 0.0
-    match = re.search(r'攻击成功率:\s*([\d.]+)', content)
-    if match:
-        asr = float(match.group(1))
-    
-    # 提取测试参数
-    param_type = None
-    param_value = None
-    for pattern, ptype in [(r'test_alpha=([\d.]+)', 'test_alpha'), 
-                           (r'test_s=([\d.]+)', 'test_s'), 
-                           (r'test_delta=([\d.]+)', 'test_delta')]:
-        match = re.search(pattern, file_path.name, re.IGNORECASE)
-        if match:
-            param_type = ptype
-            param_value = float(match.group(1).rstrip('.'))
-            break
-    
-    # 如果没有找到测试参数，尝试从文件内容中提取，或者使用默认值
-    # 对于没有 test_alpha/test_s/test_delta 的文件，可能是使用训练时的参数值
-    # 这种情况下，我们需要从对应的 test_results 文件中推断参数类型和值
-    if not param_type:
-        # 尝试从文件名推断攻击类型，然后确定参数类型
-        # 但这里我们无法确定参数值，所以返回 None，让调用者处理
-        return None
-    
-    return {"asr": asr, "param_type": param_type, "param_value": param_value}
-
-
-def parse_test_model_file(file_path: Path) -> Optional[Dict[str, Any]]:
-    """解析 test_results 文件"""
-    try:
-        data = json.loads(file_path.read_text(encoding='utf-8'))
-    except Exception:
-        return None
-    
-    asr = float(data.get('asr', 0.0) or 0.0)
-    
-    # 提取测试参数
-    param_type = None
-    param_value = None
-    for pattern, ptype in [(r'test_alpha=([\d.]+)', 'test_alpha'), 
-                           (r'test_s=([\d.]+)', 'test_s'), 
-                           (r'test_delta=([\d.]+)', 'test_delta')]:
-        match = re.search(pattern, file_path.name, re.IGNORECASE)
-        if match:
-            param_type = ptype
-            param_value = float(match.group(1).rstrip('.'))
-            break
-    
-    if not param_type:
-        return None
-    
-    return {"asr": asr, "param_type": param_type, "param_value": param_value}
-
-
-def parse_defense_file(file_path: Path) -> Optional[Dict[str, Any]]:
-    """解析防御结果文件"""
-    try:
-        data = json.loads(file_path.read_text(encoding='utf-8'))
-        tpr = float(data.get('tpr', 0.0) or 0.0)
-        if tpr > 1.0:
-            tpr = tpr / 100.0
-    except Exception:
-        return None
-    
-    # 提取测试参数
-    param_type = None
-    param_value = None
-    for pattern, ptype in [(r'test_alpha=([\d.]+)', 'test_alpha'), 
-                           (r'test_s=([\d.]+)', 'test_s'), 
-                           (r'test_delta=([\d.]+)', 'test_delta')]:
-        match = re.search(pattern, file_path.name, re.IGNORECASE)
-        if match:
-            param_type = ptype
-            param_value = float(match.group(1).rstrip('.'))
-            break
-    
-    if not param_type:
-        return None
-    
-    return {"tpr": tpr, "param_type": param_type, "param_value": param_value}
+def get_test_param_type(train_param_type: str) -> Optional[str]:
+    m = {'alpha': 'test_alpha', 's': 'test_s', 'delta': 'test_delta', 'eps': 'test_eps', 'mask_rate': 'test_mask_rate'}
+    return m.get(train_param_type)
 
 
 def parse_folder_name(folder_name: str) -> Dict[str, Any]:
-    """解析文件夹名称提取攻击类型和参数"""
     params = {}
-    
-    # 提取攻击类型 - 按优先级顺序匹配
-    attack_patterns = [
-        # adaptive 系列（需要最先匹配，避免被 blend/patch 匹配）
-        (r'^adaptive_blend', 'adaptive_blend'),
-        (r'^adaptive-blend', 'adaptive_blend'),
-        (r'^adaptive_patch', 'adaptive_patch'),
-        (r'^adaptive-patch', 'adaptive_patch'),
-        (r'^adaptive_badnet', 'adaptive_badnet'),
-        (r'^adaptive-badnet', 'adaptive_badnet'),
-        # WaNet 和 SIG（大小写敏感）
-        (r'^WaNet', 'WaNet'),
-        (r'^wanet', 'WaNet'),
-        (r'^SIG', 'SIG'),
-        (r'^sig', 'SIG'),
-        # basic, badnet, blend（basic 需要在 badnet 之前）
-        (r'^basic', 'basic'),
-        (r'^badnet', 'badnet'),
-        (r'^blend', 'blend'),
+    patterns = [
+        (r'^adaptive_blend', 'adaptive_blend'), (r'^adaptive_patch', 'adaptive_patch'),
+        (r'^belt', 'belt'), (r'^upgd', 'upgd'), (r'^WaNet', 'WaNet'), (r'^SIG', 'SIG'),
+        (r'^basic', 'basic'), (r'^badnet', 'badnet'), (r'^blend', 'blend'),
     ]
-    
     attack_type = None
-    for pattern, atype in attack_patterns:
-        if re.match(pattern, folder_name):
+    for pat, atype in patterns:
+        if re.match(pat, folder_name):
             attack_type = atype
             break
-    
-    # 如果没匹配到，使用备用方法
-    if not attack_type:
-        parts = folder_name.split('_')
-        if len(parts) > 0:
-            # 查找第一个数字位置，之前的部分是攻击类型
-            for i, part in enumerate(parts):
-                if re.match(r'^\d+\.?\d*$', part):
-                    attack_type_str = '_'.join(parts[:i])
-                    # 标准化攻击类型名称
-                    if 'adaptive' in attack_type_str.lower() and 'blend' in attack_type_str.lower():
-                        attack_type = 'adaptive_blend'
-                    elif 'adaptive' in attack_type_str.lower() and 'patch' in attack_type_str.lower():
-                        attack_type = 'adaptive_patch'
-                    elif 'adaptive' in attack_type_str.lower() and 'badnet' in attack_type_str.lower():
-                        attack_type = 'adaptive_badnet'
-                    elif 'blend' in attack_type_str.lower():
-                        attack_type = 'blend'
-                    elif 'badnet' in attack_type_str.lower():
-                        attack_type = 'badnet'
-                    elif 'basic' in attack_type_str.lower():
-                        attack_type = 'basic'
-                    elif 'wanet' in attack_type_str.lower():
-                        attack_type = 'WaNet'
-                    elif 'sig' in attack_type_str.lower():
-                        attack_type = 'SIG'
-                    else:
-                        attack_type = attack_type_str
-                    break
-    
-    params['attack_type'] = attack_type if attack_type else 'unknown'
-    
-    # 提取参数
-    match = re.search(r'^.+?_(\d+\.?\d*)_', folder_name)
-    if match:
-        params['poison_rate'] = float(match.group(1))
-    
-    match = re.search(r'alpha=([\d.]+)', folder_name)
-    if match:
-        params['alpha'] = float(match.group(1))
-    
-    match = re.search(r'cover=([\d.]+)', folder_name)
-    if match:
-        params['cover_rate'] = float(match.group(1))
-    
-    match = re.search(r'delta=([\d.]+)', folder_name)
-    if match:
-        params['delta'] = float(match.group(1))
-    
-    match = re.search(r's=([\d.]+)', folder_name)
-    if match:
-        params['s'] = float(match.group(1))
-    
+    params['attack_type'] = attack_type or 'unknown'
+    if m := re.search(r'^.+?_(\d+\.?\d*)_', folder_name):
+        params['poison_rate'] = float(m.group(1))
+    for k, pat in [('alpha', r'alpha=([\d.]+)'), ('cover_rate', r'cover=([\d.]+)'), ('delta', r'delta=([\d.]+)'),
+                   ('s', r's=([\d.]+)'), ('eps', r'eps=([\d.]+)'), ('mask_rate', r'mask=([\d.]+)')]:
+        if m := re.search(pat, folder_name):
+            params[k] = float(m.group(1))
+    # 解析 arch：arch=ResNet18_cifar10 或 arch=mobilenetv2_cifar10
+    if m := re.search(r'arch=([\w]+)_(cifar10|tiny_imagenet|mnistm)', folder_name):
+        params['arch_raw'] = m.group(1)
+        params['dataset_from_folder'] = m.group(2)
     return params
 
 
-def extract_folder_results(folder: Path, params: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """从文件夹提取所有数据点"""
+def _parse_defense_json(path: Path) -> Optional[Dict[str, float]]:
+    try:
+        d = json.loads(path.read_text(encoding='utf-8'))
+        tpr = float(d.get('tpr', 0) or 0)
+        if tpr > 1:
+            tpr /= 100.0
+        auc = float(d.get('auc', 0) or 0)
+        return {"tpr": tpr, "auc": auc}
+    except Exception:
+        return None
+
+
+def _extract_param_from_filename(name: str) -> Optional[tuple]:
+    """解析 test_stl10_results_delta=4.0.txt 等文件名中的参数"""
+    patterns = [
+        (r'results_alpha=([\d.]+)', 'test_alpha'), (r'results_s=([\d.]+)', 'test_s'),
+        (r'results_delta=([\d.]+)', 'test_delta'), (r'results_eps=([\d.]+)', 'test_eps'),
+        (r'results_mask_rate=([\d.]+)', 'test_mask_rate'),
+    ]
+    for pat, ptype in patterns:
+        if m := re.search(pat, name, re.I):
+            return ptype, float(m.group(1).rstrip('.'))
+    return None
+
+
+def _extract_param_from_test_results(name: str) -> Optional[tuple]:
+    """解析 test_results_seed=2333_delta=4.0.json 等文件名中的参数"""
+    patterns = [
+        (r'[_-]alpha=([\d.]+)', 'test_alpha'), (r'[_-]s=([\d.]+)', 'test_s'),
+        (r'[_-]delta=([\d.]+)', 'test_delta'), (r'[_-]eps=([\d.]+)', 'test_eps'),
+        (r'[_-]mask_rate=([\d.]+)', 'test_mask_rate'),
+    ]
+    for pat, ptype in patterns:
+        if m := re.search(pat, name, re.I):
+            return ptype, float(m.group(1).rstrip('.'))
+    return None
+
+
+def extract_folder_results(folder: Path, params: Dict[str, Any], include_nc: bool = True) -> List[Dict[str, Any]]:
     attack_type = params.get('attack_type')
     train_param_type = get_training_param_type(attack_type)
     train_param_value = params.get(train_param_type) if train_param_type else None
-    
-    # 收集所有测试参数值
+    test_param_type = get_test_param_type(train_param_type) if train_param_type else None
+
     test_params: Dict[float, Dict[str, Any]] = {}
-    
-    # 提取 test_model 结果
-    for test_file in folder.glob("test_results_seed=*.json"):
-        record = parse_test_model_file(test_file)
-        if record:
-            pval = record['param_value']
-            if pval not in test_params:
-                test_params[pval] = {}
-            if record.get('param_type'):
-                test_params[pval]['param_type'] = record['param_type']
-            test_params[pval]['test_model_asr'] = record['asr']
-    
-    # 提取 test_stl10 结果
-    # 先提取所有有明确测试参数的文件
-    for stl10_file in folder.glob("test_stl10_results*.txt"):
-        record = parse_test_stl10_file(stl10_file)
-        if record and record.get('param_type') and record.get('param_value') is not None:
-            pval = record['param_value']
-            if pval not in test_params:
-                test_params[pval] = {}
-            if record.get('param_type'):
-                test_params[pval]['param_type'] = record['param_type']
-            test_params[pval]['test_stl10_asr'] = record['asr']
-    
-    # 对于没有明确测试参数的文件（如 test_stl10_results.txt），
-    # 尝试从对应的 test_results 文件中推断参数值
-    # 查找没有 test_alpha/test_s/test_delta 的 test_stl10 文件
-    default_stl10_file = folder / "test_stl10_results.txt"
-    if default_stl10_file.exists():
-        # 尝试从 test_results 文件中找到对应的参数值
-        # 查找所有 test_results 文件，看哪个没有 test_alpha 等参数
-        for test_file in folder.glob("test_results_seed=*.json"):
-            # 检查文件名是否包含 test_alpha/test_s/test_delta
-            has_test_param = any(re.search(pattern, test_file.name, re.IGNORECASE) 
-                                for pattern in [r'test_alpha=', r'test_s=', r'test_delta='])
-            if not has_test_param:
-                # 这个 test_results 文件没有测试参数，可能对应默认的 test_stl10_results.txt
-                # 但我们需要知道参数类型和值
-                # 对于这种情况，我们使用训练参数值作为测试参数值
-                if train_param_type and train_param_value is not None:
-                    pval = train_param_value
-                    if pval not in test_params:
-                        test_params[pval] = {}
-                    test_param_type = get_test_param_type_from_train_type(train_param_type)
-                    if test_param_type:
-                        test_params[pval]['param_type'] = test_param_type
-                    # 解析 test_stl10_results.txt
-                    try:
-                        content = default_stl10_file.read_text(encoding='utf-8')
-                        match = re.search(r'攻击成功率:\s*([\d.]+)', content)
-                        if match:
-                            test_params[pval]['test_stl10_asr'] = float(match.group(1))
-                    except Exception:
-                        pass
-                break
-    
-    # 提取防御结果
-    defense_files = {
-        "AC": "ac_defense_results",
-        "STRIP": "strip_defense_results",
-        "SCaLe-Up": "scaleup_defense_results",
-        "SentiNet": "sentinet_defense_results",
-        "IBD_PSC": "ibd_psc_defense_results"
-    }
-    
-    for method, prefix in defense_files.items():
-        for defense_file in folder.glob(f"{prefix}_test_*.json"):
-            record = parse_defense_file(defense_file)
-            if record:
-                pval = record['param_value']
+
+    # 1. 从防御文件收集 pval 及 tpr/auc
+    for method, prefix in DEFENSE_PREFIX.items():
+        for f in folder.glob(f"{prefix}_defense_results*.json"):
+            param_info = _extract_param_from_filename(f.name)
+            if param_info:
+                ptype, pval = param_info
                 if pval not in test_params:
-                    test_params[pval] = {}
-                if record.get('param_type'):
-                    test_params[pval]['param_type'] = record['param_type']
-                if 'defense_tprs' not in test_params[pval]:
-                    test_params[pval]['defense_tprs'] = {}
-                test_params[pval]['defense_tprs'][method] = record['tpr']
-    
-    # 构建数据点
+                    test_params[pval] = {'param_type': ptype, 'defense_tprs': {}, 'defense_aucs': {}}
+                if rec := _parse_defense_json(f):
+                    test_params[pval]['defense_tprs'][method] = rec['tpr']
+                    test_params[pval]['defense_aucs'][method] = rec['auc']
+        # 无后缀 base 文件
+        base = folder / f"{prefix}_defense_results.json"
+        if base.exists() and train_param_value is not None and test_param_type:
+            pval = train_param_value
+            if pval not in test_params:
+                test_params[pval] = {'param_type': test_param_type, 'defense_tprs': {}, 'defense_aucs': {}}
+            if rec := _parse_defense_json(base):
+                test_params[pval]['defense_tprs'][method] = rec['tpr']
+                test_params[pval]['defense_aucs'][method] = rec['auc']
+
+    # 2. 迁移性：test_stl10_results_delta=4.0.txt 等
+    for f in folder.glob("test_stl10_results*.txt"):
+        param_info = _extract_param_from_filename(f.name)
+        if param_info:
+            _, pval = param_info
+            if pval in test_params:
+                try:
+                    c = f.read_text(encoding='utf-8')
+                    if m := re.search(r'攻击成功率[:：]\s*([\d.]+)', c):
+                        test_params[pval]['transfer_rate'] = float(m.group(1))
+                except Exception:
+                    pass
+    base_stl10 = folder / "test_stl10_results.txt"
+    if base_stl10.exists() and train_param_value is not None and train_param_value in test_params:
+        try:
+            c = base_stl10.read_text(encoding='utf-8')
+            if m := re.search(r'攻击成功率[:：]\s*([\d.]+)', c):
+                test_params[train_param_value]['transfer_rate'] = float(m.group(1))
+        except Exception:
+            pass
+
+    # 2b. ASR：test_results_seed=*.json 中的 asr（同数据集攻击成功率）
+    for f in folder.glob("test_results*.json"):
+        param_info = _extract_param_from_test_results(f.name)
+        pval = param_info[1] if param_info else train_param_value
+        if pval is not None and pval in test_params:
+            try:
+                d = json.loads(f.read_text(encoding='utf-8'))
+                asr = d.get('asr')
+                if asr is not None:
+                    test_params[pval]['asr'] = float(asr)
+            except Exception:
+                pass
+
+    # 3. NC detection（仅 include_nc 时提取）
+    if include_nc:
+        nc_data = None
+        for f in folder.glob("nc_detection*.json"):
+            try:
+                d = json.loads(f.read_text(encoding='utf-8'))
+                nc_data = {
+                    'max_anomaly_index': float(d['max_anomaly_index']) if d.get('max_anomaly_index') is not None else None,
+                    'is_poisoned': d.get('is_poisoned')
+                }
+                break
+            except Exception:
+                pass
+        if nc_data:
+            for pval in test_params:
+                test_params[pval]['nc_max_anomaly_index'] = nc_data['max_anomaly_index']
+                test_params[pval]['nc_is_poisoned'] = nc_data['is_poisoned']
+
+    # 4. 构建结果：至少有一种防御数据；仅对有数据的防御方法取平均
     results = []
-    for test_param_value in sorted(test_params.keys()):
-        data = test_params[test_param_value]
-        
-        # 必须要有 test_model_asr 和测试参数类型
-        if 'test_model_asr' not in data:
+    for pval in sorted(test_params.keys()):
+        d = test_params[pval]
+        tprs = {m: d['defense_tprs'].get(m, 0.0) for m in DEFENSE_METHODS}
+        aucs = {m: d['defense_aucs'].get(m, 0.0) for m in DEFENSE_METHODS}
+        methods_with_tpr = [m for m in DEFENSE_METHODS if m in d['defense_tprs']]
+        methods_with_auc = [m for m in DEFENSE_METHODS if m in d['defense_aucs']]
+        if not methods_with_tpr and not methods_with_auc:
             continue
-        
-        # 没有提取到测试参数类型时跳过
-        test_param_type = data.get('param_type')
-        if not test_param_type:
-            continue
-        
-        # 检查原始攻击成功率是否大于50%
-        test_model_asr = float(data['test_model_asr'])
-        if test_model_asr <= 0.5:
-            continue
-        
-        # test_stl10_asr 和 defense_tprs 可以为空，使用默认值
-        test_stl10_asr = float(data.get('test_stl10_asr', 0.0))
-        
-        # 防御方法数据：允许部分缺失，缺失的使用默认值 0.0
-        if 'defense_tprs' not in data:
-            data['defense_tprs'] = {}
-        defense_tprs = {method: data['defense_tprs'].get(method, 0.0) for method in DEFENSE_METHODS}
-        
-        # 计算指标
-        attack_rate = test_model_asr
-        stealth_rate = 0.2 * sum(1.0 - tpr for tpr in defense_tprs.values())
-        # 迁移率 = test_stl10_asr（直接使用 STL-10 攻击成功率）
-        transfer_rate = test_stl10_asr
-        
-        results.append({
+        # 隐蔽性 = 1 - 检测率（TPR/AUC 越高越易被检测，隐蔽性越低）
+        raw_tpr_avg = np.mean([tprs[m] for m in methods_with_tpr]) if methods_with_tpr else 0.0
+        raw_auc_avg = np.mean([aucs[m] for m in methods_with_auc]) if methods_with_auc else 0.0
+        stealth_tpr_avg = 1.0 - raw_tpr_avg
+        stealth_auc_avg = 1.0 - raw_auc_avg
+        transfer = float(d.get('transfer_rate', 0.0))
+        asr = d.get('asr')
+        row = {
             **params,
             'train_param_value': train_param_value,
-            'test_param_value': test_param_value,
-            'test_param_type': test_param_type,
-            'attack_rate': attack_rate,
-            'stealth_rate': stealth_rate,
-            'transfer_rate': transfer_rate
-        })
-    
+            'test_param_value': pval,
+            'test_param_type': d.get('param_type'),
+            'stealth_tpr_avg': stealth_tpr_avg,
+            'stealth_auc_avg': stealth_auc_avg,
+            'transfer_rate': transfer,
+            'asr': float(asr) if asr is not None else None,
+        }
+        if include_nc:
+            row['nc_max_anomaly_index'] = d.get('nc_max_anomaly_index')
+            row['nc_is_poisoned'] = d.get('nc_is_poisoned')
+        results.append(row)
     return results
 
 
-def convert_to_data_groups(all_results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """将结果转换为分组格式"""
-    # 按 (trigger_type, poison_rate, train_param_value) 分组
-    groups_dict: Dict[tuple, List[Dict[str, Any]]] = {}
-    
-    for result in all_results:
-        attack_type = result['attack_type']
-        poison_rate = result.get('poison_rate', 0.03)
-        train_param_value = result.get('train_param_value')
-        
-        # 确定触发器类型（保持原有的大小写）
-        if 'adaptive' in attack_type.lower():
-            trigger_type = attack_type  # adaptive_blend, adaptive_patch
-        elif attack_type.lower() == 'basic' or 'badnet' in attack_type.lower():
-            trigger_type = 'badnet'  # basic 和 badnet 使用相同的触发器
-        elif 'blend' in attack_type.lower() and 'adaptive' not in attack_type.lower():
-            trigger_type = 'blend'
-        elif 'wanet' in attack_type.lower():
-            trigger_type = 'WaNet'  # 保持大写
-        elif 'sig' in attack_type.lower():
-            trigger_type = 'SIG'  # 保持大写
-        else:
-            trigger_type = attack_type
-        
-        key = (trigger_type, poison_rate, train_param_value)
-        if key not in groups_dict:
-            groups_dict[key] = []
-        groups_dict[key].append(result)
-    
-    # 转换为列表格式
-    groups = []
-    def sort_key(item):
-        trigger_type, poison_rate, train_param_value = item[0]
-        normalized_train = float('-inf') if train_param_value is None else train_param_value
-        # 获取该组中第一个条目的 cover_rate 用于排序（如果存在）
-        entries = item[1]
-        cover_rate = entries[0].get('cover_rate') if entries else None
-        normalized_cover = float('-inf') if cover_rate is None else cover_rate
-        return (trigger_type, poison_rate, normalized_train, normalized_cover)
+def compute_s_stealth(all_results: List[Dict[str, Any]]) -> None:
+    """为 nc 模式计算 S_stealth，就地修改 all_results。
+    S_stealth = 0.8 * (1/4)*Σ(1-AUC_i) + 0.2 * (MaxNorm-min)/(max-min)
+    is_poisoned=False 时，将 max_norm 视为最小值（归一化后为 0）。
+    """
+    max_norms = [r['nc_max_anomaly_index'] for r in all_results
+                 if r.get('nc_is_poisoned') and r.get('nc_max_anomaly_index') is not None]
+    max_norm_min = min(max_norms) if max_norms else 0.0
+    max_norm_max = max(max_norms) if max_norms else 1.0
+    denom = max_norm_max - max_norm_min if max_norm_max > max_norm_min else 1.0
 
-    for group_id, (key, entries) in enumerate(sorted(groups_dict.items(), key=sort_key), start=1):
-        trigger_type, poison_rate, train_param_value = key
-        
-        # 排序数据点：先按 cover_rate，再按 test_param_value
-        entries.sort(key=lambda x: (
-            float('-inf') if x.get('cover_rate') is None else x.get('cover_rate'),
-            x.get('test_param_value', 0)
-        ))
-        
-        # 构建数据点
-        data_points = []
-        for point_id, entry in enumerate(entries, start=1):
-            data_points.append({
-                "group_id": group_id,
-                "point_id": point_id,
-                "attack_rate": entry['attack_rate'],
-                "stealth_rate": entry['stealth_rate'],
-                "transfer_rate": entry['transfer_rate'],
-                "train_param_value": train_param_value,
-                "test_param_value": entry['test_param_value'],
-                "test_param_type": entry.get('test_param_type'),
-                "cover_rate": entry.get('cover_rate')  # 添加 cover_rate
-            })
-        
-        # 计算统计信息
-        attack_rates = [p['attack_rate'] for p in data_points]
-        stealth_rates = [p['stealth_rate'] for p in data_points]
-        transfer_rates = [p['transfer_rate'] for p in data_points]
-        
-        group_info = {
-            "group_id": group_id,
-            "data_points": data_points,
-            "group_size": len(data_points),
-            "attack_type": entries[0]['attack_type'],
-            "poison_rate": poison_rate,
-            "trigger_type": trigger_type,
-            "train_param_value": train_param_value,
-            "avg_attack_rate": float(np.mean(attack_rates)),
-            "avg_stealth_rate": float(np.mean(stealth_rates)),
-            "avg_transfer_rate": float(np.mean(transfer_rates)),
-            "std_attack_rate": float(np.std(attack_rates)) if len(attack_rates) > 1 else 0.0,
-            "std_stealth_rate": float(np.std(stealth_rates)) if len(stealth_rates) > 1 else 0.0,
-            "std_transfer_rate": float(np.std(transfer_rates)) if len(transfer_rates) > 1 else 0.0
-        }
-        
-        # 添加训练参数类型
-        train_param_type = get_training_param_type(entries[0]['attack_type'])
-        if train_param_type:
-            group_info['train_param_type'] = train_param_type
-        
-        # 添加覆盖率（如果有）
-        if 'cover_rate' in entries[0]:
-            group_info['cover_rate'] = entries[0]['cover_rate']
-        
-        groups.append(group_info)
-    
+    for r in all_results:
+        auc_part = 0.8 * (r.get('stealth_auc_avg') or 0.0)
+        # is_poisoned=False 时，max_norm 视为最小值
+        if r.get('nc_is_poisoned') and r.get('nc_max_anomaly_index') is not None:
+            norm_val = r['nc_max_anomaly_index']
+        else:
+            norm_val = max_norm_min
+        nc_part = 0.2 * (norm_val - max_norm_min) / denom
+        r['S_stealth'] = auc_part + nc_part
+
+
+def convert_to_data_groups(all_results: List[Dict[str, Any]], include_nc: bool = True) -> List[Dict[str, Any]]:
+    base_keys = ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'asr', 'test_param_value', 'test_param_type', 'cover_rate']
+    nc_keys = ['nc_max_anomaly_index', 'nc_is_poisoned', 'S_stealth'] if include_nc else []
+    point_keys = base_keys + nc_keys
+
+    groups_dict: Dict[tuple, List] = {}
+    for r in all_results:
+        tt = r['attack_type']
+        key = (tt, r.get('poison_rate', 0.03), r.get('train_param_value'))
+        groups_dict.setdefault(key, []).append(r)
+    groups = []
+    for gid, (key, entries) in enumerate(sorted(groups_dict.items(), key=lambda x: (x[0][0], x[0][1], x[0][2] or -1)), 1):
+        entries.sort(key=lambda e: (e.get('cover_rate') or -1, e.get('test_param_value', 0)))
+        pts = [{'group_id': gid, 'point_id': i, **{k: e.get(k) for k in point_keys}} for i, e in enumerate(entries, 1)]
+        groups.append({'group_id': gid, 'attack_type': entries[0]['attack_type'], 'trigger_type': key[0], 'poison_rate': key[1], 'train_param_value': key[2], 'group_size': len(entries), 'data_points': pts})
     return groups
 
 
-def export_groups_to_csv(groups: List[Dict[str, Any]], csv_path: Path) -> None:
-    """将分组结果导出为 CSV"""
-    fieldnames = [
-        "group_id",
-        "point_id",
-        "attack_type",
-        "trigger_type",
-        "poison_rate",
-        "train_param_type",
-        "train_param_value",
-        "test_param_type",
-        "test_param_value",
-        "attack_rate",
-        "stealth_rate",
-        "transfer_rate",
-        "cover_rate"
-    ]
+def export_csv(groups: List[Dict], path: Path, dataset: str = "", arch: str = "", include_nc: bool = True):
+    base_fn = ["dataset", "arch", "group_id", "point_id", "attack_type", "trigger_type", "poison_rate", "train_param_value",
+               "test_param_type", "test_param_value", "stealth_tpr_avg", "stealth_auc_avg", "transfer_rate", "asr", "cover_rate"]
+    nc_fn = ["nc_max_anomaly_index", "nc_is_poisoned", "S_stealth"] if include_nc else []
+    fn = base_fn + nc_fn
 
-    def format_value(val: Any) -> Any:
-        return "" if val is None else val
+    def fmt(v):
+        if v is None: return ""
+        if isinstance(v, bool): return str(v).lower()
+        return v
 
-    with csv_path.open('w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        for group in groups:
-            common = {
-                "group_id": group["group_id"],
-                "attack_type": group["attack_type"],
-                "trigger_type": group.get("trigger_type"),
-                "poison_rate": group.get("poison_rate"),
-                "train_param_type": group.get("train_param_type"),
-                "train_param_value": group.get("train_param_value")
-                # cover_rate 从数据点中获取，不在这里设置
-            }
-            for point in group["data_points"]:
-                writer.writerow({
-                    **common,
-                    "point_id": point["point_id"],
-                    "test_param_type": point.get("test_param_type"),
-                    "test_param_value": point.get("test_param_value"),
-                    "attack_rate": point.get("attack_rate"),
-                    "stealth_rate": point.get("stealth_rate"),
-                    "transfer_rate": point.get("transfer_rate"),
-                    "cover_rate": point.get("cover_rate")  # 从数据点获取 cover_rate，而不是从 group
-                })
+    with path.open('w', newline='', encoding='utf-8') as f:
+        w = csv.DictWriter(f, fieldnames=fn)
+        w.writeheader()
+        for g in groups:
+            base = {"dataset": dataset, "arch": arch, "group_id": g["group_id"], "attack_type": g["attack_type"],
+                    "trigger_type": g.get("trigger_type"), "poison_rate": g.get("poison_rate"),
+                    "train_param_value": g.get("train_param_value")}
+            for p in g["data_points"]:
+                row = {**base, "point_id": p["point_id"], "test_param_type": p.get("test_param_type"),
+                       "test_param_value": p.get("test_param_value"), "stealth_tpr_avg": p.get("stealth_tpr_avg"),
+                       "stealth_auc_avg": p.get("stealth_auc_avg"), "transfer_rate": p.get("transfer_rate"),
+                       "asr": p.get("asr"), "cover_rate": p.get("cover_rate")}
+                if include_nc:
+                    row["nc_max_anomaly_index"] = p.get("nc_max_anomaly_index")
+                    row["nc_is_poisoned"] = p.get("nc_is_poisoned")
+                    row["S_stealth"] = p.get("S_stealth")
+                w.writerow({k: fmt(v) for k, v in row.items()})
+
+
+def export_json(groups: List[Dict], path: Path, dataset: str = "", arch: str = ""):
+    out = {"dataset": dataset, "arch": arch, "groups": groups,
+           "summary": {"total_groups": len(groups), "total_points": sum(g["group_size"] for g in groups)}}
+    with path.open('w', encoding='utf-8') as f:
+        json.dump(out, f, ensure_ascii=False, indent=2)
 
 
 def main():
-    """主函数"""
-    # 获取脚本所在目录（analysis文件夹）
-    script_dir = Path(__file__).parent.absolute()
-    # 项目根目录（analysis的父目录）
-    base_path = script_dir.parent
-    cifar10_path = base_path / "poisoned_train_set" / "cifar10"
-    # 输出文件保存到analysis文件夹下
-    csv_file = script_dir / "data_cifar10.csv"
-    
-    if not cifar10_path.exists():
-        print(f"错误: 路径不存在: {cifar10_path}")
+    parser = argparse.ArgumentParser(description='提取隐蔽性、迁移性、ASR，可选 NC 与 S_stealth')
+    parser.add_argument('--mode', choices=['no_nc', 'nc', 'all'], default='all',
+                        help='no_nc: 仅无 NC 版；nc: 仅 NC 版；all: 两种都提取（默认）')
+    args = parser.parse_args()
+
+    modes = ['no_nc', 'nc'] if args.mode == 'all' else [args.mode]
+
+    base = Path(__file__).parent.parent
+    poisoned_root = base / "poisoned_train_set"
+    out_dir = Path(__file__).parent
+    if not poisoned_root.exists():
+        print(f"路径不存在: {poisoned_root}")
         return
-    
-    print(f"正在扫描文件夹: {cifar10_path}")
-    print("=" * 80)
-    
-    # 获取所有文件夹
-    folders = [f for f in cifar10_path.iterdir() if f.is_dir()]
-    print(f"找到 {len(folders)} 个文件夹\n")
-    
-    # 目标中毒率
-    TARGET_POISON_RATE = 0.03  # 默认中毒率
-    TARGET_POISON_RATE_ADAPTIVE = 0.003  # adaptive_patch 和 adaptive_blend 的中毒率
-    
-    all_results = []
-    skipped_count = 0
-    skipped_poison_rate_count = 0
-    skipped_no_densenet_count = 0
-    for folder in folders:
-        print(f"处理: {folder.name}")
-        
-        # 只处理包含 densenet 的文件夹
-        if 'densenet' not in folder.name.lower():
-            print(f"  跳过（不包含 densenet）")
-            skipped_no_densenet_count += 1
-            skipped_count += 1
-            continue
-        
-        params = parse_folder_name(folder.name)
-        attack_type = params.get('attack_type', '').lower()
-        
-        # 对于 adaptive_patch 和 adaptive_blend，只提取中毒率为 0.003 的数据
-        # 对于其他攻击类型，提取中毒率为 0.03 的数据
-        if 'adaptive_patch' in attack_type or 'adaptive_blend' in attack_type:
-            target_rate = TARGET_POISON_RATE_ADAPTIVE
-        else:
-            target_rate = TARGET_POISON_RATE
-        
-        poison_rate = params.get('poison_rate')
-        if poison_rate is None or abs(poison_rate - target_rate) > 1e-6:
-            print(f"  跳过（中毒率: {poison_rate}，只提取中毒率为 {target_rate} 的数据）")
-            skipped_poison_rate_count += 1
-            skipped_count += 1
-            continue
-        
-        attack_type = params.get('attack_type')
-        train_param_type = get_training_param_type(attack_type)
-        train_param_value = params.get(train_param_type) if train_param_type else None
-        
-        # 提取结果（会自动过滤攻击成功率<=50%的数据点）
-        results = extract_folder_results(folder, params)
-        
-        if len(results) == 0:
-            if train_param_type and train_param_value is not None:
-                print(f"  跳过（未找到训练强度={train_param_type}={train_param_value} 且攻击成功率>50%的数据点）")
-            else:
-                print(f"  跳过（无法确定训练参数类型或值）")
-            skipped_count += 1
-        else:
-            all_results.extend(results)
-            print(f"  提取 {len(results)} 个数据点（训练强度={train_param_type}={train_param_value}，攻击成功率>50%）")
-    
-    print(f"\n总共提取 {len(all_results)} 个数据点")
-    print(f"跳过 {skipped_count} 个文件夹（其中 {skipped_no_densenet_count} 个不包含 densenet，{skipped_poison_rate_count} 个因中毒率不符合要求（adaptive_patch/blend: {TARGET_POISON_RATE_ADAPTIVE}，其他: {TARGET_POISON_RATE}），其余因无匹配数据或攻击成功率<=50%）")
-    
-    # 转换为分组格式
-    groups = convert_to_data_groups(all_results)
-    
-    # 保存到 CSV 文件
-    export_groups_to_csv(groups, csv_file)
-    
-    print("\n" + "=" * 80)
-    print(f"✓ CSV 已保存到: {csv_file}")
-    print(f"\n结果摘要:")
-    print(f"  总组数: {len(groups)}")
-    print(f"  总数据点: {len(all_results)}")
-    
-    # 统计每种攻击类型
-    attack_counts = {}
-    for group in groups:
-        attack_type = group['attack_type']
-        attack_counts[attack_type] = attack_counts.get(attack_type, 0) + group['group_size']
-    
-    print(f"\n攻击类型统计:")
-    for attack_type, count in sorted(attack_counts.items()):
-        print(f"  {attack_type}: {count} 个数据点")
+
+    for mode_nc in [m == 'nc' for m in modes]:
+        suffix = '_nc' if mode_nc else '_no_nc'
+        mode_name = 'nc' if mode_nc else 'no_nc'
+        for dataset in DATASETS:
+            ds_path = poisoned_root / dataset
+            if not ds_path.exists() or not ds_path.is_dir():
+                continue
+            folders = [f for f in ds_path.iterdir() if f.is_dir()]
+            for arch_in_folder, arch_out in ARCH_TO_OUTPUT.items():
+                arch_folders = []
+                for folder in folders:
+                    if folder.name.startswith('none_'):
+                        continue
+                    params = parse_folder_name(folder.name)
+                    if params.get('attack_type') == 'none':
+                        continue
+                    if params.get('arch_raw') != arch_in_folder:
+                        continue
+                    if params.get('dataset_from_folder') != dataset:
+                        continue
+                    arch_folders.append((folder, params))
+
+                if not arch_folders:
+                    continue
+                all_results = []
+                for folder, params in arch_folders:
+                    res = extract_folder_results(folder, params, include_nc=mode_nc)
+                    if res:
+                        all_results.extend(res)
+                if not all_results:
+                    continue
+                if mode_nc:
+                    compute_s_stealth(all_results)
+                groups = convert_to_data_groups(all_results, include_nc=mode_nc)
+                csv_path = out_dir / f"data_{dataset}_{arch_out}{suffix}.csv"
+                json_path = out_dir / f"data_{dataset}_{arch_out}{suffix}.json"
+                export_csv(groups, csv_path, dataset=dataset, arch=arch_out, include_nc=mode_nc)
+                export_json(groups, json_path, dataset=dataset, arch=arch_out)
+                print(f"✓ [{mode_name}] {dataset}/{arch_out}: {csv_path.name} ({len(groups)} 组, {len(all_results)} 点)")
 
 
 if __name__ == "__main__":

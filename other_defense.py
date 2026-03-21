@@ -53,6 +53,9 @@ parser.add_argument('-upgd_steps', type=int, required=False, default=100,
                     help='UPGD steps (same as create_poisoned_set.py; used to locate poison dir)')
 parser.add_argument('-upgd_steps_multiplier', type=int, required=False, default=5,
                     help='UPGD steps_multiplier (same as create_poisoned_set.py; used to locate poison dir)')
+# BELT specific parameters (for directory lookup)
+parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
+                    help='BELT cover samples 的 mask 比例（默认 0.2）')
 args = parser.parse_args()
 # ===== 修改开始（新增辅助函数与结果标注） =====
 

@@ -59,7 +59,6 @@ class STRIP(BackdoorDefense):
         val_clean_entropy = torch.cat(val_clean_entropy).flatten().sort()[0]
         threshold_low = float(val_clean_entropy[int(0.05 * len(val_clean_entropy))])  # 使用5%分位数
         threshold_high = np.inf
-        print(f'阈值计算完成: threshold_low = {threshold_low:.5f} (基于验证集 {len(val_clean_entropy)} 张样本的 5% 分位数)')
         # ========== [修改结束] ==========
         
         # 使用测试集（8000张）进行检测

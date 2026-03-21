@@ -63,7 +63,14 @@ parser.add_argument('-model', type=str, required=False, default=None,
                     choices=['resnet18', 'vgg19_bn', 'mobilenetv2'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 # ========== [BELT 参数] 结束 ==========
+
+# 设备选择，与 train_on_poisoned_set.py / test_model.py 保持一致
+parser.add_argument('-devices', type=str, default='0',
+                    help='可见 GPU 设备编号，例如 \"0\" 或 \"0,1\"')
+
 args = parser.parse_args()
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "%s" % args.devices
 
 tools.setup_seed(2333)
 

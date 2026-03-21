@@ -369,6 +369,10 @@ def main():
     parser.add_argument('-upgd_steps_multiplier', type=int, required=False, default=5,
                         help='UPGD steps_multiplier（与 create_poisoned_set.py 保持一致，用于定位数据/模型目录）')
     # ========== [UPGD 参数] 结束 ==========
+    # ========== [BELT 参数] 开始 ==========
+    parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
+                        help='BELT cover samples 的 mask 比例（默认 0.2）')
+    # ========== [BELT 参数] 结束 ==========
     
     # ===== MNIST-M 数据路径 =====
     parser.add_argument('-mnistm_data_path', type=str, default='./data/MNIST-M',

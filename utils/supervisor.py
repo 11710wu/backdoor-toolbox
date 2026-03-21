@@ -216,6 +216,11 @@ def get_poison_set_dir(args):
             args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps)
         )
         poison_set_dir = f'{poison_set_dir}_mult={upgd_steps_multiplier}'
+    elif args.poison_type == 'belt':
+        cover_rate = '%.3f' % getattr(args, 'cover_rate', 0.5)
+        mask_rate = '%.3f' % getattr(args, 'mask_rate', 0.2)
+        poison_set_dir = 'poisoned_train_set/%s/%s_%s_cover=%s_mask=%s' % (
+            args.dataset, args.poison_type, ratio, cover_rate, mask_rate)
     else:
         poison_set_dir = 'poisoned_train_set/%s/%s_%s' % (args.dataset, args.poison_type, ratio)
 
