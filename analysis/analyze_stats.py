@@ -42,6 +42,33 @@ import matplotlib.pyplot as plt
 ARCHS = ['resnet18', 'mobilenet', 'vgg']
 STEALTH_COLS = ['stealth_tpr_avg', 'stealth_auc_avg']
 METRIC_COLS = STEALTH_COLS + ['transfer_rate']
+# 与 extract 一致：stealth_* = 1 - 各防御原始 TPR/AUC 的均值，越大隐蔽性越好
+LABEL_STEALTH_TPR = 'Stealth (1-TPR)'
+LABEL_STEALTH_AUC = 'Stealth (1-AUC)'
+METRIC_LABELS = {
+    'stealth_tpr_avg': LABEL_STEALTH_TPR,
+    'stealth_auc_avg': LABEL_STEALTH_AUC,
+    'transfer_rate': 'Transfer Rate',
+}
+
+# 比率类指标以 [0,1] 为有效范围，坐标轴略扩边以免贴边难看
+RATE_AXIS_PAD = 0.05
+RATE_LIM = (-RATE_AXIS_PAD, 1.0 + RATE_AXIS_PAD)
+# 色条 / 归一化仍用严格 [0,1]，语义不变
+RATE_NORM_LIM = (0.0, 1.0)
+
+
+def _xlim_rate(ax) -> None:
+    ax.set_xlim(*RATE_LIM)
+
+
+def _ylim_rate(ax) -> None:
+    ax.set_ylim(*RATE_LIM)
+
+
+def _set_xy_rate(ax) -> None:
+    ax.set_xlim(*RATE_LIM)
+    ax.set_ylim(*RATE_LIM)
 
 
 def load_from_csv(csv_path: str) -> pd.DataFrame:
@@ -57,6 +84,11 @@ def load_from_csv(csv_path: str) -> pd.DataFrame:
     extra = ['asr', 'S_stealth', 'nc_max_anomaly_index', 'nc_is_poisoned']
     for col in METRIC_COLS + [c for c in extra if c in df.columns]:
         df[col] = pd.to_numeric(df[col], errors='coerce')
+    # ASR 若以百分数存储，缩放到 [0,1] 以便与坐标轴/色条一致
+    if 'asr' in df.columns:
+        asr_s = df['asr'].dropna()
+        if len(asr_s) and asr_s.max() > 1.5:
+            df['asr'] = df['asr'] / 100.0
     df = df.dropna(subset=METRIC_COLS)
     if 'attack_type' in df.columns:
         df = df[~df['attack_type'].isin(['none', ''])]
@@ -83,8 +115,8 @@ def plot_violin_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) ->
         return
     attack_types = sorted(df['attack_type'].unique())
     metrics = [
-        ('stealth_tpr_avg', 'Stealth TPR Avg'),
-        ('stealth_auc_avg', 'Stealth AUC Avg'),
+        ('stealth_tpr_avg', LABEL_STEALTH_TPR),
+        ('stealth_auc_avg', LABEL_STEALTH_AUC),
         ('transfer_rate', 'Transfer Rate'),
     ]
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
@@ -107,6 +139,7 @@ def plot_violin_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) ->
         ax.set_ylabel(name, fontsize=12)
         ax.set_title(f'{name} by Attack Type', fontsize=13)
         ax.grid(True, alpha=0.3, axis='y')
+        _ylim_rate(ax)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
@@ -119,16 +152,19 @@ def run_correlation_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> No
         return
     corr = df[METRIC_COLS].corr()
     fig, ax = plt.subplots(figsize=(6, 5))
-    im = ax.imshow(corr, cmap='coolwarm', vmin=-1, vmax=1)
-    plt.colorbar(im, ax=ax)
-    labels = ['Stealth TPR', 'Stealth AUC', 'Transfer Rate']
+    # 相关系数线性映射到 [0,1]，色条与坐标统一为 0–1
+    corr01 = (corr.values + 1.0) / 2.0
+    im = ax.imshow(corr01, cmap='coolwarm', vmin=0, vmax=1)
+    cbar = plt.colorbar(im, ax=ax)
+    cbar.set_label('Correlation ((ρ+1)/2)')
+    labels = [LABEL_STEALTH_TPR, LABEL_STEALTH_AUC, 'Transfer Rate']
     ax.set_xticks(range(3))
     ax.set_yticks(range(3))
     ax.set_xticklabels(labels, rotation=45, ha='right')
     ax.set_yticklabels(labels)
     for i in range(3):
         for j in range(3):
-            ax.text(j, i, f'{corr.iloc[i, j]:.3f}', ha='center', va='center')
+            ax.text(j, i, f'{corr.iloc[i, j]:.3f}', ha='center', va='center', fontsize=9)
     ax.set_title(f'Correlation ({arch})')
     plt.tight_layout()
     path = os.path.join(output_dir, f'correlation_heatmap_{arch}.png')
@@ -143,16 +179,21 @@ def run_correlation_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> No
 
     attack_markers = {'SIG': '^', 'WaNet': 'o', 'adaptive_blend': 's', 'adaptive_patch': 'D',
                      'basic': 'p', 'belt': 'h', 'blend': 'v', 'badnet': '*', 'upgd': 'X'}
-    for stealth_col, name in [('stealth_tpr_avg', 'TPR'), ('stealth_auc_avg', 'AUC')]:
+    for stealth_col, x_label, name_key in [
+        ('stealth_tpr_avg', LABEL_STEALTH_TPR, 'tpr'),
+        ('stealth_auc_avg', LABEL_STEALTH_AUC, 'auc'),
+    ]:
         sub = df.dropna(subset=[stealth_col, 'transfer_rate'])
         if len(sub) < 2:
             continue
         x, y = sub[stealth_col].to_numpy(), sub['transfer_rate'].to_numpy()
         asr_vals = sub['asr'].fillna(0) if 'asr' in sub.columns else pd.Series([0] * len(sub))
-        asr_min, asr_max = 0, max(asr_vals.max(), 0.01)
+        if len(asr_vals) and asr_vals.max() > 1.5:
+            asr_vals = asr_vals / 100.0
+        asr_min, asr_max = 0.0, 1.0
         slope, intercept = np.polyfit(x, y, 1)
-        lx = np.linspace(x.min(), x.max(), 100)
-        ly = slope * lx + intercept
+        lx = np.linspace(0, 1, 100)
+        ly = np.clip(slope * lx + intercept, 0, 1)
         fig, ax = plt.subplots(figsize=(6, 5))
         for at in sub['attack_type'].unique():
             mask = sub['attack_type'] == at
@@ -162,9 +203,10 @@ def run_correlation_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> No
                        c=asr_vals[mask], cmap='Blues', vmin=asr_min, vmax=asr_max,
                        marker=attack_markers.get(at, 'o'), s=60, edgecolors='none')
         ax.plot(lx, ly, 'gray', lw=1.5, alpha=0.7)
-        ax.set_xlabel(f'Stealth {name} Avg')
+        ax.set_xlabel(x_label)
         ax.set_ylabel('Transfer Rate')
-        ax.set_title(f'Stealth {name} vs Transfer ({arch})')
+        ax.set_title(f'{x_label} vs Transfer ({arch})')
+        _set_xy_rate(ax)
         sm = ScalarMappable(cmap='Blues', norm=Normalize(vmin=asr_min, vmax=asr_max))
         sm.set_array([])
         cbar = plt.colorbar(sm, ax=ax)
@@ -176,7 +218,7 @@ def run_correlation_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> No
         ax.legend(handles=leg_handles, fontsize=8)
         ax.grid(True, alpha=0.3)
         plt.tight_layout()
-        path = os.path.join(output_dir, f'scatter_stealth_{name.lower()}_vs_transfer_{arch}.png')
+        path = os.path.join(output_dir, f'scatter_stealth_{name_key}_vs_transfer_{arch}.png')
         plt.savefig(path, dpi=300)
         plt.close()
         print(f"  散点图: {path}")
@@ -209,7 +251,7 @@ def compute_pareto_2d(df: pd.DataFrame, x_col: str, y_col: str,
 
 
 def plot_pareto_2d(df: pd.DataFrame, pareto_df: pd.DataFrame, x_col: str, y_col: str,
-                   output_path: str, title: str) -> None:
+                   output_path: str, title: str, x_label: str = None, y_label: str = None) -> None:
     if df.empty or pareto_df.empty:
         return
     plt.figure(figsize=(8, 6))
@@ -217,11 +259,13 @@ def plot_pareto_2d(df: pd.DataFrame, pareto_df: pd.DataFrame, x_col: str, y_col:
     plt.scatter(pareto_df[x_col], pareto_df[y_col], color='red', s=60, label='Pareto Front')
     sorted_df = pareto_df.sort_values(x_col)
     plt.plot(sorted_df[x_col], sorted_df[y_col], 'r-', lw=2)
-    plt.xlabel(x_col.replace('_', ' ').title())
-    plt.ylabel(y_col.replace('_', ' ').title())
+    plt.xlabel(x_label or x_col.replace('_', ' ').title())
+    plt.ylabel(y_label or y_col.replace('_', ' ').title())
     plt.title(title)
     plt.legend()
     plt.grid(alpha=0.2)
+    plt.xlim(*RATE_LIM)
+    plt.ylim(*RATE_LIM)
     plt.tight_layout()
     plt.savefig(output_path, dpi=300)
     plt.close()
@@ -234,8 +278,8 @@ def plot_box_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> No
         return
     attack_types = sorted(df['attack_type'].unique())
     metrics = [
-        ('stealth_tpr_avg', 'Stealth TPR Avg'),
-        ('stealth_auc_avg', 'Stealth AUC Avg'),
+        ('stealth_tpr_avg', LABEL_STEALTH_TPR),
+        ('stealth_auc_avg', LABEL_STEALTH_AUC),
         ('transfer_rate', 'Transfer Rate'),
     ]
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
@@ -252,6 +296,7 @@ def plot_box_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> No
         ax.set_ylabel(name, fontsize=12)
         ax.set_title(f'{name} by Attack Type', fontsize=13)
         ax.grid(True, alpha=0.3, axis='y')
+        _ylim_rate(ax)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
@@ -270,13 +315,14 @@ def plot_bar_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> No
     for i, col in enumerate(METRIC_COLS):
         means = agg[(col, 'mean')].values
         stds = agg[(col, 'std')].fillna(0).values
-        ax.bar(x + i * width, means, width, label=col.replace('_', ' ').title(), yerr=stds, capsize=3)
+        ax.bar(x + i * width, means, width, label=METRIC_LABELS.get(col, col.replace('_', ' ').title()), yerr=stds, capsize=3)
     ax.set_xticks(x + width)
     ax.set_xticklabels(attack_types, rotation=45, ha='right')
     ax.set_ylabel('Value')
     ax.set_title(f'Mean Metrics by Attack Type ({arch})')
     ax.legend()
     ax.grid(True, alpha=0.3, axis='y')
+    _ylim_rate(ax)
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
@@ -292,10 +338,14 @@ def plot_3d_scatter(df: pd.DataFrame, output_path: str, arch: str) -> None:
     ax = fig.add_subplot(111, projection='3d')
     scatter = ax.scatter(df['stealth_tpr_avg'], df['stealth_auc_avg'], df['transfer_rate'],
                          c=df['transfer_rate'], cmap='viridis', alpha=0.6, s=30)
-    ax.set_xlabel('Stealth TPR')
-    ax.set_ylabel('Stealth AUC')
+    ax.set_xlabel(LABEL_STEALTH_TPR)
+    ax.set_ylabel(LABEL_STEALTH_AUC)
     ax.set_zlabel('Transfer Rate')
-    ax.set_title(f'3D: Stealth TPR vs AUC vs Transfer ({arch})')
+    ax.set_title(f'3D: {LABEL_STEALTH_TPR} vs {LABEL_STEALTH_AUC} vs Transfer ({arch})')
+    ax.set_xlim(*RATE_LIM)
+    ax.set_ylim(*RATE_LIM)
+    ax.set_zlim(*RATE_LIM)
+    scatter.set_clim(*RATE_NORM_LIM)
     plt.colorbar(scatter, ax=ax, shrink=0.6)
     plt.tight_layout()
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
@@ -324,8 +374,9 @@ def plot_box_by_poison_rate(df: pd.DataFrame, output_path: str, arch: str) -> No
             patch.set_alpha(0.7)
         ax.set_xticks(range(len(rates)))
         ax.set_xticklabels(rates, rotation=45, ha='right')
-        ax.set_ylabel(col.replace('_', ' ').title())
+        ax.set_ylabel(METRIC_LABELS.get(col, col.replace('_', ' ').title()))
         ax.grid(True, alpha=0.3, axis='y')
+        _ylim_rate(ax)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
@@ -350,8 +401,9 @@ def plot_box_by_trigger_type(df: pd.DataFrame, output_path: str, arch: str) -> N
             patch.set_alpha(0.7)
         ax.set_xticks(range(len(trigger_types)))
         ax.set_xticklabels(trigger_types, rotation=45, ha='right')
-        ax.set_ylabel(col.replace('_', ' ').title())
+        ax.set_ylabel(METRIC_LABELS.get(col, col.replace('_', ' ').title()))
         ax.grid(True, alpha=0.3, axis='y')
+        _ylim_rate(ax)
     plt.tight_layout(rect=[0, 0, 1, 0.98])
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
@@ -394,12 +446,15 @@ def plot_line_by_attack_type(df: pd.DataFrame, output_dir: str, arch: str) -> No
             continue
         x_param = TRIGGER_PARAM_LABEL.get(at, 'param')
         poison_rates = sorted(sub['poison_rate'].dropna().unique(), key=lambda x: float(x) if pd.notna(x) else 0)
-        asr_max = max(sub['asr'].max(), 0.01)
+        asr_max = 1.0
+        if sub['asr'].max() > 1.5:
+            sub = sub.copy()
+            sub['asr'] = sub['asr'] / 100.0
         fig, axes = plt.subplots(1, 3, figsize=(14, 5))
         fig.suptitle(f'Line Chart: {at} ({arch}) — X={x_param} (Trigger Strength)', fontsize=16, fontweight='bold', y=1.02)
         metrics = [
-            ('stealth_tpr_avg', 'Stealth TPR Avg'),
-            ('stealth_auc_avg', 'Stealth AUC Avg'),
+            ('stealth_tpr_avg', LABEL_STEALTH_TPR),
+            ('stealth_auc_avg', LABEL_STEALTH_AUC),
             ('transfer_rate', 'Transfer Rate'),
         ]
         for idx, (col, name) in enumerate(metrics):
@@ -413,13 +468,14 @@ def plot_line_by_attack_type(df: pd.DataFrame, output_dir: str, arch: str) -> No
                 asr_vals = pr_sub['asr'].values
                 cmap_name = POISON_RATE_CMAPS[pr_idx % len(POISON_RATE_CMAPS)]
                 marker = POISON_RATE_MARKERS[pr_idx % len(POISON_RATE_MARKERS)]
-                ax.scatter(x_vals, y_vals, c=asr_vals, cmap=cmap_name, vmin=0, vmax=asr_max,
+                ax.scatter(x_vals, y_vals, c=asr_vals, cmap=cmap_name, vmin=0, vmax=1.0,
                            marker=marker, s=70, edgecolors='none')
                 ax.plot(x_vals, y_vals, '-', color='gray', linewidth=1.5, alpha=0.5)
             ax.set_xlabel(f'{x_param} (Trigger Strength)')
             ax.set_ylabel(name)
             ax.set_title(name)
-            sm = ScalarMappable(cmap='Blues', norm=Normalize(vmin=0, vmax=asr_max))
+            _ylim_rate(ax)
+            sm = ScalarMappable(cmap='Blues', norm=Normalize(vmin=0, vmax=1.0))
             sm.set_array([])
             cbar = plt.colorbar(sm, ax=ax)
             cbar.set_label('ASR')
@@ -436,30 +492,27 @@ def plot_line_by_attack_type(df: pd.DataFrame, output_dir: str, arch: str) -> No
 
 
 def run_pareto_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> None:
-    """隐蔽性 vs 迁移性 帕累托分析。隐蔽性：TPR 越低越好，AUC 越接近 0.5 越好"""
+    """隐蔽性 vs 迁移性 帕累托。stealth_tpr_avg / stealth_auc_avg 均为 1-原始均值，越大越隐蔽。"""
     if df.empty:
         return
-    # Stealth TPR vs Transfer: TPR 越低越隐蔽，Transfer 越高越好
-    # 用 1 - stealth_tpr 作为“隐蔽得分”（越高越隐蔽），与 transfer 一起做帕累托
     df_temp = df.copy()
-    df_temp['stealth_score_tpr'] = 1 - df_temp['stealth_tpr_avg']
-    pareto_tpr = compute_pareto_2d(df_temp, 'stealth_score_tpr', 'transfer_rate')
+    pareto_tpr = compute_pareto_2d(df_temp, 'stealth_tpr_avg', 'transfer_rate')
     if not pareto_tpr.empty:
         plot_pareto_2d(
             df_temp, pareto_tpr,
-            'stealth_score_tpr', 'transfer_rate',
+            'stealth_tpr_avg', 'transfer_rate',
             os.path.join(output_dir, f'pareto_stealth_tpr_vs_transfer_{arch}.png'),
-            f'Pareto: Stealth(1-TPR) vs Transfer ({arch})'
+            f'Pareto: {LABEL_STEALTH_TPR} vs Transfer ({arch})',
+            x_label=LABEL_STEALTH_TPR, y_label='Transfer Rate'
         )
-    # Stealth AUC: 0.5 最理想，用 1 - 2*|auc-0.5| 作为隐蔽得分
-    df_temp['stealth_score_auc'] = 1 - 2 * np.abs(df_temp['stealth_auc_avg'] - 0.5)
-    pareto_auc = compute_pareto_2d(df_temp, 'stealth_score_auc', 'transfer_rate')
+    pareto_auc = compute_pareto_2d(df_temp, 'stealth_auc_avg', 'transfer_rate')
     if not pareto_auc.empty:
         plot_pareto_2d(
             df_temp, pareto_auc,
-            'stealth_score_auc', 'transfer_rate',
+            'stealth_auc_avg', 'transfer_rate',
             os.path.join(output_dir, f'pareto_stealth_auc_vs_transfer_{arch}.png'),
-            f'Pareto: Stealth(AUC) vs Transfer ({arch})'
+            f'Pareto: {LABEL_STEALTH_AUC} vs Transfer ({arch})',
+            x_label=LABEL_STEALTH_AUC, y_label='Transfer Rate'
         )
 
 
@@ -497,16 +550,15 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
         combined = combined[~combined['attack_type'].isin(['none', ''])]
     if combined.empty:
         return
-    asr_vals = combined['asr']
-    asr_valid = asr_vals.dropna()
-    asr_min = asr_valid.min() if len(asr_valid) > 0 else 0
-    asr_max = asr_valid.max() if len(asr_valid) > 0 else 1
-    if asr_max <= asr_min:
-        asr_min, asr_max = 0, 1
+    if 'asr' in combined.columns:
+        av = combined['asr'].dropna()
+        if len(av) and av.max() > 1.5:
+            combined['asr'] = combined['asr'] / 100.0
+    asr_min, asr_max = 0.0, 1.0
 
     plot_cols = [
-        ('stealth_auc_avg', 'Stealth AUC Avg', 'auc'),
-        ('stealth_tpr_avg', 'Stealth TPR Avg', 'tpr'),
+        ('stealth_auc_avg', LABEL_STEALTH_AUC, 'auc'),
+        ('stealth_tpr_avg', LABEL_STEALTH_TPR, 'tpr'),
     ]
     if 'S_stealth' in combined.columns:
         plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
@@ -556,6 +608,7 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
 
         ax.grid(True, alpha=0.3)
+        _set_xy_rate(ax)
         path = os.path.join(output_dir, f'scatter_stealth_{file_suffix}_vs_transfer_combined.png')
         plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.close()
@@ -575,8 +628,8 @@ def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
     from matplotlib.colors import Normalize
 
     plot_cols = [
-        ('stealth_auc_avg', 'Stealth AUC Avg', 'auc'),
-        ('stealth_tpr_avg', 'Stealth TPR Avg', 'tpr'),
+        ('stealth_auc_avg', LABEL_STEALTH_AUC, 'auc'),
+        ('stealth_tpr_avg', LABEL_STEALTH_TPR, 'tpr'),
     ]
     if 'S_stealth' in combined.columns:
         plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
@@ -611,6 +664,7 @@ def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
             sm.set_array([])
             plt.colorbar(sm, ax=ax, label='ASR')
             ax.grid(True, alpha=0.3)
+            _set_xy_rate(ax)
             path = os.path.join(output_dir, f'scatter_stealth_{file_suffix}_vs_transfer_by_method_{at}.png')
             plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
             plt.close()
@@ -627,17 +681,17 @@ def _plot_scatter_combined_bubble(combined, found, output_dir):
     method_to_color = {at: METHOD_COLORS[i] for i, at in enumerate(ATTACK_TYPE_ORDER)}
 
     plot_cols = [
-        ('stealth_auc_avg', 'Stealth AUC Avg', 'auc'),
-        ('stealth_tpr_avg', 'Stealth TPR Avg', 'tpr'),
+        ('stealth_auc_avg', LABEL_STEALTH_AUC, 'auc'),
+        ('stealth_tpr_avg', LABEL_STEALTH_TPR, 'tpr'),
     ]
     if 'S_stealth' in combined.columns:
         plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
 
-    asr_vals = combined['asr'].fillna(0)
+    combined_b = combined.copy()
+    if 'asr' in combined_b.columns and combined_b['asr'].fillna(0).max() > 1.5:
+        combined_b['asr'] = combined_b['asr'] / 100.0
     s_min, s_max = 50, 300
-    asr_min, asr_max = asr_vals.min(), max(asr_vals.max(), 0.01)
-    if asr_max <= asr_min:
-        asr_min, asr_max = 0, 1
+    asr_min, asr_max = 0.0, 1.0
 
     def size_from_asr(a):
         if pd.isna(a) or a <= 0:
@@ -646,7 +700,7 @@ def _plot_scatter_combined_bubble(combined, found, output_dir):
         return s_min + (s_max - s_min) * t
 
     for x_col, x_label, file_suffix in plot_cols:
-        sub = combined.dropna(subset=[x_col, 'transfer_rate'])
+        sub = combined_b.dropna(subset=[x_col, 'transfer_rate'])
         if sub.empty:
             continue
         fig, ax = plt.subplots(figsize=(11, 8))
@@ -671,6 +725,7 @@ def _plot_scatter_combined_bubble(combined, found, output_dir):
                        markersize=10, label=a, markeredgecolor='none') for a in ARCHS if a in found]
         ax.legend(handles=leg1 + leg2, loc='upper right', ncol=2, fontsize=7)
         ax.grid(True, alpha=0.3)
+        _set_xy_rate(ax)
         path = os.path.join(output_dir, f'scatter_stealth_{file_suffix}_vs_transfer_combined_bubble.png')
         plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
         plt.close()
