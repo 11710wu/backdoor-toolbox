@@ -53,7 +53,6 @@ echo "=========================================="
 # ==============================================================================
 
 echo '----- 1. Creation (mobilenetv2) -----'
-run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -76,7 +75,6 @@ run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=a
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Create: tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 echo '----- 2. Training (mobilenetv2) -----'
-run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -99,7 +97,6 @@ run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Train: tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 echo '----- 3. Local Testing (mobilenetv2) -----'
-run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -122,8 +119,6 @@ run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_b
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Test: tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 echo '----- 4. Cross Testing (mobilenetv2) -----'
-run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2 -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2) frost s=2"
-run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2 -corruption_type=frost -severity=3" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2) frost s=3"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2 -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2) frost s=2"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2 -corruption_type=frost -severity=3" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2) frost s=3"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2 -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2) frost s=2"
@@ -168,7 +163,6 @@ run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=ad
 echo '----- 5. Defenses (mobilenetv2) -----'
 
 echo '----- Defense: SentiNet (mobilenetv2) -----'
-run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -191,7 +185,6 @@ run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -p
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 echo '----- Defense: STRIP (mobilenetv2) -----'
-run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -214,7 +207,6 @@ run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -pois
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 echo '----- Defense: ScaleUp (mobilenetv2) -----'
-run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -237,7 +229,6 @@ run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -po
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 echo '----- Defense: IBD_PSC (mobilenetv2) -----'
-run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -260,7 +251,6 @@ run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -po
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 echo '----- Defense: NC (mobilenetv2) -----'
-run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"
@@ -283,7 +273,6 @@ run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=mobilenetv2" "Defense: NC tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (mobilenetv2)"
 
 # echo '----- Defense: FeatureRE (mobilenetv2) -----'
-# run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=mobilenetv2" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (mobilenetv2)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=mobilenetv2" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (mobilenetv2)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=mobilenetv2" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (mobilenetv2)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=mobilenetv2" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (mobilenetv2)"

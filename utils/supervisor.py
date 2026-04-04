@@ -103,13 +103,13 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
         cover_rate = '%.3f' % args.cover_rate
         dir_core = '%s_%s_%s_cover=%s' % (args.dataset, args.poison_type, ratio, cover_rate)
     elif args.poison_type == 'belt':
-        # BELT: 包含 cover_rate 和 mask_rate 参数
-        # 【重要】BELT 强制 alpha=1.0，目录名中不包含 alpha（或固定为 1.0）
+        belt_alpha = '%.3f' % getattr(args, 'alpha', 1.0)
         cover_rate = '%.3f' % getattr(args, 'cover_rate', 0.5)
         mask_rate = '%.3f' % getattr(args, 'mask_rate', 0.2)
-        # 不包含 alpha，因为 BELT 强制 alpha=1.0
-        dir_core = '%s_%s_%s_cover=%s_mask=%s_trigger=%s' % (
-            args.dataset, args.poison_type, ratio, cover_rate, mask_rate, args.trigger)
+        # BELT 不使用外部 trigger 文件，其 trigger 由 generate_belt_trigger() 内部生成，
+        # 故此处与 get_poison_set_dir 保持一致，不拼接 _trigger= 字段
+        dir_core = '%s_%s_%s_alpha=%s_cover=%s_mask=%s' % (
+            args.dataset, args.poison_type, ratio, belt_alpha, cover_rate, mask_rate)
     elif args.poison_type == 'upgd':
         # ---------------------------------------------------------------------
         # Parameter backdoor (UPGD)
@@ -217,10 +217,11 @@ def get_poison_set_dir(args):
         )
         poison_set_dir = f'{poison_set_dir}_mult={upgd_steps_multiplier}'
     elif args.poison_type == 'belt':
+        belt_alpha = '%.3f' % getattr(args, 'alpha', 1.0)
         cover_rate = '%.3f' % getattr(args, 'cover_rate', 0.5)
         mask_rate = '%.3f' % getattr(args, 'mask_rate', 0.2)
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_cover=%s_mask=%s' % (
-            args.dataset, args.poison_type, ratio, cover_rate, mask_rate)
+        poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s_cover=%s_mask=%s' % (
+            args.dataset, args.poison_type, ratio, belt_alpha, cover_rate, mask_rate)
     else:
         poison_set_dir = 'poisoned_train_set/%s/%s_%s' % (args.dataset, args.poison_type, ratio)
 
@@ -1077,35 +1078,28 @@ def get_poison_transform(poison_type, dataset_name, target_class, source_class=1
                                                        trigger_mask=trigger_mask, target_class=target_class, alpha=alpha)
 
         elif poison_type == 'belt':
-            # BELT 使用与原始代码一致的触发器生成方式（测试时）
-            # 【重要】BELT 强制 alpha=1.0，不使用归一化（与原始 BELT 代码一致）
             from poison_tool_box import belt
             import numpy as np
             
-            # BELT 强制 alpha=1.0，忽略用户输入的 alpha 参数
-            belt_alpha = 1.0
+            belt_alpha = alpha  # 使用用户指定的 alpha
             
-            # 尝试从保存的文件加载触发器
             poison_set_dir = get_poison_set_dir(args) if args is not None else None
             belt_trigger_path = os.path.join(poison_set_dir, 'belt_trigger.pt') if poison_set_dir else None
             
             if belt_trigger_path and os.path.exists(belt_trigger_path):
-                # 从文件加载触发器
                 belt_trigger_data = torch.load(belt_trigger_path, map_location='cpu')
-                belt_pattern_torch = belt_trigger_data['pattern']  # [3, H, W], [0, 1]
-                belt_mask_torch = belt_trigger_data['mask']        # [H, W], [0, 1]
-                belt_alpha = belt_trigger_data.get('alpha', 1.0)
-                print(f'[BELT] 从文件加载触发器: {belt_trigger_path}')
+                belt_pattern_torch = belt_trigger_data['pattern']
+                belt_mask_torch = belt_trigger_data['mask']
+                saved_alpha = belt_trigger_data.get('alpha', 1.0)
+                if abs(belt_alpha - saved_alpha) > 1e-6:
+                    print(f'[BELT] 注意: 命令行 alpha={belt_alpha} 与保存的 alpha={saved_alpha} 不一致，使用命令行值')
+                print(f'[BELT] 从文件加载触发器: {belt_trigger_path}, alpha={belt_alpha}')
             else:
-                # 使用公共函数动态生成触发器（兜底方案）
-                belt_mask_np, belt_pattern_np = belt.generate_belt_trigger(img_size, alpha=belt_alpha)
-                belt_mask_torch = torch.from_numpy(belt_mask_np[:, :, 0]).float()  # [H, W]
-                belt_pattern_torch = torch.from_numpy(belt_pattern_np).permute(2, 0, 1).float() / 255.0  # [3, H, W]
-                print(f'[BELT] 动态生成触发器（未找到保存文件）')
+                belt_mask_np, belt_pattern_np = belt.generate_belt_trigger(img_size)
+                belt_mask_torch = torch.from_numpy(belt_mask_np[:, :, 0]).float()
+                belt_pattern_torch = torch.from_numpy(belt_pattern_np).permute(2, 0, 1).float() / 255.0
+                print(f'[BELT] 动态生成触发器（未找到保存文件），alpha={belt_alpha}')
             
-            # 【重要】BELT 不使用归一化（与原始代码一致）
-            # 原始代码测试时只用 ToTensor()，不使用 Normalize
-            # mean=(0,0,0), std=(1,1,1) 表示不进行归一化
             belt_mean = (0.0, 0.0, 0.0)
             belt_std = (1.0, 1.0, 1.0)
             

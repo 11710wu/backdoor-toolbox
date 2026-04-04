@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """验证提取结果的正确性。支持两种模式：
   no_nc: 验证 data_*_no_nc 文件（隐蔽性、迁移性，不含 NC）
-  nc:    验证 data_*_nc 文件（含 NC、S_stealth）
+  nc:    验证 data_*_nc 文件（含 NC、S_stealth、S_stealth_tpr）
   # 默认：验证所有 arch、no_nc + nc，抽样 50 个点
 python analysis/validate_extraction.py
 
@@ -166,7 +166,13 @@ def find_result_directory(base_dir, group_info, arch=None):
     elif at == 'belt':
         cr = group_info.get('cover_rate', 0.5)
         mr = tv if tv is not None else 0.1
-        candidates = [f"belt_{pr:.3f}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333"]
+        # 与 supervisor.get_poison_set_dir 一致：含 alpha=；旧目录无 alpha 时保留第二条候选
+        ba = float(group_info.get('alpha', 1.0))
+        ba_s = f"{ba:.3f}"
+        candidates = [
+            f"belt_{pr:.3f}_alpha={ba_s}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333",
+            f"belt_{pr:.3f}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333",
+        ]
     elif at == 'upgd':
         # 文件夹格式为 eps=10.0（整数也带 .0）
         eps_str = f"{int(tv)}.0" if tv == int(tv) else str(tv)
@@ -247,7 +253,8 @@ def load_data_from_csv(csv_path):
                 'cover_rate': parse_float(row.get('cover_rate')),
                 'nc_max_anomaly_index': parse_float(row.get('nc_max_anomaly_index')),
                 'nc_is_poisoned': parse_bool(row.get('nc_is_poisoned')),
-                'S_stealth': parse_float(row.get('S_stealth'))
+                'S_stealth': parse_float(row.get('S_stealth')),
+                'S_stealth_tpr': parse_float(row.get('S_stealth_tpr')),
             }
             groups[gid]['points'].append(pt)
     return [{'group': g, 'point': p} for g in groups.values() for p in g['points']]
@@ -283,6 +290,7 @@ def load_data_from_json(json_path):
                 'nc_is_poisoned': parse_bool(dp.get('nc_is_poisoned')),
                 'cover_rate': parse_float(dp.get('cover_rate')),
                 'S_stealth': parse_float(dp.get('S_stealth')),
+                'S_stealth_tpr': parse_float(dp.get('S_stealth_tpr')),
             }
             result.append({'group': group, 'point': point})
     return result
@@ -311,7 +319,8 @@ def check_data_completeness(csv_path, include_nc):
         required_cols.extend([
             ('nc_max_anomaly_index', 'NC异常指数'),
             ('nc_is_poisoned', 'NC是否中毒'),
-            ('S_stealth', 'S_stealth'),
+            ('S_stealth', 'S_stealth(AUC)'),
+            ('S_stealth_tpr', 'S_stealth(TPR)'),
         ])
     issues = []
     with open(csv_path, 'r', encoding='utf-8') as f:
@@ -332,8 +341,8 @@ def check_data_completeness(csv_path, include_nc):
 
 
 def recompute_s_stealth(all_points):
-    """按 extract 公式重算 S_stealth，返回 {point_key: s_stealth}。
-    is_poisoned=False 时，max_norm 视为最小值。
+    """按 extract 公式重算 S_stealth（AUC）与 S_stealth_tpr（TPR），返回 (out_auc, out_tpr)。
+    nc_part = 0.2 * (max - val) / (max - min)（仅中毒点）；is_poisoned=False 时 nc_part = 0。
     """
     max_norms = [it['point']['nc_max_anomaly_index'] for it in all_points
                  if it['point'].get('nc_is_poisoned') and it['point'].get('nc_max_anomaly_index') is not None]
@@ -341,17 +350,20 @@ def recompute_s_stealth(all_points):
     max_norm_max = max(max_norms) if max_norms else 1.0
     denom = max_norm_max - max_norm_min if max_norm_max > max_norm_min else 1.0
 
-    out = {}
+    out_auc, out_tpr = {}, {}
     for it in all_points:
         p = it['point']
+        k = _point_key(it)
         auc_part = 0.8 * (p.get('stealth_auc_avg') or 0.0)
+        tpr_part = 0.8 * (p.get('stealth_tpr_avg') or 0.0)
         if p.get('nc_is_poisoned') and p.get('nc_max_anomaly_index') is not None:
-            norm_val = p['nc_max_anomaly_index']
+            val = p['nc_max_anomaly_index']
+            nc_part = 0.2 * (max_norm_max - val) / denom
         else:
-            norm_val = max_norm_min
-        nc_part = 0.2 * (norm_val - max_norm_min) / denom
-        out[_point_key(it)] = auc_part + nc_part
-    return out
+            nc_part = 0.0
+        out_auc[k] = auc_part + nc_part
+        out_tpr[k] = tpr_part + nc_part
+    return out_auc, out_tpr
 
 
 def compare_csv_json(csv_pt, json_pt, tol=1e-6, include_nc=True):
@@ -366,7 +378,7 @@ def compare_csv_json(csv_pt, json_pt, tol=1e-6, include_nc=True):
         elif (cv is None) != (jv is None):
             errors.append(f"{k}: CSV={cv}, JSON={jv} (一方缺失)")
     if include_nc:
-        for k in ['nc_max_anomaly_index', 'S_stealth']:
+        for k in ['nc_max_anomaly_index', 'S_stealth', 'S_stealth_tpr']:
             cv, jv = csv_pt.get(k), json_pt.get(k)
             if cv is not None and jv is not None:
                 if abs(cv - jv) > tol:
@@ -441,21 +453,29 @@ def main():
                     pct = cnt / tot * 100 if tot else 0
                     print(f"    - {name}({col}): {cnt}/{tot} 条缺失 ({pct:.1f}%)")
 
-            # nc 模式：验证 S_stealth 计算正确性
-            s_stealth_err = 0
+            # nc 模式：验证 S_stealth / S_stealth_tpr 计算正确性
+            s_stealth_err = s_stealth_tpr_err = 0
             if include_nc and all_pts:
-                recomputed = recompute_s_stealth(all_pts)
+                recomputed_auc, recomputed_tpr = recompute_s_stealth(all_pts)
                 tol = 1e-6
                 for it in all_pts:
                     k = _point_key(it)
-                    exp = recomputed.get(k)
-                    got = it['point'].get('S_stealth')
-                    if exp is not None and got is not None and abs(exp - got) > tol:
+                    exp_a = recomputed_auc.get(k)
+                    got_a = it['point'].get('S_stealth')
+                    if exp_a is not None and got_a is not None and abs(exp_a - got_a) > tol:
                         s_stealth_err += 1
+                    exp_t = recomputed_tpr.get(k)
+                    got_t = it['point'].get('S_stealth_tpr')
+                    if exp_t is not None and got_t is not None and abs(exp_t - got_t) > tol:
+                        s_stealth_tpr_err += 1
                 if s_stealth_err:
-                    print(f"  S_stealth 公式校验: {s_stealth_err} 个点与重算值不一致")
+                    print(f"  S_stealth(AUC) 公式校验: {s_stealth_err} 个点与重算值不一致")
                 else:
-                    print(f"  S_stealth 公式校验: 通过")
+                    print(f"  S_stealth(AUC) 公式校验: 通过")
+                if s_stealth_tpr_err:
+                    print(f"  S_stealth(TPR) 公式校验: {s_stealth_tpr_err} 个点与重算值不一致")
+                else:
+                    print(f"  S_stealth(TPR) 公式校验: 通过")
 
             # CSV vs JSON 全量一致性校验（所有数据点）
             csv_json_mismatch = []

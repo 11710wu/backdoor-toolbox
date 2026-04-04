@@ -53,7 +53,6 @@ echo "=========================================="
 # ==============================================================================
 
 echo '----- 1. Creation (vgg19) -----'
-run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Create: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -76,7 +75,6 @@ run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=a
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Create: tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 echo '----- 2. Training (vgg19) -----'
-run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Train: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -99,7 +97,6 @@ run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Train: tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 echo '----- 3. Local Testing (vgg19) -----'
-run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Test: tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -122,8 +119,6 @@ run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_b
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Test: tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 echo '----- 4. Cross Testing (vgg19) -----'
-run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19) frost s=2"
-run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn -corruption_type=frost -severity=3" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19) frost s=3"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19) frost s=2"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn -corruption_type=frost -severity=3" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19) frost s=3"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19) frost s=2"
@@ -168,7 +163,6 @@ run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=ad
 echo '----- 5. Defenses (vgg19) -----'
 
 echo '----- Defense: SentiNet (vgg19) -----'
-run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -191,7 +185,6 @@ run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -p
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Defense: SentiNet tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 echo '----- Defense: STRIP (vgg19) -----'
-run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -214,7 +207,6 @@ run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -pois
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Defense: STRIP tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 echo '----- Defense: ScaleUp (vgg19) -----'
-run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -237,7 +229,6 @@ run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -po
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Defense: ScaleUp tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 echo '----- Defense: IBD_PSC (vgg19) -----'
-run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -260,7 +251,6 @@ run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -po
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Defense: IBD_PSC tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 echo '----- Defense: NC (vgg19) -----'
-run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Defense: NC tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"
@@ -283,7 +273,6 @@ run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.005 -cover_rate=0.005 -alpha=0.3 -model=vgg19_bn" "Defense: NC tiny_imagenet adaptive_blend rate=0.005 cover=0.005 alpha=0.3 (vgg19)"
 
 # echo '----- Defense: FeatureRE (vgg19) -----'
-# run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.01 -model=vgg19_bn" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.01 (vgg19)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.05 -model=vgg19_bn" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.05 (vgg19)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.1 -model=vgg19_bn" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.1 (vgg19)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=adaptive_blend -poison_rate=0.05 -cover_rate=0.05 -alpha=0.15 -model=vgg19_bn" "Defense: FeatureRE tiny_imagenet adaptive_blend rate=0.05 cover=0.05 alpha=0.15 (vgg19)"

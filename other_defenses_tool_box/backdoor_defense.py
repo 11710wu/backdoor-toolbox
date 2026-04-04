@@ -108,19 +108,27 @@ class BackdoorDefense():
             self.source_classes = None
 
         
-        trigger_path = os.path.join(config.triggers_dir, args.trigger)
-        print('trigger_path:', trigger_path)
-        self.trigger_mark = Image.open(trigger_path).convert("RGB")
-        self.trigger_mark = self.trigger_transform(self.trigger_mark).cuda()
-        
-        trigger_mask_path = os.path.join(config.triggers_dir, 'mask_%s' % args.trigger)
-        if os.path.exists(trigger_mask_path): # if there explicitly exists a trigger mask (with the same name)
-            print('trigger_mask_path:', trigger_mask_path)
-            self.trigger_mask = Image.open(trigger_mask_path).convert("RGB")
-            self.trigger_mask = transforms.ToTensor()(self.trigger_mask)[0].cuda() # only use 1 channel
-        else: # by default, all black pixels are masked with 0's (not used)
-            print('No trigger mask found! By default masking all black pixels...')
-            self.trigger_mask = torch.logical_or(torch.logical_or(self.trigger_mark[0] > 0, self.trigger_mark[1] > 0), self.trigger_mark[2] > 0).cuda()
+        # 对于不使用外部 trigger 文件的攻击（如 belt、upgd、WaNet、SIG），
+        # args.trigger == 'none'，跳过文件加载，self.trigger_mark/mask 设为 None。
+        # 这些攻击的触发器由 self.poison_transform 内部管理，防御方法不直接用 trigger_mark。
+        if args.trigger == 'none':
+            print('trigger: none (no external trigger file, managed by poison_transform)')
+            self.trigger_mark = None
+            self.trigger_mask = None
+        else:
+            trigger_path = os.path.join(config.triggers_dir, args.trigger)
+            print('trigger_path:', trigger_path)
+            self.trigger_mark = Image.open(trigger_path).convert("RGB")
+            self.trigger_mark = self.trigger_transform(self.trigger_mark).cuda()
+            
+            trigger_mask_path = os.path.join(config.triggers_dir, 'mask_%s' % args.trigger)
+            if os.path.exists(trigger_mask_path): # if there explicitly exists a trigger mask (with the same name)
+                print('trigger_mask_path:', trigger_mask_path)
+                self.trigger_mask = Image.open(trigger_mask_path).convert("RGB")
+                self.trigger_mask = transforms.ToTensor()(self.trigger_mask)[0].cuda() # only use 1 channel
+            else: # by default, all black pixels are masked with 0's (not used)
+                print('No trigger mask found! By default masking all black pixels...')
+                self.trigger_mask = torch.logical_or(torch.logical_or(self.trigger_mark[0] > 0, self.trigger_mark[1] > 0), self.trigger_mark[2] > 0).cuda()
 
         self.poison_set_dir = supervisor.get_poison_set_dir(args)
         # 当使用 test_s / test_delta 时，args 已被覆盖，get_poison_set_dir 会返回测试目录；

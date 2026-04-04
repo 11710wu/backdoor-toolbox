@@ -54,7 +54,6 @@ echo "=========================================="
 # ==============================================================================
 
 echo '----- 1. Creation (resnet18) -----'
-run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Create: tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Create: tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Create: tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Create: tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -77,7 +76,6 @@ run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=b
 run_command "python create_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Create: tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 echo '----- 2. Training (resnet18) -----'
-run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Train: tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Train: tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Train: tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Train: tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -100,7 +98,6 @@ run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type
 run_command "python train_on_poisoned_set.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Train: tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 echo '----- 3. Local Testing (resnet18) -----'
-run_command "python test_model.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Test: tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Test: tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Test: tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Test: tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -123,8 +120,6 @@ run_command "python test_model.py -dataset=tiny_imagenet -poison_type=blend -poi
 run_command "python test_model.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Test: tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 echo '----- 4. Cross Testing (resnet18) -----'
-run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18 -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py blend rate=0.05 alpha=0.01 (resnet18) frost s=2"
-run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18 -corruption_type=frost -severity=3" "Cross Test: test_tiny_imagenet.py blend rate=0.05 alpha=0.01 (resnet18) frost s=3"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18 -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py blend rate=0.05 alpha=0.05 (resnet18) frost s=2"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18 -corruption_type=frost -severity=3" "Cross Test: test_tiny_imagenet.py blend rate=0.05 alpha=0.05 (resnet18) frost s=3"
 run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18 -corruption_type=frost -severity=2" "Cross Test: test_tiny_imagenet.py blend rate=0.05 alpha=0.1 (resnet18) frost s=2"
@@ -169,7 +164,6 @@ run_command "python test_tiny_imagenet.py -dataset=tiny_imagenet -poison_type=bl
 echo '----- 5. Defenses (resnet18) -----'
 
 echo '----- Defense: SentiNet (resnet18) -----'
-run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Defense: SentiNet tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Defense: SentiNet tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Defense: SentiNet tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Defense: SentiNet tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -192,7 +186,6 @@ run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -p
 run_command "python other_defense.py -defense=SentiNet -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Defense: SentiNet tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 echo '----- Defense: STRIP (resnet18) -----'
-run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Defense: STRIP tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Defense: STRIP tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Defense: STRIP tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Defense: STRIP tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -215,7 +208,6 @@ run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -pois
 run_command "python other_defense.py -defense=STRIP -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Defense: STRIP tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 echo '----- Defense: ScaleUp (resnet18) -----'
-run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Defense: ScaleUp tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Defense: ScaleUp tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Defense: ScaleUp tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Defense: ScaleUp tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -238,7 +230,6 @@ run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -po
 run_command "python other_defense.py -defense=ScaleUp -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Defense: ScaleUp tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 echo '----- Defense: IBD_PSC (resnet18) -----'
-run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Defense: IBD_PSC tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Defense: IBD_PSC tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Defense: IBD_PSC tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Defense: IBD_PSC tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -261,7 +252,6 @@ run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -po
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Defense: IBD_PSC tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 echo '----- Defense: NC (resnet18) -----'
-run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Defense: NC tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Defense: NC tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Defense: NC tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Defense: NC tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"
@@ -284,7 +274,6 @@ run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.005 -alpha=0.3 -model=resnet18" "Defense: NC tiny_imagenet blend rate=0.005 alpha=0.3 (resnet18)"
 
 # echo '----- Defense: FeatureRE (resnet18) -----'
-# run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.01 -model=resnet18" "Defense: FeatureRE tiny_imagenet blend rate=0.05 alpha=0.01 (resnet18)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.05 -model=resnet18" "Defense: FeatureRE tiny_imagenet blend rate=0.05 alpha=0.05 (resnet18)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.1 -model=resnet18" "Defense: FeatureRE tiny_imagenet blend rate=0.05 alpha=0.1 (resnet18)"
 # run_command "python other_defense.py -defense=FeatureRE -dataset=tiny_imagenet -poison_type=blend -poison_rate=0.05 -alpha=0.15 -model=resnet18" "Defense: FeatureRE tiny_imagenet blend rate=0.05 alpha=0.15 (resnet18)"

@@ -73,7 +73,7 @@ def _set_xy_rate(ax) -> None:
 
 def load_from_csv(csv_path: str) -> pd.DataFrame:
     """从 CSV 加载数据，要求含 stealth_tpr_avg, stealth_auc_avg, transfer_rate。
-    若含 S_stealth 列则保留，供 nc 模式分析使用。
+    若含 S_stealth / S_stealth_tpr 列则保留，供 nc 模式分析使用。
     """
     if not os.path.exists(csv_path):
         raise FileNotFoundError(f"CSV 不存在: {csv_path}")
@@ -81,7 +81,7 @@ def load_from_csv(csv_path: str) -> pd.DataFrame:
     missing = [c for c in METRIC_COLS if c not in df.columns]
     if missing:
         raise ValueError(f"CSV 缺少列: {missing}")
-    extra = ['asr', 'S_stealth', 'nc_max_anomaly_index', 'nc_is_poisoned']
+    extra = ['asr', 'S_stealth', 'S_stealth_tpr', 'nc_max_anomaly_index', 'nc_is_poisoned']
     for col in METRIC_COLS + [c for c in extra if c in df.columns]:
         df[col] = pd.to_numeric(df[col], errors='coerce')
     # ASR 若以百分数存储，缩放到 [0,1] 以便与坐标轴/色条一致
@@ -195,14 +195,15 @@ def run_correlation_analysis(df: pd.DataFrame, output_dir: str, arch: str) -> No
         lx = np.linspace(0, 1, 100)
         ly = np.clip(slope * lx + intercept, 0, 1)
         fig, ax = plt.subplots(figsize=(6, 5))
+        add_method_parallelograms(ax, sub, stealth_col, 'transfer_rate')
         for at in sub['attack_type'].unique():
             mask = sub['attack_type'] == at
             if mask.sum() == 0:
                 continue
             ax.scatter(sub.loc[mask, stealth_col], sub.loc[mask, 'transfer_rate'],
                        c=asr_vals[mask], cmap='Blues', vmin=asr_min, vmax=asr_max,
-                       marker=attack_markers.get(at, 'o'), s=60, edgecolors='none')
-        ax.plot(lx, ly, 'gray', lw=1.5, alpha=0.7)
+                       marker=attack_markers.get(at, 'o'), s=60, edgecolors='none', zorder=2.5)
+        ax.plot(lx, ly, 'gray', lw=1.5, alpha=0.7, zorder=2)
         ax.set_xlabel(x_label)
         ax.set_ylabel('Transfer Rate')
         ax.set_title(f'{x_label} vs Transfer ({arch})')
@@ -301,6 +302,53 @@ def plot_box_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> No
     plt.savefig(output_path, dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print(f"  箱线图: {output_path}")
+
+
+def plot_box_by_attack_type_combined_all_archs(data_dir: str, output_dir: str, suffix: str = '') -> None:
+    """合并所有 arch 的数据，按 attack_type 绘制三种指标箱线图。"""
+    found = discover_arch_csvs(data_dir, suffix=suffix)
+    if len(found) < 2:
+        return
+    dfs = []
+    for arch, path in found.items():
+        df = load_from_csv(path).copy()
+        if df.empty:
+            continue
+        df['arch'] = arch
+        dfs.append(df)
+    if not dfs:
+        return
+    combined = pd.concat(dfs, ignore_index=True)
+    if combined.empty or 'attack_type' not in combined.columns:
+        return
+    attack_types = sorted(combined['attack_type'].dropna().unique())
+    if not attack_types:
+        return
+    metrics = [
+        ('stealth_tpr_avg', LABEL_STEALTH_TPR),
+        ('stealth_auc_avg', LABEL_STEALTH_AUC),
+        ('transfer_rate', 'Transfer Rate'),
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.suptitle('Box Plot by Attack Type (All Archs Combined)', fontsize=16, fontweight='bold', y=1.02)
+    for idx, (col, name) in enumerate(metrics):
+        ax = axes[idx]
+        data_by_type = [combined[combined['attack_type'] == at][col].dropna().values for at in attack_types]
+        bp = ax.boxplot(data_by_type, positions=range(len(attack_types)), patch_artist=True, widths=0.6)
+        for patch in bp['boxes']:
+            patch.set_facecolor('#4A90E2')
+            patch.set_alpha(0.7)
+        ax.set_xticks(range(len(attack_types)))
+        ax.set_xticklabels(attack_types, rotation=45, ha='right')
+        ax.set_ylabel(name, fontsize=12)
+        ax.set_title(f'{name} by Attack Type', fontsize=13)
+        ax.grid(True, alpha=0.3, axis='y')
+        _ylim_rate(ax)
+    plt.tight_layout(rect=[0, 0, 1, 0.98])
+    path = os.path.join(output_dir, 'box_by_attack_type_combined.png')
+    plt.savefig(path, dpi=300, bbox_inches='tight', facecolor='white')
+    plt.close()
+    print(f"  箱线图(全部数据): {path}")
 
 
 def plot_bar_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> None:
@@ -526,6 +574,219 @@ ATTACK_TYPE_ORDER = [
 ]
 
 
+def _method_envelope_rgba() -> dict:
+    """与气泡图一致：每种攻击方法一种颜色，用于包围平行四边形描边/填充。"""
+    arr = plt.cm.tab10(np.linspace(0, 1, 10))[: len(ATTACK_TYPE_ORDER)]
+    return {at: arr[i] for i, at in enumerate(ATTACK_TYPE_ORDER)}
+
+
+def axis_aligned_bbox_corners_xy(x: np.ndarray, y: np.ndarray, pad_frac: float = 0.02):
+    """轴对齐矩形的四个顶点 (4,2)；作退化/数值失败时的回退。"""
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    m = np.isfinite(x) & np.isfinite(y)
+    x, y = x[m], y[m]
+    n = len(x)
+    if n == 0:
+        return None
+    span_axis = RATE_LIM[1] - RATE_LIM[0]
+    if n == 1:
+        pad = max(span_axis * pad_frac, 0.012)
+        xmin, xmax = x[0] - pad, x[0] + pad
+        ymin, ymax = y[0] - pad, y[0] + pad
+    else:
+        xmin, xmax = float(x.min()), float(x.max())
+        ymin, ymax = float(y.min()), float(y.max())
+        dx = (xmax - xmin) * pad_frac + 1e-9
+        dy = (ymax - ymin) * pad_frac + 1e-9
+        xmin -= dx
+        xmax += dx
+        ymin -= dy
+        ymax += dy
+    corners = np.array([[xmin, ymin], [xmax, ymin], [xmax, ymax], [xmin, ymax]], dtype=float)
+    corners[:, 0] = np.clip(corners[:, 0], RATE_LIM[0], RATE_LIM[1])
+    corners[:, 1] = np.clip(corners[:, 1], RATE_LIM[0], RATE_LIM[1])
+    return corners
+
+
+def tradeoff_parallelogram_xy(
+    x: np.ndarray,
+    y: np.ndarray,
+    pad_frac: float = 0.02,
+    *,
+    intercept_pct_low: float = 5.0,
+    intercept_pct_high: float = 95.0,
+    x_pad: float = 0.02,
+):
+    """Linear Regression Corridor：OLS 斜率 k，截距带用分位数抗离群；左右各扩固定 x_pad。
+
+    1) 一元线性回归 Y = k*X + b（k、b 为 OLS）；上下边斜率均为 k。
+    2) b_i = y_i - k*x_i；b_max = percentile(b_i, intercept_pct_high)，b_min = percentile(b_i, intercept_pct_low)。
+    3) x_left = min(X) - x_pad，x_right = max(X) + x_pad，再按 RATE_LIM 裁剪 x 后算顶点 y。
+    4) 逆时针顶点（理论几何）：(X_min, k·X_min+b_max) → (X_max, k·X_max+b_max) →
+       (X_max, k·X_max+b_min) → (X_min, k·X_min+b_min)。上下边与 OLS 线 Y=k·X+b 斜率同为 k。
+
+    返回 (corners, k, b, b_max, b_min, x_min, x_max)。主情形 corners 的 y 不裁剪，便于与平行线一致；
+    退化情形 b_max/b_min/x_min/x_max 为 nan，仅用 corners 画多边形。
+    """
+    x = np.asarray(x, dtype=float)
+    y = np.asarray(y, dtype=float)
+    m = np.isfinite(x) & np.isfinite(y)
+    x, y = x[m], y[m]
+    n = len(x)
+    if n == 0:
+        return None
+
+    span_axis = RATE_LIM[1] - RATE_LIM[0]
+
+    if n == 1:
+        xm, ym = float(x[0]), float(y[0])
+        pad_x = max(x_pad, span_axis * pad_frac, 0.012)
+        pad_y = max(span_axis * pad_frac, 0.012)
+        x_min = np.clip(xm - pad_x, RATE_LIM[0], RATE_LIM[1])
+        x_max = np.clip(xm + pad_x, RATE_LIM[0], RATE_LIM[1])
+        if x_min >= x_max:
+            x_min, x_max = RATE_LIM[0], RATE_LIM[1]
+        corners = np.array(
+            [
+                [x_min, ym + pad_y],
+                [x_max, ym + pad_y],
+                [x_max, ym - pad_y],
+                [x_min, ym - pad_y],
+            ],
+            dtype=float,
+        )
+        corners[:, 1] = np.clip(corners[:, 1], RATE_LIM[0], RATE_LIM[1])
+        nan4 = (np.nan, np.nan, np.nan, np.nan)
+        return corners, 0.0, ym, *nan4
+
+    x_range = float(x.max() - x.min())
+    if x_range < 1e-12:
+        c = axis_aligned_bbox_corners_xy(x, y, pad_frac=pad_frac)
+        nan4 = (np.nan, np.nan, np.nan, np.nan)
+        return c, 0.0, float(np.mean(y)), *nan4
+
+    coef = np.polyfit(x, y, 1)
+    k, b = float(coef[0]), float(coef[1])
+    b_i = y - k * x
+    b_max = float(np.percentile(b_i, intercept_pct_high))
+    b_min = float(np.percentile(b_i, intercept_pct_low))
+    if b_max <= b_min:
+        mid = 0.5 * (b_max + b_min)
+        eps = max(1e-9, span_axis * 1e-6)
+        b_max, b_min = mid + eps, mid - eps
+
+    x_min = float(np.min(x)) - x_pad
+    x_max = float(np.max(x)) + x_pad
+    x_min = float(np.clip(x_min, RATE_LIM[0], RATE_LIM[1]))
+    x_max = float(np.clip(x_max, RATE_LIM[0], RATE_LIM[1]))
+    if x_min >= x_max:
+        x_min, x_max = float(RATE_LIM[0]), float(RATE_LIM[1])
+
+    # y 不 clip：保证 Y=kX+b_max / kX+b_min 与 Y=kX+b 严格平行；作图时由坐标轴裁切
+    corners = np.array(
+        [
+            [x_min, k * x_min + b_max],
+            [x_max, k * x_max + b_max],
+            [x_max, k * x_max + b_min],
+            [x_min, k * x_min + b_min],
+        ],
+        dtype=float,
+    )
+    return corners, k, b, b_max, b_min, x_min, x_max
+
+
+def add_method_parallelograms(
+    ax,
+    df: pd.DataFrame,
+    x_col: str,
+    y_col: str = 'transfer_rate',
+    *,
+    attack_col: str = 'attack_type',
+    zorder: float = 0.5,
+    pad_frac: float = 0.02,
+    face_alpha: float = 0.14,
+    edge_lw: float = 1.65,
+    intercept_pct_low: float = 5.0,
+    intercept_pct_high: float = 95.0,
+    x_pad: float = 0.02,
+) -> None:
+    """每种攻击方法：上下界为 Y=kX+b_max / kX+b_min，与 OLS 拟合线 Y=kX+b 平行；保留中间拟合线。"""
+    from matplotlib.patches import Polygon
+
+    if df.empty or attack_col not in df.columns:
+        return
+    colors = _method_envelope_rgba()
+    for at in ATTACK_TYPE_ORDER:
+        g = df[df[attack_col] == at].dropna(subset=[x_col, y_col])
+        if len(g) < 1:
+            continue
+        band = tradeoff_parallelogram_xy(
+            g[x_col].to_numpy(),
+            g[y_col].to_numpy(),
+            pad_frac=pad_frac,
+            intercept_pct_low=intercept_pct_low,
+            intercept_pct_high=intercept_pct_high,
+            x_pad=x_pad,
+        )
+        if band is None:
+            continue
+        corners, k, b, b_max, b_min, x_lo, x_hi = band
+        rgba = colors.get(at, (0.5, 0.5, 0.5, 1.0))
+        rgb = tuple(rgba[:3])
+        line_kw = dict(color=rgb, solid_capstyle='round', zorder=zorder + 0.15)
+
+        if np.isfinite(b_max) and np.isfinite(b_min) and np.isfinite(x_lo) and np.isfinite(x_hi):
+            xspan_ax = RATE_LIM[1] - RATE_LIM[0]
+            npt = max(50, int(200 * (x_hi - x_lo) / max(xspan_ax, 1e-9)))
+            xs = np.linspace(x_lo, x_hi, npt)
+            y_top = k * xs + b_max
+            y_bot = k * xs + b_min
+            y_mid = k * xs + b
+            ax.fill_between(
+                xs,
+                y_bot,
+                y_top,
+                facecolor=rgb,
+                alpha=face_alpha,
+                edgecolor='none',
+                zorder=zorder,
+            )
+            ax.plot(xs, y_top, lw=max(1.0, edge_lw * 0.9), ls='-', alpha=0.9, **line_kw)
+            ax.plot(xs, y_bot, lw=max(1.0, edge_lw * 0.9), ls='-', alpha=0.9, **line_kw)
+            ax.plot(
+                xs,
+                y_mid,
+                lw=max(1.15, edge_lw * 0.95),
+                ls='-',
+                alpha=0.98,
+                **line_kw,
+            )
+        else:
+            poly = Polygon(
+                corners,
+                closed=True,
+                facecolor=rgb,
+                alpha=face_alpha,
+                edgecolor=rgb,
+                linewidth=edge_lw,
+                zorder=zorder,
+            )
+            ax.add_patch(poly)
+            xa, xb = float(corners[0, 0]), float(corners[1, 0])
+            if abs(xb - xa) < 1e-9:
+                xs_line = np.linspace(RATE_LIM[0], RATE_LIM[1], 200)
+            else:
+                xs_line = np.linspace(xa, xb, 200)
+            ax.plot(
+                xs_line,
+                k * xs_line + b,
+                lw=max(1.0, edge_lw * 0.85),
+                ls='-',
+                **line_kw,
+            )
+
+
 def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str = '') -> None:
     """合并 cifar10 所有 arch 数据：stealth_auc/stealth_tpr vs transfer，形状区分 arch，颜色表示 ASR"""
     from matplotlib.lines import Line2D
@@ -538,7 +799,7 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
     dfs = []
     for arch, path in found.items():
         df = pd.read_csv(path, encoding='utf-8')
-        for col in ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'asr', 'S_stealth']:
+        for col in ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'asr', 'S_stealth', 'S_stealth_tpr']:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors='coerce')
         df['arch'] = arch
@@ -561,7 +822,9 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
         ('stealth_tpr_avg', LABEL_STEALTH_TPR, 'tpr'),
     ]
     if 'S_stealth' in combined.columns:
-        plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
+        plot_cols.append(('S_stealth', 'S_stealth (NC, AUC)', 's_stealth_auc'))
+    if 'S_stealth_tpr' in combined.columns:
+        plot_cols.append(('S_stealth_tpr', 'S_stealth (NC, TPR)', 's_stealth_tpr'))
     # 方法编号映射
     method_to_num = {at: i + 1 for i, at in enumerate(ATTACK_TYPE_ORDER)}
 
@@ -571,6 +834,7 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
             continue
         fig, ax = plt.subplots(figsize=(11, 8))
         fig.subplots_adjust(left=0.1, right=0.65, top=0.92, bottom=0.1)
+        add_method_parallelograms(ax, sub_combined, x_col, 'transfer_rate')
         for arch in ARCHS:
             if arch not in found:
                 continue
@@ -581,13 +845,13 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
             y = sub['transfer_rate'].values
             c = sub['asr'].fillna(asr_min + (asr_max - asr_min) / 2).values
             attack_types = sub['attack_type'].values if 'attack_type' in sub.columns else [''] * len(x)
-            sc = ax.scatter(x, y, c=c, cmap='Blues', vmin=asr_min, vmax=asr_max,
-                            marker=ARCH_MARKERS.get(arch, 'o'), s=80, edgecolors='none')
+            ax.scatter(x, y, c=c, cmap='Blues', vmin=asr_min, vmax=asr_max,
+                       marker=ARCH_MARKERS.get(arch, 'o'), s=80, edgecolors='none', zorder=2.5)
             for xi, yi, at in zip(x, y, attack_types):
                 num = method_to_num.get(at, '')
                 if num:
                     ax.annotate(str(num), (xi, yi), fontsize=5, ha='center', va='center',
-                               color='gray', alpha=0.8)
+                               color='gray', alpha=0.8, zorder=3)
         ax.set_xlabel(x_label)
         ax.set_ylabel('Transfer Rate')
         ax.set_title(f'CIFAR-10: {x_label} vs Transfer (shape=arch, color=ASR)')
@@ -632,7 +896,9 @@ def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
         ('stealth_tpr_avg', LABEL_STEALTH_TPR, 'tpr'),
     ]
     if 'S_stealth' in combined.columns:
-        plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
+        plot_cols.append(('S_stealth', 'S_stealth (NC, AUC)', 's_stealth_auc'))
+    if 'S_stealth_tpr' in combined.columns:
+        plot_cols.append(('S_stealth_tpr', 'S_stealth (NC, TPR)', 's_stealth_tpr'))
 
     for at in ATTACK_TYPE_ORDER:
         sub = combined[combined['attack_type'] == at]
@@ -643,6 +909,7 @@ def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
             if sub2.empty:
                 continue
             fig, ax = plt.subplots(figsize=(8, 6))
+            add_method_parallelograms(ax, sub2, x_col, 'transfer_rate')
             for arch in ARCHS:
                 if arch not in found:
                     continue
@@ -652,7 +919,7 @@ def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
                 c = s['asr'].fillna(asr_min + (asr_max - asr_min) / 2).values
                 ax.scatter(s[x_col], s['transfer_rate'], c=c, cmap='Blues',
                            vmin=asr_min, vmax=asr_max, marker=ARCH_MARKERS.get(arch, 'o'),
-                           s=80, edgecolors='none')
+                           s=80, edgecolors='none', zorder=2.5)
             ax.set_xlabel(x_label)
             ax.set_ylabel('Transfer Rate')
             ax.set_title(f'{at}: {x_label} vs Transfer (shape=arch, color=ASR)')
@@ -685,7 +952,9 @@ def _plot_scatter_combined_bubble(combined, found, output_dir):
         ('stealth_tpr_avg', LABEL_STEALTH_TPR, 'tpr'),
     ]
     if 'S_stealth' in combined.columns:
-        plot_cols.append(('S_stealth', 'S_stealth (NC)', 's_stealth'))
+        plot_cols.append(('S_stealth', 'S_stealth (NC, AUC)', 's_stealth_auc'))
+    if 'S_stealth_tpr' in combined.columns:
+        plot_cols.append(('S_stealth_tpr', 'S_stealth (NC, TPR)', 's_stealth_tpr'))
 
     combined_b = combined.copy()
     if 'asr' in combined_b.columns and combined_b['asr'].fillna(0).max() > 1.5:
@@ -705,6 +974,7 @@ def _plot_scatter_combined_bubble(combined, found, output_dir):
             continue
         fig, ax = plt.subplots(figsize=(11, 8))
         fig.subplots_adjust(right=0.75)
+        add_method_parallelograms(ax, sub, x_col, 'transfer_rate')
         for at in ATTACK_TYPE_ORDER:
             for arch in ARCHS:
                 if arch not in found:
@@ -716,7 +986,7 @@ def _plot_scatter_combined_bubble(combined, found, output_dir):
                 n = len(s)
                 ax.scatter(s[x_col], s['transfer_rate'],
                            c=[method_to_color[at]] * n, marker=ARCH_MARKERS.get(arch, 'o'),
-                           s=sizes, alpha=0.7, edgecolors='gray', linewidths=0.5)
+                           s=sizes, alpha=0.7, edgecolors='gray', linewidths=0.5, zorder=2.5)
         ax.set_xlabel(x_label)
         ax.set_ylabel('Transfer Rate')
         ax.set_title(f'CIFAR-10: {x_label} vs Transfer (size=ASR, color=method, shape=arch)')
@@ -790,6 +1060,8 @@ def main() -> None:
     parser.add_argument('--line-plot', action='store_true', help='折线图(每个方法一张)')
     parser.add_argument('--combined-scatter', action='store_true',
                         help='整体散点图：合并所有arch，形状=arch，颜色=ASR')
+    parser.add_argument('--combined-box', action='store_true',
+                        help='整体箱线图：合并所有arch，按attack_type分组')
     parser.add_argument('--all-plots', action='store_true', help='生成所有类型的图')
     args = parser.parse_args()
 
@@ -837,17 +1109,21 @@ def main() -> None:
     do_box_trigger = args.box_trigger
     do_line = args.line_plot
     do_combined = args.combined_scatter
+    do_combined_box = args.combined_box
 
     if args.all_plots:
         do_corr = do_violin = do_pareto = do_box = do_bar = True
-        do_3d = do_box_poison = do_box_trigger = do_line = do_combined = True
-    elif not any([do_corr, do_violin, do_pareto, do_box, do_bar, do_3d, do_box_poison, do_box_trigger, do_line, do_combined]):
+        do_3d = do_box_poison = do_box_trigger = do_line = do_combined = do_combined_box = True
+    elif not any([do_corr, do_violin, do_pareto, do_box, do_bar, do_3d, do_box_poison, do_box_trigger, do_line, do_combined, do_combined_box]):
         do_corr = do_violin = do_pareto = do_box = do_bar = True
-        do_3d = do_box_poison = do_box_trigger = do_line = do_combined = True
+        do_3d = do_box_poison = do_box_trigger = do_line = do_combined = do_combined_box = True
 
     if do_combined and len(discover_arch_csvs(data_dir, suffix=suffix)) >= 2:
         os.makedirs(output_dir, exist_ok=True)
         plot_scatter_combined_all_archs(data_dir, output_dir, suffix=suffix)
+    if do_combined_box and len(discover_arch_csvs(data_dir, suffix=suffix)) >= 2:
+        os.makedirs(output_dir, exist_ok=True)
+        plot_box_by_attack_type_combined_all_archs(data_dir, output_dir, suffix=suffix)
 
     print(f"将分析 {len(to_analyze)} 个模型: {[a for a, _ in to_analyze]}")
     for arch, csv_path in to_analyze:

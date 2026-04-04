@@ -16,25 +16,27 @@ from torchvision.utils import save_image
 from PIL import Image
 import torchvision.transforms as transforms
 from torchvision import transforms as T
+from torchvision.utils import save_image
 
 
 def generate_belt_trigger(size, alpha=1.0):
     """
-    生成与原始 BELT 代码一致的触发器
-    
+    生成 BELT 触发器（二值 mask + 随机 pattern）
+
     Args:
         size: 图像尺寸 (H=W)
-        alpha: 触发器透明度/强度，BELT 强制使用 1.0
-        
+        alpha: 保留参数，仅用于向后兼容；mask 始终为二值 0/1，
+               强度由 poison_generator / poison_transform 的 alpha 控制
+
     Returns:
-        mask: np.ndarray [size, size, 3], 触发器掩码，[2:8, 2:8] 区域为 alpha，其余为 0
+        mask: np.ndarray [size, size, 3], 二值掩码，[2:8, 2:8] 区域为 1，其余为 0
         pattern: np.ndarray [size, size, 3], 触发器图案，随机 RGB 值 [0, 255]
     """
     pattern_x, pattern_y = 2, 8
     mask = np.zeros([size, size, 3])
-    mask[pattern_x:pattern_y, pattern_x:pattern_y, :] = 1 * alpha
-    
-    np.random.seed(0)  # 固定种子，确保可复现
+    mask[pattern_x:pattern_y, pattern_x:pattern_y, :] = 1.0
+
+    np.random.seed(0)
     pattern = np.random.rand(size, size, 3)
     pattern = np.round(pattern * 255.)
     return mask, pattern
@@ -129,8 +131,7 @@ class poison_generator():
         self.target_class = target_class
         self.trigger_mark = trigger_mark  # 触发器图案（pattern），要添加到图像上的内容 tensor [C, H, W]
         self.trigger_mask = trigger_mask  # 触发器掩码（mask），指示哪些像素位置应该应用触发器 tensor [H, W]
-        # 【重要】BELT 强制 alpha=1.0（与原始 BELT 代码一致）
-        self.alpha = 1.0  # 强制为 1.0
+        self.alpha = alpha
         self.cover_rate = cover_rate  # cover samples 占投毒样本的比例
         self.mask_rate = mask_rate  # cover samples 的 mask 比例（部分触发器）
 
@@ -281,9 +282,7 @@ class poison_generator():
             
             if i in full_poison_indices_set:
                 # 完整投毒样本（pmark=1）
-                # 原始代码：dataset.data[i] = dataset.data[i] * (1 - mask) + pattern * mask
-                # 注意：原始代码中 dataset.data 是 [0, 255] 的 numpy array，pattern 也是 [0, 255]
-                # 我们的代码中 img 是 [0, 1] 的 tensor，pattern_np 也应该是 [0, 1]
+                # BELT 的 data_transform 不含 Normalize，img 始终在 [0, 1] 空间
                 gt = self.target_class
                 
                 # 【关键检查】如果图像已经归一化（值可能是负值），需要先反归一化
@@ -298,22 +297,22 @@ class poison_generator():
                     std = torch.tensor([0.247, 0.243, 0.261]).view(3, 1, 1)
                     img = img * std + mean  # 反归一化
                     img = torch.clamp(img, 0.0, 1.0)  # 限制到 [0, 1]
-                
+
                 img_np = img.permute(1, 2, 0).cpu().numpy()  # [C, H, W] -> [H, W, C]，值在 [0, 1]
                 
-                # 原始公式：img = img * (1 - mask) + pattern * mask
-                # 注意：mask_np 的值是 0 或 1（二值化），因为 alpha 被强制为 1.0
-                img_np = img_np * (1 - self.mask_np) + self.pattern_np * self.mask_np
+                # 原始 BELT：img = img * (1 - mask) + pattern * mask（mask∈{0,1}）
+                # 带强度时保持同一结构，仅缩放 pattern：img * (1 - mask) + alpha * pattern * mask
+                # mask=1 处结果为 alpha*pattern（整块替换为缩放后的 pattern）；与
+                # img + alpha*mask*(pattern-img) 在 alpha<1 时不相同（后者是向 pattern 插值、仍含原图）。
+                img_np = img_np * (1.0 - self.mask_np) + self.alpha * self.pattern_np * self.mask_np
                 
                 img = torch.from_numpy(img_np).permute(2, 0, 1).float()  # [H, W, C] -> [C, H, W]
-                
-                # 确保值在 [0, 1] 范围内
                 img = torch.clamp(img, 0.0, 1.0)
                 
                 pmark_set.append(1)
             elif i in cover_indices_set:
                 # Cover 样本（pmark=2，部分 mask）
-                # 原始代码：dataset.data[i] = dataset.data[i] * (1 - mask) + self.pattern * mask
+                # BELT 的 data_transform 不含 Normalize，img 始终在 [0, 1] 空间
                 partial_mask = self.mask_mask(self.mask_rate)  # 返回 [H, W, 3] numpy array
                 
                 # 【关键检查】如果图像已经归一化，需要先反归一化
@@ -328,10 +327,9 @@ class poison_generator():
                     img = torch.clamp(img, 0.0, 1.0)  # 限制到 [0, 1]
                 
                 img_np = img.permute(1, 2, 0).cpu().numpy()  # [C, H, W] -> [H, W, C]，值在 [0, 1]
-                
                 # 原始公式：img = img * (1 - mask) + pattern * mask
                 # 注意：partial_mask 的值是 0 或 1（二值化），因为 alpha 被强制为 1.0
-                img_np = img_np * (1 - partial_mask) + self.pattern_np * partial_mask
+                img_np = img_np * (1.0 - partial_mask) + self.alpha * self.pattern_np * partial_mask
                 
                 img = torch.from_numpy(img_np).permute(2, 0, 1).float()  # [H, W, C] -> [C, H, W]
                 
@@ -369,8 +367,7 @@ class poison_transform():
         self.target_class = target_class
         self.trigger_mark = trigger_mark
         self.trigger_mask = trigger_mask
-        # 【重要】BELT 强制 alpha=1.0（与原始 BELT 代码一致）
-        self.alpha = 1.0  # 强制为 1.0
+        self.alpha = alpha
         # 归一化参数（支持不同数据集）
         self.mean = mean
         self.std = std
@@ -387,10 +384,11 @@ class poison_transform():
         data = data * std + mean  # 反归一化
         data = torch.clamp(data, 0.0, 1.0)
         
-        # 在[0,1]空间添加触发器
+        # 在[0,1]空间添加触发器（与投毒生成同一式）
+        # data * (1 - mask) + alpha * mark * mask；alpha=1 时同原始 BELT
         trigger_mask = self.trigger_mask.to(device=device, dtype=dtype).unsqueeze(0).unsqueeze(0)  # [H, W] -> [1, 1, H, W]
         trigger_mark = self.trigger_mark.to(device=device, dtype=dtype).unsqueeze(0)  # [C, H, W] -> [1, C, H, W]
-        data = data + self.alpha * trigger_mask * (trigger_mark - data)
+        data = data * (1.0 - trigger_mask) + self.alpha * trigger_mark * trigger_mask
         data = torch.clamp(data, 0.0, 1.0)
         
         # 重新归一化

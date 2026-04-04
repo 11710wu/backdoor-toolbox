@@ -66,7 +66,7 @@ trigger_default = {
         'bpp': 'none',
         'WB': 'none',
         'upgd': 'none',
-        'belt': 'badnet_patch_32.png',  # BELT 使用默认 BadNet 触发器
+        'belt': 'none',  # BELT 内部自己生成 trigger，不使用外部文件
     },
     'gtsrb': {
         'none' : 'none',
@@ -90,7 +90,7 @@ trigger_default = {
         'SRA': 'phoenix_corner_32.png',
         'trojan': 'trojan_square_32.png',
         'upgd': 'none',
-        'belt': 'badnet_patch_32.png',  # BELT 使用默认 BadNet 触发器
+        'belt': 'none',  # BELT 内部自己生成 trigger，不使用外部文件
     },
     'imagenet': {
         'none': 'none',
@@ -114,7 +114,7 @@ trigger_default = {
         'SIG' : 'none',
         'WaNet': 'none',
         'upgd': 'none',
-        'belt': 'badnet_patch_64.png',  # BELT 使用默认 BadNet 触发器（64×64）
+        'belt': 'none',  # BELT 内部自己生成 trigger，不使用外部文件
     },
     # ========== [Tiny ImageNet 支持] 结束 ==========
     # ========== [MNIST 支持] 添加触发器配置 ==========
@@ -131,7 +131,7 @@ trigger_default = {
         'SIG' : 'none',
         'WaNet': 'none',
         'upgd': 'none',
-        'belt': 'badnet_patch_28.png',  # BELT 使用默认 BadNet 触发器（28×28）
+        'belt': 'none',  # BELT 内部自己生成 trigger，不使用外部文件
     },
     # ========== [MNIST 支持] 结束 ==========
     # ========== [MNIST-M 支持] 添加触发器配置 ==========
@@ -147,7 +147,7 @@ trigger_default = {
         'SIG' : 'none',
         'WaNet': 'none',
         'upgd': 'none',
-        'belt': 'badnet_patch_28.png',  # BELT 使用默认 BadNet 触发器（28×28）
+        'belt': 'none',  # BELT 内部自己生成 trigger，不使用外部文件
     },
     # ========== [MNIST-M 支持] 结束 ==========
 }

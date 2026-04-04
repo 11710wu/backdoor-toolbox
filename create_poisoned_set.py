@@ -304,17 +304,10 @@ trigger_transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-# Create poisoned dataset directory for current setting
+# Create poisoned dataset directory for current setting（已存在则直接覆盖同名产物，可与模型权重同目录）
 poison_set_dir = supervisor.get_poison_set_dir(args)
-# poison_set_img_dir = os.path.join(poison_set_dir, 'data')
-
-if os.path.exists(poison_set_dir):
-    print(f"Poisoned set directory '{poison_set_dir}' to be created is not empty! Exiting...")
-    exit()
-if not os.path.exists(poison_set_dir):
-    os.mkdir(poison_set_dir)
-# if not os.path.exists(poison_set_img_dir):
-#     os.mkdir(poison_set_img_dir)
+os.makedirs(poison_set_dir, exist_ok=True)
+print(f"[Poisoned set] {poison_set_dir}（同配置下已存在的张量与索引文件将被覆盖）")
 
 
 
@@ -375,23 +368,18 @@ if args.poison_type in ['basic', 'badnet', 'blend', 'clean_label', 'refool',
     elif args.poison_type == 'belt':
         # ========== [BELT 支持] 开始 ==========
         # BELT (Backdoor Exclusivity Lifting Technique)
-        # 使用与原始 BELT 代码一致的触发器生成方式
-        # 【重要】BELT 强制 alpha=1.0（与原始 BELT 代码一致）
         from poison_tool_box import belt
         import numpy as np
         
-        # BELT 强制 alpha=1.0，忽略用户输入的 alpha 参数
-        belt_alpha = 1.0
+        belt_alpha = alpha  # 使用用户指定的 alpha（命令行 -alpha 参数）
         
-        # 使用公共函数生成触发器（与原始 BELT 代码一致）
-        belt_mask_np, belt_pattern_np = belt.generate_belt_trigger(img_size, alpha=belt_alpha)
+        belt_mask_np, belt_pattern_np = belt.generate_belt_trigger(img_size)
         
-        # 验证触发器生成
-        assert belt_mask_np.shape == (img_size, img_size, 3), f"mask shape错误: {belt_mask_np.shape}"
-        assert belt_pattern_np.shape == (img_size, img_size, 3), f"pattern shape错误: {belt_pattern_np.shape}"
-        assert belt_pattern_np.min() >= 0 and belt_pattern_np.max() <= 255, f"pattern值范围错误: [{belt_pattern_np.min()}, {belt_pattern_np.max()}]"
-        assert np.all(belt_mask_np[2:8, 2:8, :] == belt_alpha), f"mask区域值错误: 应该是{belt_alpha}"
-        assert np.all(belt_mask_np[:2, :, :] == 0) and np.all(belt_mask_np[8:, :, :] == 0), "mask非触发区域应该为0"
+        assert belt_mask_np.shape == (img_size, img_size, 3)
+        assert belt_pattern_np.shape == (img_size, img_size, 3)
+        assert belt_pattern_np.min() >= 0 and belt_pattern_np.max() <= 255
+        assert np.all(belt_mask_np[2:8, 2:8, :] == 1.0), "mask 触发区域应为二值 1"
+        assert np.all(belt_mask_np[:2, :, :] == 0) and np.all(belt_mask_np[8:, :, :] == 0)
         
         # 转换为 torch tensor（与代码库格式一致）
         # mask: [H, W, 3] -> [H, W] (单通道，因为三个通道值相同)

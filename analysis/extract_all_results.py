@@ -3,9 +3,12 @@
 
 两种模式 (--mode)：
   no_nc: 仅提取隐蔽性(TPR/AUC)、迁移性、ASR，不提取 NC
-  nc:    提取隐蔽性、迁移性、ASR、NC，并计算 S_stealth 综合隐蔽性
-         S_stealth = 0.8 * (1/4)*Σ(1-AUC_i) + 0.2 * norm(MaxNorm)
-         is_poisoned=False 时 NC 加权项为 0
+  nc:    提取隐蔽性、迁移性、ASR、NC，并计算综合隐蔽性 S（AUC 与 TPR 两套）
+         NC 项（仅 is_poisoned=True）：在当次全量结果上对 MaxNorm min-max 后取反再乘 0.2，
+           nc_part = 0.2 * (max - val) / (max - min)，异常指数越大 NC 贡献越小（与「越大越易感」一致）
+         S_stealth     = 0.8 * stealth_auc_avg + nc_part
+         S_stealth_tpr = 0.8 * stealth_tpr_avg + nc_part
+         is_poisoned=False 时 nc_part = 0
 
 输出：data_{dataset}_{arch}_{suffix}.csv/json
   no_nc -> _no_nc,  nc -> _nc
@@ -227,30 +230,31 @@ def extract_folder_results(folder: Path, params: Dict[str, Any], include_nc: boo
 
 
 def compute_s_stealth(all_results: List[Dict[str, Any]]) -> None:
-    """为 nc 模式计算 S_stealth，就地修改 all_results。
-    S_stealth = 0.8 * (1/4)*Σ(1-AUC_i) + 0.2 * (MaxNorm-min)/(max-min)
-    is_poisoned=False 时，将 max_norm 视为最小值（归一化后为 0）。
+    """为 nc 模式计算 S_stealth（AUC 版）与 S_stealth_tpr（TPR 版），就地修改 all_results。
+    min/max 仅对 is_poisoned=True 且指数有效的行统计；nc_part = 0.2 * (max - val) / (max - min)。
+    is_poisoned=False 时 nc_part = 0。
     """
     max_norms = [r['nc_max_anomaly_index'] for r in all_results
                  if r.get('nc_is_poisoned') and r.get('nc_max_anomaly_index') is not None]
-    max_norm_min = min(max_norms) if max_norms else 0.0
     max_norm_max = max(max_norms) if max_norms else 1.0
+    max_norm_min = min(max_norms) if max_norms else 0.0
     denom = max_norm_max - max_norm_min if max_norm_max > max_norm_min else 1.0
 
     for r in all_results:
         auc_part = 0.8 * (r.get('stealth_auc_avg') or 0.0)
-        # is_poisoned=False 时，max_norm 视为最小值
+        tpr_part = 0.8 * (r.get('stealth_tpr_avg') or 0.0)
         if r.get('nc_is_poisoned') and r.get('nc_max_anomaly_index') is not None:
-            norm_val = r['nc_max_anomaly_index']
+            val = r['nc_max_anomaly_index']
+            nc_part = 0.2 * (max_norm_max - val) / denom
         else:
-            norm_val = max_norm_min
-        nc_part = 0.2 * (norm_val - max_norm_min) / denom
+            nc_part = 0.0
         r['S_stealth'] = auc_part + nc_part
+        r['S_stealth_tpr'] = tpr_part + nc_part
 
 
 def convert_to_data_groups(all_results: List[Dict[str, Any]], include_nc: bool = True) -> List[Dict[str, Any]]:
     base_keys = ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'asr', 'test_param_value', 'test_param_type', 'cover_rate']
-    nc_keys = ['nc_max_anomaly_index', 'nc_is_poisoned', 'S_stealth'] if include_nc else []
+    nc_keys = ['nc_max_anomaly_index', 'nc_is_poisoned', 'S_stealth', 'S_stealth_tpr'] if include_nc else []
     point_keys = base_keys + nc_keys
 
     groups_dict: Dict[tuple, List] = {}
@@ -269,7 +273,7 @@ def convert_to_data_groups(all_results: List[Dict[str, Any]], include_nc: bool =
 def export_csv(groups: List[Dict], path: Path, dataset: str = "", arch: str = "", include_nc: bool = True):
     base_fn = ["dataset", "arch", "group_id", "point_id", "attack_type", "trigger_type", "poison_rate", "train_param_value",
                "test_param_type", "test_param_value", "stealth_tpr_avg", "stealth_auc_avg", "transfer_rate", "asr", "cover_rate"]
-    nc_fn = ["nc_max_anomaly_index", "nc_is_poisoned", "S_stealth"] if include_nc else []
+    nc_fn = ["nc_max_anomaly_index", "nc_is_poisoned", "S_stealth", "S_stealth_tpr"] if include_nc else []
     fn = base_fn + nc_fn
 
     def fmt(v):
@@ -293,6 +297,7 @@ def export_csv(groups: List[Dict], path: Path, dataset: str = "", arch: str = ""
                     row["nc_max_anomaly_index"] = p.get("nc_max_anomaly_index")
                     row["nc_is_poisoned"] = p.get("nc_is_poisoned")
                     row["S_stealth"] = p.get("S_stealth")
+                    row["S_stealth_tpr"] = p.get("S_stealth_tpr")
                 w.writerow({k: fmt(v) for k, v in row.items()})
 
 

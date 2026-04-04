@@ -22,7 +22,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.591102123260498,
           "nc_is_poisoned": false,
-          "S_stealth": 0.422086518320247
+          "S_stealth": 0.422086518320247,
+          "S_stealth_tpr": 0.710277380952381
         }
       ]
     },
@@ -46,7 +47,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.6276333332061768,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3466366566016353
+          "S_stealth": 0.3466366566016353,
+          "S_stealth_tpr": 0.5943309859154929
         }
       ]
     },
@@ -70,7 +72,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.959134578704834,
           "nc_is_poisoned": false,
-          "S_stealth": 0.41217991663434184
+          "S_stealth": 0.41217991663434184,
+          "S_stealth_tpr": 0.6611439873417722
         }
       ]
     },
@@ -94,7 +97,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.1935786008834839,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3338820895021728
+          "S_stealth": 0.3338820895021728,
+          "S_stealth_tpr": 0.4676171291624622
         }
       ]
     },
@@ -118,7 +122,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.8019535541534424,
           "nc_is_poisoned": false,
-          "S_stealth": 0.41033978178455216
+          "S_stealth": 0.41033978178455216,
+          "S_stealth_tpr": 0.5049722232455333
         }
       ]
     },
@@ -142,7 +147,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.446581840515137,
           "nc_is_poisoned": false,
-          "S_stealth": 0.41553463990816475
+          "S_stealth": 0.41553463990816475,
+          "S_stealth_tpr": 0.644508040201005
         }
       ]
     },
@@ -166,7 +172,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7093666791915894,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4496452699177133
+          "S_stealth": 0.4496452699177133,
+          "S_stealth_tpr": 0.5378218103203857
         }
       ]
     },
@@ -190,7 +197,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.394678592681885,
           "nc_is_poisoned": false,
-          "S_stealth": 0.35398298889248025
+          "S_stealth": 0.35398298889248025,
+          "S_stealth_tpr": 0.6302520408163266
         }
       ]
     },
@@ -214,7 +222,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7763475179672241,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3702370030279803
+          "S_stealth": 0.3702370030279803,
+          "S_stealth_tpr": 0.673199358974359
         }
       ]
     },
@@ -238,7 +247,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.526753902435303,
           "nc_is_poisoned": true,
-          "S_stealth": 0.37556211764278946
+          "S_stealth": 0.37556211764278946,
+          "S_stealth_tpr": 0.5723961273693152
         }
       ]
     },
@@ -262,7 +272,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.69638729095459,
           "nc_is_poisoned": false,
-          "S_stealth": 0.40053417346033293
+          "S_stealth": 0.40053417346033293,
+          "S_stealth_tpr": 0.6391895795246801
         }
       ]
     },
@@ -286,7 +297,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 7.312988758087158,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4517098125152979
+          "S_stealth": 0.4517098125152979,
+          "S_stealth_tpr": 0.6449816029013642
         }
       ]
     },
@@ -310,7 +322,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.722630023956299,
           "nc_is_poisoned": false,
-          "S_stealth": 0.225207808771419
+          "S_stealth": 0.225207808771419,
+          "S_stealth_tpr": 0.3831432415656492
         }
       ]
     },
@@ -334,7 +347,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.3482203483581543,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4583622614274012
+          "S_stealth": 0.4583622614274012,
+          "S_stealth_tpr": 0.6576934383483355
         }
       ]
     },
@@ -358,7 +372,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.4305856227874756,
           "nc_is_poisoned": false,
-          "S_stealth": 0.42629067286250744
+          "S_stealth": 0.42629067286250744,
+          "S_stealth_tpr": 0.660613888888889
         }
       ]
     },
@@ -382,7 +397,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.0295350551605225,
           "nc_is_poisoned": false,
-          "S_stealth": 0.39368621563917827
+          "S_stealth": 0.39368621563917827,
+          "S_stealth_tpr": 0.6026854304635763
         }
       ]
     },
@@ -406,7 +422,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.9218947887420654,
           "nc_is_poisoned": false,
-          "S_stealth": 0.397295806945656
+          "S_stealth": 0.397295806945656,
+          "S_stealth_tpr": 0.49582811534500515
         }
       ]
     },
@@ -430,7 +447,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.2687519788742065,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3270035750626346
+          "S_stealth": 0.3270035750626346,
+          "S_stealth_tpr": 0.48815775862068966
         }
       ]
     },
@@ -454,7 +472,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.6558146476745605,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3278030310998256
+          "S_stealth": 0.3278030310998256,
+          "S_stealth_tpr": 0.4880006894390473
         }
       ]
     },
@@ -478,7 +497,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 5.468559741973877,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2895467469304531
+          "S_stealth": 0.2895467469304531,
+          "S_stealth_tpr": 0.44988288075560806
         }
       ]
     },
@@ -502,7 +522,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.9639968872070312,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3033046380815705
+          "S_stealth": 0.3033046380815705,
+          "S_stealth_tpr": 0.4535105620876528
         }
       ]
     },
@@ -526,7 +547,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.141026258468628,
           "nc_is_poisoned": false,
-          "S_stealth": 0.35240011648015657
+          "S_stealth": 0.35240011648015657,
+          "S_stealth_tpr": 0.6105106796116506
         }
       ]
     },
@@ -550,7 +572,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 4.043642997741699,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4449105838292893
+          "S_stealth": 0.4449105838292893,
+          "S_stealth_tpr": 0.5230856267029973
         }
       ]
     },
@@ -574,7 +597,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.3603880405426025,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3833763956694567
+          "S_stealth": 0.3833763956694567,
+          "S_stealth_tpr": 0.6525399842271293
         }
       ]
     },
@@ -598,7 +622,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 4.264884948730469,
           "nc_is_poisoned": false,
-          "S_stealth": 0.39644119219535945
+          "S_stealth": 0.39644119219535945,
+          "S_stealth_tpr": 0.6694334602368867
         }
       ]
     },
@@ -622,7 +647,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 7.458046913146973,
           "nc_is_poisoned": false,
-          "S_stealth": 0.356362624003989
+          "S_stealth": 0.356362624003989,
+          "S_stealth_tpr": 0.6347858012170386
         }
       ]
     },
@@ -646,7 +672,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 6.430558204650879,
           "nc_is_poisoned": false,
-          "S_stealth": 0.41413956179927836
+          "S_stealth": 0.41413956179927836,
+          "S_stealth_tpr": 0.6402891411520498
         }
       ]
     },
@@ -670,7 +697,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.4883084297180176,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3895751543037802
+          "S_stealth": 0.3895751543037802,
+          "S_stealth_tpr": 0.6508080596191003
         }
       ]
     },
@@ -694,7 +722,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.048591375350952,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3534381711013139
+          "S_stealth": 0.3534381711013139,
+          "S_stealth_tpr": 0.4197673218598795
         }
       ]
     },
@@ -718,7 +747,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 3.200089693069458,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4092925164612877
+          "S_stealth": 0.4092925164612877,
+          "S_stealth_tpr": 0.6466378865979382
         }
       ]
     },
@@ -742,7 +772,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 13.615730285644531,
           "nc_is_poisoned": false,
-          "S_stealth": 0.381589227067757
+          "S_stealth": 0.381589227067757,
+          "S_stealth_tpr": 0.6665869402985075
         }
       ]
     },
@@ -766,7 +797,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 4.1865763664245605,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4541961954092056
+          "S_stealth": 0.4541961954092056,
+          "S_stealth_tpr": 0.6823505636472408
         }
       ]
     },
@@ -790,7 +822,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 2.362959146499634,
           "nc_is_poisoned": false,
-          "S_stealth": 0.38005984079780086
+          "S_stealth": 0.38005984079780086,
+          "S_stealth_tpr": 0.6307439639222943
         }
       ]
     },
@@ -814,7 +847,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.8124498128890991,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4117547417196383
+          "S_stealth": 0.4117547417196383,
+          "S_stealth_tpr": 0.4379743293678564
         }
       ]
     },
@@ -838,7 +872,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.931941270828247,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3016446614243273
+          "S_stealth": 0.3016446614243273,
+          "S_stealth_tpr": 0.4963231765134939
         }
       ]
     },
@@ -862,7 +897,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.2583521604537964,
           "nc_is_poisoned": false,
-          "S_stealth": 0.33675444817774525
+          "S_stealth": 0.33675444817774525,
+          "S_stealth_tpr": 0.5522637137452712
         }
       ]
     },
@@ -886,7 +922,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.7157981395721436,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2933288372849301
+          "S_stealth": 0.2933288372849301,
+          "S_stealth_tpr": 0.38147951003030744
         }
       ]
     },
@@ -910,7 +947,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 2.291398763656616,
           "nc_is_poisoned": false,
-          "S_stealth": 0.43435881388840036
+          "S_stealth": 0.43435881388840036,
+          "S_stealth_tpr": 0.6091756534365924
         }
       ]
     },
@@ -934,7 +972,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 2.324960470199585,
           "nc_is_poisoned": false,
-          "S_stealth": 0.36543011854060814
+          "S_stealth": 0.36543011854060814,
+          "S_stealth_tpr": 0.5193288514195129
         }
       ]
     },
@@ -958,7 +997,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 1.7040488719940186,
           "nc_is_poisoned": false,
-          "S_stealth": 0.27968176970949526
+          "S_stealth": 0.27968176970949526,
+          "S_stealth_tpr": 0.43865322279643987
         }
       ]
     },
@@ -982,7 +1022,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 8.987974166870117,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4518714244070555
+          "S_stealth": 0.4518714244070555,
+          "S_stealth_tpr": 0.6278314107447998
         }
       ]
     },
@@ -1006,7 +1047,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 2.0298240184783936,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2733531823344945
+          "S_stealth": 0.2733531823344945,
+          "S_stealth_tpr": 0.4945846696441232
         }
       ]
     },
@@ -1030,7 +1072,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 5.1080756187438965,
           "nc_is_poisoned": false,
-          "S_stealth": 0.30382617705595316
+          "S_stealth": 0.30382617705595316,
+          "S_stealth_tpr": 0.47137271689497723
         }
       ]
     },
@@ -1054,7 +1097,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 3.171616792678833,
           "nc_is_poisoned": false,
-          "S_stealth": 0.22879532248079526
+          "S_stealth": 0.22879532248079526,
+          "S_stealth_tpr": 0.42343619489559164
         }
       ]
     },
@@ -1078,7 +1122,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 2.6160902976989746,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3345516006349229
+          "S_stealth": 0.3345516006349229,
+          "S_stealth_tpr": 0.4848883552539528
         }
       ]
     },
@@ -1102,7 +1147,8 @@
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 3.005892753601074,
           "nc_is_poisoned": false,
-          "S_stealth": 0.42393703279125483
+          "S_stealth": 0.42393703279125483,
+          "S_stealth_tpr": 0.6769222222222222
         }
       ]
     },
@@ -1126,7 +1172,8 @@
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 4.644017696380615,
           "nc_is_poisoned": true,
-          "S_stealth": 0.43747482502569063
+          "S_stealth": 0.43747482502569063,
+          "S_stealth_tpr": 0.7035041070156302
         }
       ]
     },
@@ -1150,7 +1197,8 @@
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 1.426376223564148,
           "nc_is_poisoned": false,
-          "S_stealth": 0.43331949519119006
+          "S_stealth": 0.43331949519119006,
+          "S_stealth_tpr": 0.7036682642487047
         }
       ]
     },
@@ -1174,7 +1222,8 @@
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 2.8369221687316895,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3845694235844382
+          "S_stealth": 0.3845694235844382,
+          "S_stealth_tpr": 0.5923291396905789
         }
       ]
     },
@@ -1198,7 +1247,8 @@
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 1.6127231121063232,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2815932485924703
+          "S_stealth": 0.2815932485924703,
+          "S_stealth_tpr": 0.5348502852654209
         }
       ]
     },
@@ -1222,7 +1272,8 @@
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 0.8837913274765015,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3745316362755888
+          "S_stealth": 0.3745316362755888,
+          "S_stealth_tpr": 0.5264407480314961
         }
       ]
     },
@@ -1246,7 +1297,8 @@
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 1.9518718719482422,
           "nc_is_poisoned": false,
-          "S_stealth": 0.37683464098488284
+          "S_stealth": 0.37683464098488284,
+          "S_stealth_tpr": 0.49315965250965255
         }
       ]
     },
@@ -1270,7 +1322,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 5.473560333251953,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3612174560973558
+          "S_stealth": 0.3612174560973558,
+          "S_stealth_tpr": 0.6168541338582678
         }
       ]
     },
@@ -1294,7 +1347,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 5.048583030700684,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4769685257944756
+          "S_stealth": 0.4769685257944756,
+          "S_stealth_tpr": 0.732834954637054
         }
       ]
     },
@@ -1318,7 +1372,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 5.462274074554443,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4323455825992305
+          "S_stealth": 0.4323455825992305,
+          "S_stealth_tpr": 0.6392321111823758
         }
       ]
     },
@@ -1342,7 +1397,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.6029120683670044,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4005254227314833
+          "S_stealth": 0.4005254227314833,
+          "S_stealth_tpr": 0.6544460410557185
         }
       ]
     },
@@ -1366,7 +1422,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.5243263244628906,
           "nc_is_poisoned": false,
-          "S_stealth": 0.40325477271885735
+          "S_stealth": 0.40325477271885735,
+          "S_stealth_tpr": 0.6286149572649573
         }
       ]
     },
@@ -1390,7 +1447,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.2986364364624023,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2700412051610323
+          "S_stealth": 0.2700412051610323,
+          "S_stealth_tpr": 0.5182842668569391
         }
       ]
     },
@@ -1414,7 +1472,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.9201560020446777,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3718011617761292
+          "S_stealth": 0.3718011617761292,
+          "S_stealth_tpr": 0.6047407954972785
         }
       ]
     },
@@ -1438,7 +1497,8 @@
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 1.591325044631958,
           "nc_is_poisoned": false,
-          "S_stealth": 0.366050206006602
+          "S_stealth": 0.366050206006602,
+          "S_stealth_tpr": 0.6423589464882944
         }
       ]
     },
@@ -1462,7 +1522,8 @@
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 2.2908265590667725,
           "nc_is_poisoned": true,
-          "S_stealth": 0.33625595015375637
+          "S_stealth": 0.33625595015375637,
+          "S_stealth_tpr": 0.5641136281700725
         }
       ]
     },
@@ -1486,7 +1547,8 @@
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 1.8746851682662964,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3397901365258891
+          "S_stealth": 0.3397901365258891,
+          "S_stealth_tpr": 0.5905424114671164
         }
       ]
     },
@@ -1510,7 +1572,8 @@
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 1.5714571475982666,
           "nc_is_poisoned": false,
-          "S_stealth": 0.23186041531025153
+          "S_stealth": 0.23186041531025153,
+          "S_stealth_tpr": 0.3995056932648628
         }
       ]
     },
@@ -1534,7 +1597,8 @@
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 2.571876287460327,
           "nc_is_poisoned": true,
-          "S_stealth": 0.358702376167909
+          "S_stealth": 0.358702376167909,
+          "S_stealth_tpr": 0.5940885244738507
         }
       ]
     },
@@ -1558,7 +1622,8 @@
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 1.4439226388931274,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2656952550096356
+          "S_stealth": 0.2656952550096356,
+          "S_stealth_tpr": 0.3926170901932713
         }
       ]
     },
@@ -1582,7 +1647,8 @@
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 2.6277077198028564,
           "nc_is_poisoned": false,
-          "S_stealth": 0.1687338064599011
+          "S_stealth": 0.1687338064599011,
+          "S_stealth_tpr": 0.372378953279425
         }
       ]
     },
@@ -1606,7 +1672,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.4509822130203247,
           "nc_is_poisoned": false,
-          "S_stealth": 0.19409639762357475
+          "S_stealth": 0.19409639762357475,
+          "S_stealth_tpr": 0.31370449712393234
         }
       ]
     },
@@ -1630,7 +1697,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.9783209562301636,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3147920018987394
+          "S_stealth": 0.3147920018987394,
+          "S_stealth_tpr": 0.4247037630492838
         }
       ]
     },
@@ -1654,7 +1722,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.997351884841919,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3158460526078405
+          "S_stealth": 0.3158460526078405,
+          "S_stealth_tpr": 0.4971725818720242
         }
       ]
     },
@@ -1678,7 +1747,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.9131956100463867,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3812265673666897
+          "S_stealth": 0.3812265673666897,
+          "S_stealth_tpr": 0.49496932848279185
         }
       ]
     },
@@ -1702,7 +1772,8 @@
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 4.177517414093018,
           "nc_is_poisoned": true,
-          "S_stealth": 0.38070450149798807
+          "S_stealth": 0.38070450149798807,
+          "S_stealth_tpr": 0.5159441956663988
         }
       ]
     },
@@ -1726,7 +1797,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 2.20281982421875,
           "nc_is_poisoned": true,
-          "S_stealth": 0.38036885688361666
+          "S_stealth": 0.38036885688361666,
+          "S_stealth_tpr": 0.5108837539387574
         }
       ]
     },
@@ -1750,7 +1822,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 4.197139739990234,
           "nc_is_poisoned": true,
-          "S_stealth": 0.40437922410219457
+          "S_stealth": 0.40437922410219457,
+          "S_stealth_tpr": 0.5601433358967699
         }
       ]
     },
@@ -1774,7 +1847,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 4.959897994995117,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4318152749579584
+          "S_stealth": 0.4318152749579584,
+          "S_stealth_tpr": 0.5957520704401522
         }
       ]
     },
@@ -1798,7 +1872,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 2.819286584854126,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3934225214722818
+          "S_stealth": 0.3934225214722818,
+          "S_stealth_tpr": 0.535185430655877
         }
       ]
     },
@@ -1822,7 +1897,8 @@
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 3.158653497695923,
           "nc_is_poisoned": true,
-          "S_stealth": 0.41320326767203475
+          "S_stealth": 0.41320326767203475,
+          "S_stealth_tpr": 0.538656915973261
         }
       ]
     },
@@ -1846,7 +1922,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 4.422177791595459,
           "nc_is_poisoned": true,
-          "S_stealth": 0.32372572286820517
+          "S_stealth": 0.32372572286820517,
+          "S_stealth_tpr": 0.5081381724959424
         }
       ]
     },
@@ -1870,7 +1947,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 4.210085868835449,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3358590389154082
+          "S_stealth": 0.3358590389154082,
+          "S_stealth_tpr": 0.49944916839136455
         }
       ]
     },
@@ -1894,7 +1972,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 8.636204719543457,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3801723979362953
+          "S_stealth": 0.3801723979362953,
+          "S_stealth_tpr": 0.5624487339039972
         }
       ]
     },
@@ -1918,7 +1997,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 5.324593544006348,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3497325348879669
+          "S_stealth": 0.3497325348879669,
+          "S_stealth_tpr": 0.474813321608611
         }
       ]
     },
@@ -1942,7 +2022,8 @@
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 4.416513919830322,
           "nc_is_poisoned": true,
-          "S_stealth": 0.31156273924566585
+          "S_stealth": 0.31156273924566585,
+          "S_stealth_tpr": 0.44413753174314824
         }
       ]
     },
@@ -1966,7 +2047,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.9773532152175903,
           "nc_is_poisoned": false,
-          "S_stealth": 0.38579777424795836
+          "S_stealth": 0.38579777424795836,
+          "S_stealth_tpr": 0.6969626543209877
         }
       ]
     },
@@ -1990,7 +2072,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.678206920623779,
           "nc_is_poisoned": true,
-          "S_stealth": 0.13654163274514558
+          "S_stealth": 0.13654163274514558,
+          "S_stealth_tpr": 0.21324050646114284
         }
       ]
     },
@@ -2014,7 +2097,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.762878656387329,
           "nc_is_poisoned": true,
-          "S_stealth": 0.08820092854480421
+          "S_stealth": 0.08820092854480421,
+          "S_stealth_tpr": 0.1497910813691795
         }
       ]
     },
@@ -2038,7 +2122,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.6039323806762695,
           "nc_is_poisoned": true,
-          "S_stealth": 0.06441828098456437
+          "S_stealth": 0.06441828098456437,
+          "S_stealth_tpr": 0.11051700429877415
         }
       ]
     },
@@ -2062,7 +2147,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.382028102874756,
           "nc_is_poisoned": true,
-          "S_stealth": 0.08788901608600289
+          "S_stealth": 0.08788901608600289,
+          "S_stealth_tpr": 0.1035184304517186
         }
       ]
     },
@@ -2086,7 +2172,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.7080800533294678,
           "nc_is_poisoned": true,
-          "S_stealth": 0.05494318366354427
+          "S_stealth": 0.05494318366354427,
+          "S_stealth_tpr": 0.06906348150774881
         }
       ]
     },
@@ -2110,7 +2197,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.9930601119995117,
           "nc_is_poisoned": true,
-          "S_stealth": 0.07399038649031461
+          "S_stealth": 0.07399038649031461,
+          "S_stealth_tpr": 0.07439866321176569
         }
       ]
     },
@@ -2134,7 +2222,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.2872467041015625,
           "nc_is_poisoned": true,
-          "S_stealth": 0.07431885007521644
+          "S_stealth": 0.07431885007521644,
+          "S_stealth_tpr": 0.053898560377314574
         }
       ]
     },
@@ -2158,7 +2247,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.7901926040649414,
           "nc_is_poisoned": true,
-          "S_stealth": 0.06163053470804461
+          "S_stealth": 0.06163053470804461,
+          "S_stealth_tpr": 0.04089699816666681
         }
       ]
     },
@@ -2182,7 +2272,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7640557289123535,
           "nc_is_poisoned": false,
-          "S_stealth": 0.11232712652152071
+          "S_stealth": 0.11232712652152071,
+          "S_stealth_tpr": 0.23364511395799195
         }
       ]
     },
@@ -2206,7 +2297,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.721971035003662,
           "nc_is_poisoned": false,
-          "S_stealth": 0.07510625905874857
+          "S_stealth": 0.07510625905874857,
+          "S_stealth_tpr": 0.15804060542797496
         }
       ]
     },
@@ -2230,7 +2322,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.0346834659576416,
           "nc_is_poisoned": true,
-          "S_stealth": 0.0681335020137605
+          "S_stealth": 0.0681335020137605,
+          "S_stealth_tpr": 0.10428545413179496
         }
       ]
     },
@@ -2254,7 +2347,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.8467488288879395,
           "nc_is_poisoned": false,
-          "S_stealth": 0.05772113982101637
+          "S_stealth": 0.05772113982101637,
+          "S_stealth_tpr": 0.14005216529959688
         }
       ]
     },
@@ -2278,7 +2372,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.102596282958984,
           "nc_is_poisoned": true,
-          "S_stealth": 0.09010087356394983
+          "S_stealth": 0.09010087356394983,
+          "S_stealth_tpr": 0.15434480932302336
         }
       ]
     },
@@ -2302,7 +2397,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.192641258239746,
           "nc_is_poisoned": true,
-          "S_stealth": 0.06485852343548434
+          "S_stealth": 0.06485852343548434,
+          "S_stealth_tpr": 0.09314600789567026
         }
       ]
     },
@@ -2326,7 +2422,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.203880548477173,
           "nc_is_poisoned": true,
-          "S_stealth": 0.06333893589316299
+          "S_stealth": 0.06333893589316299,
+          "S_stealth_tpr": 0.10485638461083567
         }
       ]
     },
@@ -2350,7 +2447,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 6.792124271392822,
           "nc_is_poisoned": true,
-          "S_stealth": 0.14209020238335168
+          "S_stealth": 0.14209020238335168,
+          "S_stealth_tpr": 0.20080163287712316
         }
       ]
     },
@@ -2374,7 +2472,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 6.934935569763184,
           "nc_is_poisoned": true,
-          "S_stealth": 0.12673570462909087
+          "S_stealth": 0.12673570462909087,
+          "S_stealth_tpr": 0.12485950365955027
         }
       ]
     },
@@ -2398,7 +2497,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.240884780883789,
           "nc_is_poisoned": true,
-          "S_stealth": 0.10047058345737883
+          "S_stealth": 0.10047058345737883,
+          "S_stealth_tpr": 0.15924475537738525
         }
       ]
     },
@@ -2422,7 +2522,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.9693214893341064,
           "nc_is_poisoned": true,
-          "S_stealth": 0.07879581291726424
+          "S_stealth": 0.07879581291726424,
+          "S_stealth_tpr": 0.14988476545448717
         }
       ]
     },
@@ -2446,7 +2547,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 6.902410507202148,
           "nc_is_poisoned": true,
-          "S_stealth": 0.16059626047781742
+          "S_stealth": 0.16059626047781742,
+          "S_stealth_tpr": 0.22442783387690612
         }
       ]
     },
@@ -2470,7 +2572,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.606166362762451,
           "nc_is_poisoned": true,
-          "S_stealth": 0.06726286491939562
+          "S_stealth": 0.06726286491939562,
+          "S_stealth_tpr": 0.12746380319812095
         }
       ]
     },
@@ -2494,7 +2597,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 11.193161010742188,
           "nc_is_poisoned": true,
-          "S_stealth": 0.26476675150949025
+          "S_stealth": 0.26476675150949025,
+          "S_stealth_tpr": 0.3579183650771583
         }
       ]
     },
@@ -2518,7 +2622,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 8.296897888183594,
           "nc_is_poisoned": true,
-          "S_stealth": 0.19222638073015522
+          "S_stealth": 0.19222638073015522,
+          "S_stealth_tpr": 0.23865914329577856
         }
       ]
     },
@@ -2542,7 +2647,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.542738914489746,
           "nc_is_poisoned": false,
-          "S_stealth": 0.051817134639518786
+          "S_stealth": 0.051817134639518786,
+          "S_stealth_tpr": 0.11878444668427637
         }
       ]
     },
@@ -2566,7 +2672,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 5.786550521850586,
           "nc_is_poisoned": true,
-          "S_stealth": 0.12299452247420738
+          "S_stealth": 0.12299452247420738,
+          "S_stealth_tpr": 0.18967301682126908
         }
       ]
     },
@@ -2590,7 +2697,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.2091541290283203,
           "nc_is_poisoned": true,
-          "S_stealth": 0.040543050607673214
+          "S_stealth": 0.040543050607673214,
+          "S_stealth_tpr": 0.10776407869646892
         }
       ]
     },
@@ -2614,7 +2722,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 1.7417417764663696,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2183123936640337
+          "S_stealth": 0.2183123936640337,
+          "S_stealth_tpr": 0.4055870378857318
         }
       ]
     },
@@ -2638,7 +2747,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 2.273301839828491,
           "nc_is_poisoned": true,
-          "S_stealth": 0.21443240431024108
+          "S_stealth": 0.21443240431024108,
+          "S_stealth_tpr": 0.4038299871048655
         }
       ]
     },
@@ -2662,7 +2772,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 2.760823965072632,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2125213439361785
+          "S_stealth": 0.2125213439361785,
+          "S_stealth_tpr": 0.385099539369512
         }
       ]
     },
@@ -2686,7 +2797,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 2.1206207275390625,
           "nc_is_poisoned": false,
-          "S_stealth": 0.23324395833916478
+          "S_stealth": 0.23324395833916478,
+          "S_stealth_tpr": 0.4400233077459874
         }
       ]
     },
@@ -2710,7 +2822,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 1.6733357906341553,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3736767417815897
+          "S_stealth": 0.3736767417815897,
+          "S_stealth_tpr": 0.6122464056168786
         }
       ]
     },
@@ -2734,7 +2847,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 1.7702443599700928,
           "nc_is_poisoned": false,
-          "S_stealth": 0.20026652104356277
+          "S_stealth": 0.20026652104356277,
+          "S_stealth_tpr": 0.4691874372559956
         }
       ]
     },
@@ -2758,7 +2872,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 2.248897075653076,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3800983416352652
+          "S_stealth": 0.3800983416352652,
+          "S_stealth_tpr": 0.6526626769997546
         }
       ]
     },
@@ -2782,7 +2897,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 4.846864700317383,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4845963806857652
+          "S_stealth": 0.4845963806857652,
+          "S_stealth_tpr": 0.5104958509142054
         }
       ]
     },
@@ -2806,7 +2922,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 6.040882110595703,
           "nc_is_poisoned": true,
-          "S_stealth": 0.29826293446306584
+          "S_stealth": 0.29826293446306584,
+          "S_stealth_tpr": 0.47673155658481203
         }
       ]
     },
@@ -2830,7 +2947,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 2.2826344966888428,
           "nc_is_poisoned": false,
-          "S_stealth": 0.24502570511294763
+          "S_stealth": 0.24502570511294763,
+          "S_stealth_tpr": 0.477788879226381
         }
       ]
     },
@@ -2854,7 +2972,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 1.171442985534668,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2292699999651429
+          "S_stealth": 0.2292699999651429,
+          "S_stealth_tpr": 0.4571423814819964
         }
       ]
     },
@@ -2878,7 +2997,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 3.5643310546875,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2823787887533654
+          "S_stealth": 0.2823787887533654,
+          "S_stealth_tpr": 0.5072860596158784
         }
       ]
     },
@@ -2902,7 +3022,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 2.772233724594116,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3037353690287797
+          "S_stealth": 0.3037353690287797,
+          "S_stealth_tpr": 0.5002432596193289
         }
       ]
     },
@@ -2926,7 +3047,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 5.71887731552124,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3593760028325915
+          "S_stealth": 0.3593760028325915,
+          "S_stealth_tpr": 0.5646472564813124
         }
       ]
     },
@@ -2950,7 +3072,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 4.702635288238525,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3016705269407041
+          "S_stealth": 0.3016705269407041,
+          "S_stealth_tpr": 0.5042921468224728
         }
       ]
     },
@@ -2974,7 +3097,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 1.2850667238235474,
           "nc_is_poisoned": false,
-          "S_stealth": 0.24974090845146657
+          "S_stealth": 0.24974090845146657,
+          "S_stealth_tpr": 0.4552157792298068
         }
       ]
     },
@@ -2998,7 +3122,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 3.621718645095825,
           "nc_is_poisoned": false,
-          "S_stealth": 0.28403403805842675
+          "S_stealth": 0.28403403805842675,
+          "S_stealth_tpr": 0.4710584248575003
         }
       ]
     },
@@ -3022,7 +3147,8 @@
           "cover_rate": 0.5,
           "nc_max_anomaly_index": 2.8194327354431152,
           "nc_is_poisoned": true,
-          "S_stealth": 0.23684983728487227
+          "S_stealth": 0.23684983728487227,
+          "S_stealth_tpr": 0.45126603434041107
         }
       ]
     },
@@ -3046,7 +3172,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.3822433948516846,
           "nc_is_poisoned": false,
-          "S_stealth": 0.40525190035142833
+          "S_stealth": 0.40525190035142833,
+          "S_stealth_tpr": 0.6395333333333334
         }
       ]
     },
@@ -3070,7 +3197,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.1944921016693115,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3592576230487364
+          "S_stealth": 0.3592576230487364,
+          "S_stealth_tpr": 0.5915619658119659
         }
       ]
     },
@@ -3094,7 +3222,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 6.065311908721924,
           "nc_is_poisoned": true,
-          "S_stealth": 0.42565178970998624
+          "S_stealth": 0.42565178970998624,
+          "S_stealth_tpr": 0.6630354285700762
         }
       ]
     },
@@ -3118,7 +3247,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.2835021018981934,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2293573647945725
+          "S_stealth": 0.2293573647945725,
+          "S_stealth_tpr": 0.36454340299438553
         }
       ]
     },
@@ -3142,7 +3272,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.172010660171509,
           "nc_is_poisoned": false,
-          "S_stealth": 0.31468363370991165
+          "S_stealth": 0.31468363370991165,
+          "S_stealth_tpr": 0.3261406976744186
         }
       ]
     },
@@ -3166,7 +3297,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.4981296062469482,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4439641467392563
+          "S_stealth": 0.4439641467392563,
+          "S_stealth_tpr": 0.5330923104434907
         }
       ]
     },
@@ -3190,7 +3322,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7611303329467773,
           "nc_is_poisoned": false,
-          "S_stealth": 0.25625836073616676
+          "S_stealth": 0.25625836073616676,
+          "S_stealth_tpr": 0.5100898652442448
         }
       ]
     },
@@ -3214,7 +3347,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.5846378803253174,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4078188125001485
+          "S_stealth": 0.4078188125001485,
+          "S_stealth_tpr": 0.6620455974842767
         }
       ]
     },
@@ -3238,7 +3372,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.264615774154663,
           "nc_is_poisoned": true,
-          "S_stealth": 0.41869551805524335
+          "S_stealth": 0.41869551805524335,
+          "S_stealth_tpr": 0.7009203607243146
         }
       ]
     },
@@ -3262,7 +3397,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.269481897354126,
           "nc_is_poisoned": true,
-          "S_stealth": 0.33031913766363485
+          "S_stealth": 0.33031913766363485,
+          "S_stealth_tpr": 0.5341249263865003
         }
       ]
     },
@@ -3286,7 +3422,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 6.441068172454834,
           "nc_is_poisoned": false,
-          "S_stealth": 0.303322145097581
+          "S_stealth": 0.303322145097581,
+          "S_stealth_tpr": 0.4879463123803916
         }
       ]
     },
@@ -3310,7 +3447,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.1216434240341187,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2693182849688288
+          "S_stealth": 0.2693182849688288,
+          "S_stealth_tpr": 0.45200606276747507
         }
       ]
     },
@@ -3334,7 +3472,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.389575004577637,
           "nc_is_poisoned": true,
-          "S_stealth": 0.38696511396891736
+          "S_stealth": 0.38696511396891736,
+          "S_stealth_tpr": 0.6809681268073502
         }
       ]
     },
@@ -3358,7 +3497,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 6.645614147186279,
           "nc_is_poisoned": false,
-          "S_stealth": 0.34756946228347574
+          "S_stealth": 0.34756946228347574,
+          "S_stealth_tpr": 0.5954477703455965
         }
       ]
     },
@@ -3382,7 +3522,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.0004148483276367,
           "nc_is_poisoned": true,
-          "S_stealth": 0.39226366615764996
+          "S_stealth": 0.39226366615764996,
+          "S_stealth_tpr": 0.6909008887610559
         }
       ]
     },
@@ -3406,7 +3547,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.235405683517456,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3586804476082053
+          "S_stealth": 0.3586804476082053,
+          "S_stealth_tpr": 0.5869535387889416
         }
       ]
     },
@@ -3430,7 +3572,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.980445146560669,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3347752147082942
+          "S_stealth": 0.3347752147082942,
+          "S_stealth_tpr": 0.46790160885963433
         }
       ]
     },
@@ -3454,7 +3597,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.6293854713439941,
           "nc_is_poisoned": false,
-          "S_stealth": 0.23029905167950995
+          "S_stealth": 0.23029905167950995,
+          "S_stealth_tpr": 0.4089331611134543
         }
       ]
     },
@@ -3478,7 +3622,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 6.150723934173584,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3126364211530816
+          "S_stealth": 0.3126364211530816,
+          "S_stealth_tpr": 0.4594970883617112
         }
       ]
     },
@@ -3502,7 +3647,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.3735878467559814,
           "nc_is_poisoned": true,
-          "S_stealth": 0.26911732083088963
+          "S_stealth": 0.26911732083088963,
+          "S_stealth_tpr": 0.4114650901696181
         }
       ]
     },
@@ -3526,7 +3672,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.9463547468185425,
           "nc_is_poisoned": false,
-          "S_stealth": 0.17833727506389332
+          "S_stealth": 0.17833727506389332,
+          "S_stealth_tpr": 0.35587607788595266
         }
       ]
     },
@@ -3550,7 +3697,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 5.985161781311035,
           "nc_is_poisoned": true,
-          "S_stealth": 0.5171760425608256
+          "S_stealth": 0.5171760425608256,
+          "S_stealth_tpr": 0.7398759234748404
         }
       ]
     },
@@ -3574,7 +3722,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.797478675842285,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4024332062988388
+          "S_stealth": 0.4024332062988388,
+          "S_stealth_tpr": 0.6417998664311733
         }
       ]
     },
@@ -3598,7 +3747,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.376652240753174,
           "nc_is_poisoned": false,
-          "S_stealth": 0.37443181943405524
+          "S_stealth": 0.37443181943405524,
+          "S_stealth_tpr": 0.5970388497652582
         }
       ]
     },
@@ -3622,7 +3772,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.709479570388794,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2660159508278855
+          "S_stealth": 0.2660159508278855,
+          "S_stealth_tpr": 0.4172881279350365
         }
       ]
     },
@@ -3646,7 +3797,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.477492570877075,
           "nc_is_poisoned": false,
-          "S_stealth": 0.30890585023236383
+          "S_stealth": 0.30890585023236383,
+          "S_stealth_tpr": 0.4612273005197188
         }
       ]
     },
@@ -3670,7 +3822,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 5.229992866516113,
           "nc_is_poisoned": false,
-          "S_stealth": 0.280630655931704
+          "S_stealth": 0.280630655931704,
+          "S_stealth_tpr": 0.5365160867084997
         }
       ]
     },
@@ -3694,7 +3847,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7083865404129028,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2868617611034792
+          "S_stealth": 0.2868617611034792,
+          "S_stealth_tpr": 0.48763899269457717
         }
       ]
     },
@@ -3718,7 +3872,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.6068267822265625,
           "nc_is_poisoned": true,
-          "S_stealth": 0.26705995071627975
+          "S_stealth": 0.26705995071627975,
+          "S_stealth_tpr": 0.4468274127214667
         }
       ]
     },
@@ -3742,7 +3897,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.898325800895691,
           "nc_is_poisoned": false,
-          "S_stealth": 0.42090731521529734
+          "S_stealth": 0.42090731521529734,
+          "S_stealth_tpr": 0.6350214539007093
         }
       ]
     },
@@ -3766,7 +3922,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.617630958557129,
           "nc_is_poisoned": false,
-          "S_stealth": 0.39612576764033386
+          "S_stealth": 0.39612576764033386,
+          "S_stealth_tpr": 0.6671696196196196
         }
       ]
     },
@@ -3790,7 +3947,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.13846492767334,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3518164441386367
+          "S_stealth": 0.3518164441386367,
+          "S_stealth_tpr": 0.5410658153319523
         }
       ]
     },
@@ -3814,7 +3972,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.162214994430542,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3114140374093248
+          "S_stealth": 0.3114140374093248,
+          "S_stealth_tpr": 0.557950387425792
         }
       ]
     },
@@ -3838,7 +3997,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.666778087615967,
           "nc_is_poisoned": false,
-          "S_stealth": 0.31389118609190025
+          "S_stealth": 0.31389118609190025,
+          "S_stealth_tpr": 0.513562930068811
         }
       ]
     },
@@ -3862,7 +4022,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.221367597579956,
           "nc_is_poisoned": false,
-          "S_stealth": 0.21624750966806694
+          "S_stealth": 0.21624750966806694,
+          "S_stealth_tpr": 0.38865039863325745
         }
       ]
     },
@@ -3886,7 +4047,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.771175861358643,
           "nc_is_poisoned": false,
-          "S_stealth": 0.21190459921008067
+          "S_stealth": 0.21190459921008067,
+          "S_stealth_tpr": 0.3881991618333569
         }
       ]
     },
@@ -3910,7 +4072,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.1123158931732178,
           "nc_is_poisoned": false,
-          "S_stealth": 0.29133899979920397
+          "S_stealth": 0.29133899979920397,
+          "S_stealth_tpr": 0.4455815632458234
         }
       ]
     },
@@ -3934,7 +4097,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7623599767684937,
           "nc_is_poisoned": false,
-          "S_stealth": 0.3431262929481423
+          "S_stealth": 0.3431262929481423,
+          "S_stealth_tpr": 0.563296407394489
         }
       ]
     },
@@ -3958,7 +4122,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.201181411743164,
           "nc_is_poisoned": true,
-          "S_stealth": 0.20204300907540254
+          "S_stealth": 0.20204300907540254,
+          "S_stealth_tpr": 0.325791516571521
         }
       ]
     },
@@ -3982,7 +4147,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.537144899368286,
           "nc_is_poisoned": false,
-          "S_stealth": 0.19216355398231225
+          "S_stealth": 0.19216355398231225,
+          "S_stealth_tpr": 0.335349120603015
         }
       ]
     },
@@ -4006,7 +4172,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 5.646359920501709,
           "nc_is_poisoned": true,
-          "S_stealth": 0.37285100468645865
+          "S_stealth": 0.37285100468645865,
+          "S_stealth_tpr": 0.5666748637692249
         }
       ]
     },
@@ -4030,7 +4197,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 3.2674851417541504,
           "nc_is_poisoned": true,
-          "S_stealth": 0.29604117739638325
+          "S_stealth": 0.29604117739638325,
+          "S_stealth_tpr": 0.4578763711408943
         }
       ]
     },
@@ -4054,7 +4222,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 4.247111797332764,
           "nc_is_poisoned": false,
-          "S_stealth": 0.20268675713083006
+          "S_stealth": 0.20268675713083006,
+          "S_stealth_tpr": 0.36064844632768356
         }
       ]
     },
@@ -4078,7 +4247,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 2.2661356925964355,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2628706890331808
+          "S_stealth": 0.2628706890331808,
+          "S_stealth_tpr": 0.45974696974968404
         }
       ]
     },
@@ -4102,7 +4272,8 @@
           "cover_rate": null,
           "nc_max_anomaly_index": 11.191808700561523,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4184766404181259
+          "S_stealth": 0.4184766404181259,
+          "S_stealth_tpr": 0.5456243194973114
         }
       ]
     }
