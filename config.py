@@ -15,6 +15,7 @@ imagenet_dir = '/scratch/gpfs/DATASETS/imagenet/ilsvrc_2012_classification_local
 # 用途: 轻量级 ImageNet 风格数据集，适合跨数据集后门迁移实验
 tiny_imagenet_dir = './data/Tiny-imagenet/tiny-imagenet-200' # Tiny ImageNet dataset directory
 tiny_imagenet_c_dir = './data/Tiny-imagenet-c/Tiny-ImageNet-C' # Tiny ImageNet-C dataset directory (corrupted version)
+tiny_target_domain_dir = './data/tiny-target-domain' # FLUX generated target domain for transfer test
 # ========== [Tiny ImageNet 支持] 结束 ==========
 # ========== [MNIST 支持] 添加 MNIST 数据集路径 ==========
 # MNIST: 28×28 灰度图，10 个类别（0-9）

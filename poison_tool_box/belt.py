@@ -300,11 +300,10 @@ class poison_generator():
 
                 img_np = img.permute(1, 2, 0).cpu().numpy()  # [C, H, W] -> [H, W, C]，值在 [0, 1]
                 
-                # 原始 BELT：img = img * (1 - mask) + pattern * mask（mask∈{0,1}）
-                # 带强度时保持同一结构，仅缩放 pattern：img * (1 - mask) + alpha * pattern * mask
-                # mask=1 处结果为 alpha*pattern（整块替换为缩放后的 pattern）；与
-                # img + alpha*mask*(pattern-img) 在 alpha<1 时不相同（后者是向 pattern 插值、仍含原图）。
-                img_np = img_np * (1.0 - self.mask_np) + self.alpha * self.pattern_np * self.mask_np
+                # 与 BadNet 相同的混合公式：img + alpha * mask * (pattern - img)
+                # 展开：img * (1 - alpha*mask) + alpha * mask * pattern
+                # alpha=1 时 mask 区域完全替换为 pattern；alpha<1 时保留 (1-alpha) 比例的原图
+                img_np = img_np + self.alpha * self.mask_np * (self.pattern_np - img_np)
                 
                 img = torch.from_numpy(img_np).permute(2, 0, 1).float()  # [H, W, C] -> [C, H, W]
                 img = torch.clamp(img, 0.0, 1.0)
@@ -327,9 +326,8 @@ class poison_generator():
                     img = torch.clamp(img, 0.0, 1.0)  # 限制到 [0, 1]
                 
                 img_np = img.permute(1, 2, 0).cpu().numpy()  # [C, H, W] -> [H, W, C]，值在 [0, 1]
-                # 原始公式：img = img * (1 - mask) + pattern * mask
-                # 注意：partial_mask 的值是 0 或 1（二值化），因为 alpha 被强制为 1.0
-                img_np = img_np * (1.0 - partial_mask) + self.alpha * self.pattern_np * partial_mask
+                # 与 BadNet 相同的混合公式（cover 样本同样使用）
+                img_np = img_np + self.alpha * partial_mask * (self.pattern_np - img_np)
                 
                 img = torch.from_numpy(img_np).permute(2, 0, 1).float()  # [H, W, C] -> [C, H, W]
                 
@@ -384,11 +382,11 @@ class poison_transform():
         data = data * std + mean  # 反归一化
         data = torch.clamp(data, 0.0, 1.0)
         
-        # 在[0,1]空间添加触发器（与投毒生成同一式）
-        # data * (1 - mask) + alpha * mark * mask；alpha=1 时同原始 BELT
+        # 在[0,1]空间添加触发器（与 BadNet / poison_generator 同一公式）
+        # data + alpha * mask * (mark - data)  等价于 data*(1-alpha*mask) + alpha*mask*mark
         trigger_mask = self.trigger_mask.to(device=device, dtype=dtype).unsqueeze(0).unsqueeze(0)  # [H, W] -> [1, 1, H, W]
         trigger_mark = self.trigger_mark.to(device=device, dtype=dtype).unsqueeze(0)  # [C, H, W] -> [1, C, H, W]
-        data = data * (1.0 - trigger_mask) + self.alpha * trigger_mark * trigger_mask
+        data = data + self.alpha * trigger_mask * (trigger_mark - data)
         data = torch.clamp(data, 0.0, 1.0)
         
         # 重新归一化

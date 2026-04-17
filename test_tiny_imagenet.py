@@ -631,19 +631,29 @@ def main():
     # 创建数据变换（根据源数据集调整尺寸和归一化）
     # 注意：Tiny ImageNet-C 图像原始是 64×64（与 Tiny ImageNet 训练集一致）
     if source_dataset == 'tiny_imagenet':
-        # Tiny ImageNet 使用 64×64 尺寸和 Tiny ImageNet 特定归一化参数（与 BackdoorBench 一致）
-        # 无需 resize，因为 Tiny ImageNet-C 已经是 64×64
-        tiny_imagenet_transform = transforms.Compose([
-            transforms.ToTensor(),  # 无需 Resize，已经是 64×64
-            transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262])  # Tiny ImageNet 特定归一化参数
-        ])
+        if args.poison_type in ('upgd', 'belt'):
+            # UPGD/BELT 训练时不使用 Normalize，测试时也必须保持一致
+            tiny_imagenet_transform = transforms.Compose([
+                transforms.ToTensor(),
+            ])
+        else:
+            tiny_imagenet_transform = transforms.Compose([
+                transforms.ToTensor(),
+                transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262])
+            ])
     else:
         # 其他数据集：需要将 64×64 resize 到 32×32 + 对应的归一化参数
-        tiny_imagenet_transform = transforms.Compose([
-            transforms.Resize((32, 32)),  # 从 64×64 resize 到 32×32
-            transforms.ToTensor(),
-            transforms.Normalize([0.4914, 0.4822, 0.4465], [0.247, 0.243, 0.261])  # CIFAR-10 归一化（默认）
-        ])
+        if args.poison_type in ('upgd', 'belt'):
+            tiny_imagenet_transform = transforms.Compose([
+                transforms.Resize((32, 32)),
+                transforms.ToTensor(),
+            ])
+        else:
+            tiny_imagenet_transform = transforms.Compose([
+                transforms.Resize((32, 32)),
+                transforms.ToTensor(),
+                transforms.Normalize([0.4914, 0.4822, 0.4465], [0.247, 0.243, 0.261])
+            ])
     
     test_set = datasets.ImageFolder(test_set_path, transform=tiny_imagenet_transform)
     print(f"Tiny ImageNet-C 数据集加载完成: {len(test_set)} 张图像")

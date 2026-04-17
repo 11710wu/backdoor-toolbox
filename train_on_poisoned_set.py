@@ -310,43 +310,22 @@ else:
 
 
 if args.dataset != 'ember' and args.dataset != 'imagenet':
-    # ========== [MNIST-M 支持] 测试时使用 MNIST 数据集 ==========
-    # 如果训练数据集是 MNIST-M，测试时使用 MNIST 测试集
-    if args.dataset == 'mnistm':
-        # 使用 MNIST 的测试集（跨域测试）
-        test_set_dir = os.path.join('clean_set', 'mnist', 'test_split')
-        test_set_img_dir = os.path.join(test_set_dir, 'data')
-        test_set_label_path = os.path.join(test_set_dir, 'labels')
-        # 使用 MNIST 的数据变换（MNIST 归一化参数）
-        from utils.supervisor import get_transforms
-        import argparse
-        mnist_args = argparse.Namespace()
-        mnist_args.dataset = 'mnist'
-        mnist_args.no_normalize = args.no_normalize
-        mnist_args.no_aug = args.no_aug
-        mnist_args.poison_type = args.poison_type
-        _, mnist_data_transform, _, _, _ = get_transforms(mnist_args)
-        test_set = tools.IMG_Dataset(data_dir=test_set_img_dir,
-                                     label_path=test_set_label_path, transforms=mnist_data_transform)
-        # Poison Transform 使用 MNIST 的配置（因为测试在 MNIST 上）
-        poison_transform = supervisor.get_poison_transform(poison_type=args.poison_type, dataset_name='mnist',
-                                                           target_class=config.target_class['mnist'], trigger_transform=mnist_data_transform,
-                                                           is_normalized_input=True,
-                                                           alpha=args.alpha if args.test_alpha is None else args.test_alpha,
-                                                           trigger_name=args.trigger, args=args)
+    # Set Up Test Set for Debug & Evaluation
+    test_set_dir = os.path.join('clean_set', args.dataset, 'test_split')
+    test_set_img_dir = os.path.join(test_set_dir, 'data')
+    test_set_label_path = os.path.join(test_set_dir, 'labels')
+    test_set = tools.IMG_Dataset(data_dir=test_set_img_dir,
+                                 label_path=test_set_label_path, transforms=data_transform)
+    # Poison Transform for Testing
+    if args.poison_type in ('upgd', 'belt'):
+        is_normalized = False
     else:
-        # Set Up Test Set for Debug & Evaluation
-        test_set_dir = os.path.join('clean_set', args.dataset, 'test_split')
-        test_set_img_dir = os.path.join(test_set_dir, 'data')
-        test_set_label_path = os.path.join(test_set_dir, 'labels')
-        test_set = tools.IMG_Dataset(data_dir=test_set_img_dir,
-                                     label_path=test_set_label_path, transforms=data_transform)
-        # Poison Transform for Testing
-        poison_transform = supervisor.get_poison_transform(poison_type=args.poison_type, dataset_name=args.dataset,
-                                                           target_class=config.target_class[args.dataset], trigger_transform=trigger_transform,
-                                                           is_normalized_input=True,
-                                                           alpha=args.alpha if args.test_alpha is None else args.test_alpha,
-                                                           trigger_name=args.trigger, args=args)
+        is_normalized = not args.no_normalize
+    poison_transform = supervisor.get_poison_transform(poison_type=args.poison_type, dataset_name=args.dataset,
+                                                       target_class=config.target_class[args.dataset], trigger_transform=trigger_transform,
+                                                       is_normalized_input=is_normalized,
+                                                       alpha=args.alpha if args.test_alpha is None else args.test_alpha,
+                                                       trigger_name=args.trigger, args=args)
     
     test_set_loader = torch.utils.data.DataLoader(
         test_set,

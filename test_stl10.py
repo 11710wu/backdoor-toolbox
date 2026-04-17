@@ -475,10 +475,14 @@ def main():
     
     # 创建自定义数据集
     # 处理流程：下采样到 32x32 -> 归一化（使用 CIFAR-10 的标准化参数）
+    # UPGD/BELT 训练时不使用 Normalize，测试时也必须跳过以保持一致
+    skip_normalize = args.poison_type in ('upgd', 'belt')
+    
     class FilteredSTL10:
-        def __init__(self, data, targets):
+        def __init__(self, data, targets, skip_normalize=False):
             self.data = data
             self.targets = targets
+            self.skip_normalize = skip_normalize
             # CIFAR-10 的归一化参数
             self.normalize = transforms.Normalize([0.4914, 0.4822, 0.4465], [0.247, 0.243, 0.261])
         
@@ -496,13 +500,12 @@ def main():
                 img = tensor_resize(img, 32)  # 下采样: (1, C, 32, 32)
                 img = img.squeeze(0)  # 移除 batch 维度: (C, 32, 32)
             
-            # 应用归一化（CIFAR-10 的标准化参数）
-            # 归一化在下采样之后进行，确保归一化参数适用于 32x32 的图像
-            img = self.normalize(img)
+            if not self.skip_normalize:
+                img = self.normalize(img)
             
             return img, target
     
-    test_set = FilteredSTL10(filtered_data, filtered_targets)
+    test_set = FilteredSTL10(filtered_data, filtered_targets, skip_normalize=skip_normalize)
     print(f"STL-10数据集加载完成: {len(test_set)} 张图像")
     print(f"过滤掉monkey类别，保留与CIFAR-10匹配的9个类别")
     

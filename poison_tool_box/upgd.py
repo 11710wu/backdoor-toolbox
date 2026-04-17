@@ -364,25 +364,13 @@ class poison_transform:
         self.delta_raw = self.upgd_data  # 别名，兼容其他代码
 
     def transform(self, data: torch.Tensor, labels: torch.Tensor):
-        """
-        对输入数据添加 UPGD 扰动
-        
-        Args:
-            data: 输入图像 [B, C, H, W]，可能是归一化后的
-            labels: 输入标签 [B]
-        
-        Returns:
-            data: 加扰动后的图像（与输入同样的归一化状态）
-            labels: 全部改为 target_class（用于 ASR 计算）
-        """
         data, labels = data.clone(), labels.clone()
 
         device = data.device
         upgd_data = self.upgd_data.to(device=device, dtype=data.dtype).view(1, 3, *self.upgd_data.shape[1:])
 
-        # UPGD 默认假设输入未归一化：直接加扰动，不做 clamp
+        # UPGD 默认假设输入未归一化：直接加扰动
         data = data + upgd_data
 
-        # 标签全部改为 target_class（用于计算 ASR：有多少被误分类为 target）
         labels[:] = self.target_class
         return data, labels

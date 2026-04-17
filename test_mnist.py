@@ -1,108 +1,31 @@
 """
 MNIST-M 后门攻击测试脚本
 用于测试在 MNIST-M 上训练的后门模型在 MNIST 测试集上的表现（跨域测试）
-MNIST-M 是 MNIST 的彩色版本，用于跨域测试
 """
 
-import numpy as np
 import torch
 import os
-from torchvision import transforms
 import argparse
 from torch import nn
-from PIL import Image
 from utils import supervisor, tools, default_args
 import config
 import time
 from torchvision.utils import save_image
-from torch.utils.data import Dataset, DataLoader
-
-
-# =============================================================================
-# MNIST-M 数据集类
-# =============================================================================
-
-class MNISTMDataset(Dataset):
-    """
-    MNIST-M 数据集类：加载 MNIST-M 彩色图像
-    MNIST-M 是 MNIST 的彩色版本，图像尺寸为 28×28×3（RGB）
-    """
-    def __init__(self, data_path, train=True, normalizer=None):
-        """
-        Args:
-            data_path: MNIST-M 数据文件路径（.npy 文件所在目录）
-            train: 是否加载训练集（True=训练集，False=测试集）
-            normalizer: 归一化变换器
-        """
-        self.normalizer = normalizer
-        
-        # 加载数据
-        if train:
-            data_file = os.path.join(data_path, 'train.npy')
-        else:
-            data_file = os.path.join(data_path, 'test.npy')
-        
-        if not os.path.exists(data_file):
-            raise FileNotFoundError(f"MNIST-M 数据文件不存在: {data_file}")
-        
-        # 加载图像数据
-        self.data = np.load(data_file)  # shape: (N, 28, 28, 3)
-        
-        # ========== [重要说明] MNIST-M 标签从 MNIST 加载的原因 ==========
-        # MNIST-M 是 MNIST 的彩色版本，通过将 MNIST 灰度图叠加在彩色背景上生成
-        # MNIST-M 数据集通常只提供图像数据（.npy 文件），不包含标签文件
-        # 因为 MNIST-M 的每个图像都对应 MNIST 的原始图像，标签是一一对应的：
-        #   - train.npy 的第 i 个图像对应 MNIST train 的第 i 个标签
-        #   - test.npy 的第 i 个图像对应 MNIST test 的第 i 个标签
-        # 因此需要从 MNIST 数据集加载标签，这是 MNIST-M 数据集的标准做法
-        # ========== [重要说明] 结束 ==========
-        from torchvision.datasets import MNIST
-        mnist_dataset = MNIST(root=config.mnist_dir, train=train, download=False)
-        self.targets = mnist_dataset.targets
-        
-        # 验证数据一致性：MNIST-M 图像数量必须与 MNIST 标签数量一致
-        if len(self.data) != len(self.targets):
-            raise ValueError(
-                f"MNIST-M 图像数量 ({len(self.data)}) 与 MNIST 标签数量 ({len(self.targets)}) 不匹配！\n"
-                f"MNIST-M 图像文件: {data_file}\n"
-                f"MNIST 数据集: {config.mnist_dir}, train={train}\n"
-                f"请确保 MNIST-M 数据集与 MNIST 数据集一一对应（第 i 个 MNIST-M 图像对应第 i 个 MNIST 标签）。"
-            )
-        
-        print(f"[MNIST-M] 加载 {'训练集' if train else '测试集'}: {len(self.data)} 张图像")
-        print(f"[MNIST-M] 图像形状: {self.data.shape}, 标签数量: {len(self.targets)}")
-    
-    def __len__(self):
-        return len(self.data)
-    
-    def __getitem__(self, idx):
-        # 获取图像和标签
-        img = self.data[idx]  # shape: (28, 28, 3), dtype: uint8, range: [0, 255]
-        target = int(self.targets[idx])
-        
-        # 转换为 PIL Image 然后应用 ToTensor（将 [0, 255] 转换为 [0, 1]）
-        img = Image.fromarray(img)
-        img = transforms.ToTensor()(img)  # shape: (3, 28, 28), range: [0, 1]
-        
-        # 应用归一化（如果提供）
-        if self.normalizer is not None:
-            img = self.normalizer(img)
-        
-        return img, target
+from torch.utils.data import DataLoader
 
 
 # =============================================================================
 # MNIST-M 后门攻击测试函数
 # =============================================================================
 
-def test_mnistm_model(model, test_loader, poison_transform, poison_type, num_classes, 
-                     target_class, save_example=True, model_dir=None):
+def test_mnist_cross_model(model, test_loader, poison_transform, poison_type, num_classes, 
+                          target_class, save_example=True, model_dir=None):
     """
-    在 MNIST-M 数据集上测试后门攻击效果
+    在 MNIST 跨域测试集上测试后门攻击效果（模型训练域为 MNIST-M）
     
     Args:
         model (torch.nn.Module): 已训练的目标模型（在 MNIST 上训练）
-        test_loader (torch.utils.data.DataLoader): MNIST-M 测试数据加载器
+        test_loader (torch.utils.data.DataLoader): MNIST 测试数据加载器（跨域测试）
         poison_transform: 后门攻击变换器
         poison_type (str): 攻击类型名称
         num_classes (int): 数据集类别数量（10）
@@ -113,13 +36,13 @@ def test_mnistm_model(model, test_loader, poison_transform, poison_type, num_cla
     Returns:
         tuple: (准确率, 攻击成功率)
     """
-    print(f"执行 MNIST-M 测试: 攻击类型={poison_type}")
+    print(f"执行 MNIST 跨域测试: 攻击类型={poison_type}")
     
     # 将模型设置为评估模式
     model.eval()
     
     # 首先计算准确率（不加触发器）
-    print(f"\n=== 计算准确率（MNIST-M，不加触发器）===")
+    print(f"\n=== 计算准确率（MNIST，跨域测试，不加触发器）===")
     acc_correct = 0
     acc_total = 0
 
@@ -135,7 +58,7 @@ def test_mnistm_model(model, test_loader, poison_transform, poison_type, num_cla
 
     # 计算准确率
     acc = acc_correct / acc_total if acc_total > 0 else 0
-    print(f"MNIST-M 总体准确率: {acc:.6f} ({acc*100:.2f}%)")
+    print(f"MNIST 测试集总体准确率: {acc:.6f} ({acc*100:.2f}%)")
     
     # 测试攻击成功率
     print(f"\n=== 测试攻击成功率 ===")
@@ -161,7 +84,7 @@ def test_mnistm_model(model, test_loader, poison_transform, poison_type, num_cla
                 if model_dir:
                     save_poisoned_example_to_dir(original_img, poisoned_img, 
                                                 poison_type, 
-                                                "mnistm_test", model_dir)
+                                                "mnist_cross_test", model_dir)
             
             # 预测
             output = model(data_poisoned)
@@ -193,7 +116,7 @@ def save_poisoned_example_to_dir(original_img, poisoned_img, attack_type, method
         model_dir (str): 模型目录路径
     """
     # 创建保存目录
-    save_dir = os.path.join(model_dir, "mnistm_examples")
+    save_dir = os.path.join(model_dir, "mnist_cross_examples")
     os.makedirs(save_dir, exist_ok=True)
     
     # 反归一化图片（使用 MNIST-M 的归一化参数）
@@ -256,13 +179,13 @@ def create_poison_transform(args, data_transform):
     elif args.poison_type == 'belt':
         is_normalized = False  # BELT 强制不归一化
     else:
-        is_normalized = True  # 其他攻击使用归一化
+        is_normalized = not getattr(args, 'no_normalize', False)
     
-    # 创建 poison transform（使用 MNIST 的配置，因为模型是在 MNIST 上训练的）
+    # 模型在 MNIST-M 上训练，使用 MNIST-M 的配置（target_class、normalizer 等）
     poison_transform = supervisor.get_poison_transform(
         poison_type=args.poison_type, 
-        dataset_name='mnist',  # 使用 MNIST 的配置
-        target_class=config.target_class['mnist'], 
+        dataset_name='mnistm',
+        target_class=config.target_class['mnistm'], 
         trigger_transform=data_transform,
         is_normalized_input=is_normalized,
         alpha=args.alpha if args.test_alpha is None else args.test_alpha,
@@ -498,7 +421,7 @@ def main():
     # 获取模型目录路径
     model_dir = os.path.dirname(model_path)
     
-    acc, asr = test_mnistm_model(
+    acc, asr = test_mnist_cross_model(
         model=model, 
         test_loader=test_set_loader, 
         poison_transform=poison_transform,
@@ -512,24 +435,24 @@ def main():
     if args.poison_type == 'SIG':
         if args.test_delta is not None:
             delta_value = args.test_delta
-            test_result_path = os.path.join(model_dir, f'test_mnistm_results_test_delta={delta_value}.txt')
+            test_result_path = os.path.join(model_dir, f'test_mnist_cross_results_test_delta={delta_value}.txt')
         else:
             delta_value = args.delta if hasattr(args, 'delta') else 30
-            test_result_path = os.path.join(model_dir, f'test_mnistm_results_delta={delta_value}.txt')
+            test_result_path = os.path.join(model_dir, f'test_mnist_cross_results_delta={delta_value}.txt')
     elif args.poison_type == 'WaNet':
         if args.test_s is not None:
             s_value = args.test_s
-            test_result_path = os.path.join(model_dir, f'test_mnistm_results_test_s={s_value}.txt')
+            test_result_path = os.path.join(model_dir, f'test_mnist_cross_results_test_s={s_value}.txt')
         else:
             s_value = args.s if hasattr(args, 's') else 0.5
-            test_result_path = os.path.join(model_dir, f'test_mnistm_results_s={s_value}.txt')
+            test_result_path = os.path.join(model_dir, f'test_mnist_cross_results_s={s_value}.txt')
     elif args.poison_type in ['blend', 'adaptive_blend', 'adaptive_patch', 'basic', 'clean_label']:
         if args.test_alpha is not None:
-            test_result_path = os.path.join(model_dir, f'test_mnistm_results_test_alpha={args.test_alpha}.txt')
+            test_result_path = os.path.join(model_dir, f'test_mnist_cross_results_test_alpha={args.test_alpha}.txt')
         else:
-            test_result_path = os.path.join(model_dir, 'test_mnistm_results.txt')
+            test_result_path = os.path.join(model_dir, 'test_mnist_cross_results.txt')
     else:
-        test_result_path = os.path.join(model_dir, 'test_mnistm_results.txt')
+        test_result_path = os.path.join(model_dir, 'test_mnist_cross_results.txt')
     
     with open(test_result_path, 'w', encoding='utf-8') as f:
         f.write(f"=== MNIST 跨域测试结果 ===\n")

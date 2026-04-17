@@ -8,6 +8,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.005,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -19,6 +21,7 @@
           "asr": 0.004309745585986376,
           "test_param_value": 4.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.0990073680877686,
           "nc_is_poisoned": false,
@@ -33,6 +36,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.005,
       "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -44,6 +49,7 @@
           "asr": 0.07298762685944668,
           "test_param_value": 12.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.9864917993545532,
           "nc_is_poisoned": false,
@@ -58,6 +64,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.005,
       "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -69,6 +77,7 @@
           "asr": 0.46322813846795496,
           "test_param_value": 20.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.644643306732178,
           "nc_is_poisoned": false,
@@ -83,6 +92,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.005,
       "train_param_value": 28.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -94,6 +105,7 @@
           "asr": 0.7391908800222439,
           "test_param_value": 28.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.1705520153045654,
           "nc_is_poisoned": false,
@@ -108,6 +120,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.005,
       "train_param_value": 36.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -119,6 +133,7 @@
           "asr": 0.8935075768107883,
           "test_param_value": 36.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7865824699401855,
           "nc_is_poisoned": false,
@@ -133,6 +148,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.005,
       "train_param_value": 44.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -144,11 +161,12 @@
           "asr": 0.9347977200055609,
           "test_param_value": 44.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.5238139629364014,
           "nc_is_poisoned": true,
-          "S_stealth": 0.32681877057008907,
-          "S_stealth_tpr": 0.62799048008713
+          "S_stealth": 0.5128244552500825,
+          "S_stealth_tpr": 0.8139961647671234
         }
       ]
     },
@@ -158,6 +176,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.005,
       "train_param_value": 56.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -169,11 +189,12 @@
           "asr": 0.9545391352704018,
           "test_param_value": 56.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.4714338779449463,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3235620903962807,
-          "S_stealth_tpr": 0.48352652819183095
+          "S_stealth": 0.47984578029866587,
+          "S_stealth_tpr": 0.6398102180942161
         }
       ]
     },
@@ -183,6 +204,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.01,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -194,6 +217,7 @@
           "asr": 0.00333657722786042,
           "test_param_value": 4.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.26068115234375,
           "nc_is_poisoned": false,
@@ -208,6 +232,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.01,
       "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -219,6 +245,7 @@
           "asr": 0.21729459196440984,
           "test_param_value": 12.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.8994616270065308,
           "nc_is_poisoned": false,
@@ -233,6 +260,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.01,
       "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -244,11 +273,12 @@
           "asr": 0.4553037675517865,
           "test_param_value": 20.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.8160624504089355,
           "nc_is_poisoned": true,
-          "S_stealth": 0.4006527034502394,
-          "S_stealth_tpr": 0.7003749850385106
+          "S_stealth": 0.5774920463503175,
+          "S_stealth_tpr": 0.8772143279385887
         }
       ]
     },
@@ -258,6 +288,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.01,
       "train_param_value": 28.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -269,6 +301,7 @@
           "asr": 0.7301543166967885,
           "test_param_value": 28.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.1973624229431152,
           "nc_is_poisoned": false,
@@ -283,6 +316,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.01,
       "train_param_value": 36.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -294,6 +329,7 @@
           "asr": 0.8919783122480189,
           "test_param_value": 36.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.9616351127624512,
           "nc_is_poisoned": false,
@@ -308,6 +344,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.01,
       "train_param_value": 44.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -319,11 +357,12 @@
           "asr": 0.9666342277213958,
           "test_param_value": 44.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.403592824935913,
           "nc_is_poisoned": true,
-          "S_stealth": 0.33049389950607205,
-          "S_stealth_tpr": 0.599592229157929
+          "S_stealth": 0.5202703070035323,
+          "S_stealth_tpr": 0.7893686366553891
         }
       ]
     },
@@ -333,6 +372,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.01,
       "train_param_value": 56.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -344,11 +385,12 @@
           "asr": 0.9905463645210622,
           "test_param_value": 56.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.282599449157715,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3029121214441373,
-          "S_stealth_tpr": 0.44323756987994034
+          "S_stealth": 0.496483472912327,
+          "S_stealth_tpr": 0.63680892134813
         }
       ]
     },
@@ -358,6 +400,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.05,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -369,6 +413,7 @@
           "asr": 0.21951897678298346,
           "test_param_value": 4.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.9385120868682861,
           "nc_is_poisoned": false,
@@ -383,6 +428,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.05,
       "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -394,6 +441,7 @@
           "asr": 0.6517447518420687,
           "test_param_value": 12.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.236987590789795,
           "nc_is_poisoned": false,
@@ -408,6 +456,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.05,
       "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -419,6 +469,7 @@
           "asr": 0.8319199221465313,
           "test_param_value": 20.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.4975310564041138,
           "nc_is_poisoned": false,
@@ -433,6 +484,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.05,
       "train_param_value": 28.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -444,6 +497,7 @@
           "asr": 0.9541220631169193,
           "test_param_value": 28.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.1300208568572998,
           "nc_is_poisoned": false,
@@ -458,6 +512,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.05,
       "train_param_value": 36.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -469,6 +525,7 @@
           "asr": 0.9799805366328375,
           "test_param_value": 36.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.25941801071167,
           "nc_is_poisoned": false,
@@ -483,6 +540,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.05,
       "train_param_value": 44.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -494,6 +553,7 @@
           "asr": 0.9902683164187405,
           "test_param_value": 44.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.616701602935791,
           "nc_is_poisoned": false,
@@ -508,6 +568,8 @@
       "trigger_type": "SIG",
       "poison_rate": 0.05,
       "train_param_value": 56.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -519,6 +581,7 @@
           "asr": 0.999026831641874,
           "test_param_value": 56.0,
           "test_param_type": "test_delta",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.100159168243408,
           "nc_is_poisoned": false,
@@ -533,6 +596,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 0.4,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -544,11 +609,12 @@
           "asr": 0.03934380647852079,
           "test_param_value": 0.4,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.077636241912842,
           "nc_is_poisoned": true,
-          "S_stealth": 0.41546675221184703,
-          "S_stealth_tpr": 0.7158094522968198
+          "S_stealth": 0.6154667522118471,
+          "S_stealth_tpr": 0.9158094522968199
         }
       ]
     },
@@ -558,6 +624,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 0.6,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -569,6 +637,7 @@
           "asr": 0.5512303628527735,
           "test_param_value": 0.6,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 4.0601043701171875,
           "nc_is_poisoned": false,
@@ -583,6 +652,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 0.8,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -594,6 +665,7 @@
           "asr": 0.5816766300569999,
           "test_param_value": 0.8,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.5874886512756348,
           "nc_is_poisoned": false,
@@ -608,6 +680,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 1.0,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -619,11 +693,12 @@
           "asr": 0.6375642986236619,
           "test_param_value": 1.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 3.0285356044769287,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3402720396484663,
-          "S_stealth_tpr": 0.6728396840141155
+          "S_stealth": 0.5104471853576973,
+          "S_stealth_tpr": 0.8430148297233464
         }
       ]
     },
@@ -633,6 +708,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 1.2,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -644,6 +721,7 @@
           "asr": 0.5904351452801334,
           "test_param_value": 1.2,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 3.405649423599243,
           "nc_is_poisoned": false,
@@ -658,6 +736,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 1.4,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -669,6 +749,7 @@
           "asr": 0.5385791741971361,
           "test_param_value": 1.4,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 3.987729072570801,
           "nc_is_poisoned": false,
@@ -683,6 +764,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 2.0,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -694,6 +777,7 @@
           "asr": 0.6945641595996107,
           "test_param_value": 2.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.6014295816421509,
           "nc_is_poisoned": false,
@@ -708,6 +792,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.005,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -719,6 +805,7 @@
           "asr": 0.9388294174892257,
           "test_param_value": 4.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 4.8083319664001465,
           "nc_is_poisoned": false,
@@ -733,6 +820,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 0.4,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -744,6 +833,7 @@
           "asr": 0.15723620186292228,
           "test_param_value": 0.4,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.8067561388015747,
           "nc_is_poisoned": false,
@@ -758,6 +848,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 0.6,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -769,11 +861,12 @@
           "asr": 0.8716808007785347,
           "test_param_value": 0.6,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 2.1920294761657715,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3031713574601413,
-          "S_stealth_tpr": 0.629454731177813
+          "S_stealth": 0.49958342620499385,
+          "S_stealth_tpr": 0.8258667999226657
         }
       ]
     },
@@ -783,6 +876,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 0.8,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -794,11 +889,12 @@
           "asr": 0.8876685666620325,
           "test_param_value": 0.8,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 2.111130714416504,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2885656362902066,
-          "S_stealth_tpr": 0.496187980789492
+          "S_stealth": 0.4875150858310348,
+          "S_stealth_tpr": 0.6951374303303202
         }
       ]
     },
@@ -808,6 +904,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 1.0,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -819,6 +917,7 @@
           "asr": 0.8734881134436258,
           "test_param_value": 1.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.788537859916687,
           "nc_is_poisoned": false,
@@ -833,6 +932,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 1.2,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -844,6 +945,7 @@
           "asr": 0.8812734603086334,
           "test_param_value": 1.2,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.964860439300537,
           "nc_is_poisoned": false,
@@ -858,6 +960,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 1.4,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -869,6 +973,7 @@
           "asr": 0.8759905463645211,
           "test_param_value": 1.4,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 1.944960594177246,
           "nc_is_poisoned": false,
@@ -883,6 +988,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 2.0,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -894,6 +1001,7 @@
           "asr": 0.8309467537884054,
           "test_param_value": 2.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 2.9778645038604736,
           "nc_is_poisoned": false,
@@ -908,6 +1016,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.01,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -919,11 +1029,12 @@
           "asr": 0.9783122480189073,
           "test_param_value": 4.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 4.201309680938721,
           "nc_is_poisoned": true,
-          "S_stealth": 0.35960166270483945,
-          "S_stealth_tpr": 0.6112574795861199
+          "S_stealth": 0.4929928780387812,
+          "S_stealth_tpr": 0.7446486949200617
         }
       ]
     },
@@ -933,6 +1044,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 0.4,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -944,6 +1057,7 @@
           "asr": 0.855554010843876,
           "test_param_value": 0.4,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 2.2195630073547363,
           "nc_is_poisoned": false,
@@ -958,6 +1072,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 0.6,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -969,6 +1085,7 @@
           "asr": 0.9887390518559711,
           "test_param_value": 0.6,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 3.551323413848877,
           "nc_is_poisoned": false,
@@ -983,6 +1100,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 0.8,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -994,11 +1113,12 @@
           "asr": 0.9929097733907966,
           "test_param_value": 0.8,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 13.19038200378418,
           "nc_is_poisoned": true,
-          "S_stealth": 0.41870868133380246,
-          "S_stealth_tpr": 0.6182587774969108
+          "S_stealth": 0.27015862844023275,
+          "S_stealth_tpr": 0.4697087246033411
         }
       ]
     },
@@ -1008,6 +1128,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 1.0,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1019,11 +1141,12 @@
           "asr": 0.99346586959544,
           "test_param_value": 1.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 3.296175956726074,
           "nc_is_poisoned": true,
-          "S_stealth": 0.28306294792493014,
-          "S_stealth_tpr": 0.4992526503972333
+          "S_stealth": 0.4448435833185409,
+          "S_stealth_tpr": 0.6610332857908441
         }
       ]
     },
@@ -1033,6 +1156,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 1.2,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1044,11 +1169,12 @@
           "asr": 0.9930487974419575,
           "test_param_value": 1.2,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 4.5880866050720215,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3174987908002898,
-          "S_stealth_tpr": 0.5907818230144307
+          "S_stealth": 0.43875879029851783,
+          "S_stealth_tpr": 0.7120418225126588
         }
       ]
     },
@@ -1058,6 +1184,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 1.4,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1069,6 +1197,7 @@
           "asr": 0.989712220214097,
           "test_param_value": 1.4,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 3.102606773376465,
           "nc_is_poisoned": false,
@@ -1083,6 +1212,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 2.0,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1094,6 +1225,7 @@
           "asr": 0.9851244265257889,
           "test_param_value": 2.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 1.6836910247802734,
           "nc_is_poisoned": false,
@@ -1108,6 +1240,8 @@
       "trigger_type": "WaNet",
       "poison_rate": 0.05,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1119,11 +1253,12 @@
           "asr": 0.9970804949256221,
           "test_param_value": 4.0,
           "test_param_type": "test_s",
+          "alpha": null,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 2.4848473072052,
           "nc_is_poisoned": true,
-          "S_stealth": 0.29345754133423996,
-          "S_stealth_tpr": 0.6537837506602109
+          "S_stealth": 0.4806854109006002,
+          "S_stealth_tpr": 0.8410116202265712
         }
       ]
     },
@@ -1133,6 +1268,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.005,
       "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": 0.005,
       "group_size": 1,
       "data_points": [
         {
@@ -1144,6 +1281,7 @@
           "asr": 0.007368274711525094,
           "test_param_value": 0.01,
           "test_param_type": "test_alpha",
+          "alpha": 0.01,
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 4.420733451843262,
           "nc_is_poisoned": false,
@@ -1158,6 +1296,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.005,
       "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": 0.005,
       "group_size": 1,
       "data_points": [
         {
@@ -1169,6 +1309,7 @@
           "asr": 0.00834144306965105,
           "test_param_value": 0.05,
           "test_param_type": "test_alpha",
+          "alpha": 0.05,
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 1.8610173463821411,
           "nc_is_poisoned": false,
@@ -1183,6 +1324,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.005,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.005,
       "group_size": 1,
       "data_points": [
         {
@@ -1194,6 +1337,7 @@
           "asr": 0.415681912970944,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 3.8932735919952393,
           "nc_is_poisoned": false,
@@ -1208,6 +1352,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.005,
       "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": 0.005,
       "group_size": 1,
       "data_points": [
         {
@@ -1219,6 +1365,7 @@
           "asr": 0.7913248992075629,
           "test_param_value": 0.15,
           "test_param_type": "test_alpha",
+          "alpha": 0.15,
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 1.0806673765182495,
           "nc_is_poisoned": false,
@@ -1233,6 +1380,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.005,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.005,
       "group_size": 1,
       "data_points": [
         {
@@ -1244,6 +1393,7 @@
           "asr": 0.8750173780063951,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 1.175864338874817,
           "nc_is_poisoned": false,
@@ -1258,6 +1408,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.005,
       "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": 0.005,
       "group_size": 1,
       "data_points": [
         {
@@ -1269,6 +1421,7 @@
           "asr": 0.8752954261087168,
           "test_param_value": 0.25,
           "test_param_type": "test_alpha",
+          "alpha": 0.25,
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 2.126964569091797,
           "nc_is_poisoned": false,
@@ -1283,6 +1436,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.005,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.005,
       "group_size": 1,
       "data_points": [
         {
@@ -1294,6 +1449,7 @@
           "asr": 0.9382733212845822,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": 0.005,
           "nc_max_anomaly_index": 1.7466552257537842,
           "nc_is_poisoned": false,
@@ -1308,6 +1464,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.01,
       "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1319,6 +1477,7 @@
           "asr": 0.007507298762685945,
           "test_param_value": 0.01,
           "test_param_type": "test_alpha",
+          "alpha": 0.01,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.9233771562576294,
           "nc_is_poisoned": false,
@@ -1333,6 +1492,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.01,
       "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1344,6 +1505,7 @@
           "asr": 0.016543862088141247,
           "test_param_value": 0.05,
           "test_param_type": "test_alpha",
+          "alpha": 0.05,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 3.7063355445861816,
           "nc_is_poisoned": false,
@@ -1358,6 +1520,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.01,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1369,6 +1533,7 @@
           "asr": 0.6404838036980398,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 4.0029096603393555,
           "nc_is_poisoned": false,
@@ -1383,6 +1548,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.01,
       "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1394,6 +1561,7 @@
           "asr": 0.8045321840678438,
           "test_param_value": 0.15,
           "test_param_type": "test_alpha",
+          "alpha": 0.15,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.780069351196289,
           "nc_is_poisoned": false,
@@ -1408,6 +1576,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.01,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1419,6 +1589,7 @@
           "asr": 0.8682051994995135,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.4252961874008179,
           "nc_is_poisoned": false,
@@ -1433,6 +1604,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.01,
       "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1444,6 +1617,7 @@
           "asr": 0.8974002502432921,
           "test_param_value": 0.25,
           "test_param_type": "test_alpha",
+          "alpha": 0.25,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.7044007778167725,
           "nc_is_poisoned": false,
@@ -1458,6 +1632,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.01,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1469,6 +1645,7 @@
           "asr": 0.9309050465730572,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 1.8850202560424805,
           "nc_is_poisoned": false,
@@ -1483,6 +1660,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.05,
       "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": 0.05,
       "group_size": 1,
       "data_points": [
         {
@@ -1494,6 +1673,7 @@
           "asr": 0.025163353260114,
           "test_param_value": 0.01,
           "test_param_type": "test_alpha",
+          "alpha": 0.01,
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 3.5635671615600586,
           "nc_is_poisoned": false,
@@ -1508,6 +1688,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.05,
       "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": 0.05,
       "group_size": 1,
       "data_points": [
         {
@@ -1519,6 +1701,7 @@
           "asr": 0.48380369803976087,
           "test_param_value": 0.05,
           "test_param_type": "test_alpha",
+          "alpha": 0.05,
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 1.7131489515304565,
           "nc_is_poisoned": false,
@@ -1533,6 +1716,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.05,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.05,
       "group_size": 1,
       "data_points": [
         {
@@ -1544,11 +1729,12 @@
           "asr": 0.6065619352147922,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 2.8365657329559326,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2844123403958239,
-          "S_stealth_tpr": 0.5835318907876889
+          "S_stealth": 0.4606086000859211,
+          "S_stealth_tpr": 0.759728150477786
         }
       ]
     },
@@ -1558,6 +1744,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.05,
       "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": 0.05,
       "group_size": 1,
       "data_points": [
         {
@@ -1569,11 +1757,12 @@
           "asr": 0.7209787293201724,
           "test_param_value": 0.15,
           "test_param_type": "test_alpha",
+          "alpha": 0.15,
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 6.192278861999512,
           "nc_is_poisoned": true,
-          "S_stealth": 0.30223278060156106,
-          "S_stealth_tpr": 0.6386556226970129
+          "S_stealth": 0.37317746577648414,
+          "S_stealth_tpr": 0.709600307871936
         }
       ]
     },
@@ -1583,6 +1772,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.05,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.05,
       "group_size": 1,
       "data_points": [
         {
@@ -1594,6 +1785,7 @@
           "asr": 0.7436396496593911,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 2.460522413253784,
           "nc_is_poisoned": false,
@@ -1608,6 +1800,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.05,
       "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": 0.05,
       "group_size": 1,
       "data_points": [
         {
@@ -1619,11 +1813,12 @@
           "asr": 0.7649103294870012,
           "test_param_value": 0.25,
           "test_param_type": "test_alpha",
+          "alpha": 0.25,
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 2.444650173187256,
           "nc_is_poisoned": true,
-          "S_stealth": 0.226073754404119,
-          "S_stealth_tpr": 0.4383681599591344
+          "S_stealth": 0.41456240267345257,
+          "S_stealth_tpr": 0.626856808228468
         }
       ]
     },
@@ -1633,6 +1828,8 @@
       "trigger_type": "adaptive_blend",
       "poison_rate": 0.05,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.05,
       "group_size": 1,
       "data_points": [
         {
@@ -1644,6 +1841,7 @@
           "asr": 0.8541637703322675,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": 0.05,
           "nc_max_anomaly_index": 1.7211384773254395,
           "nc_is_poisoned": false,
@@ -1658,6 +1856,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.005,
       "train_param_value": 0.0,
+      "alpha": 0.0,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1669,11 +1869,12 @@
           "asr": 0.32045043792576117,
           "test_param_value": 0.0,
           "test_param_type": "test_alpha",
+          "alpha": 0.0,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.118845224380493,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2746532089384149,
-          "S_stealth_tpr": 0.5018963118392862
+          "S_stealth": 0.47336069371971246,
+          "S_stealth_tpr": 0.7006037966205838
         }
       ]
     },
@@ -1683,6 +1884,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.005,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1694,11 +1897,12 @@
           "asr": 0.6995690254414013,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 8.394145965576172,
           "nc_is_poisoned": true,
-          "S_stealth": 0.36596012448847526,
-          "S_stealth_tpr": 0.528009912715292
+          "S_stealth": 0.3678434892785235,
+          "S_stealth_tpr": 0.5298932775053402
         }
       ]
     },
@@ -1708,6 +1912,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.005,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1719,11 +1925,12 @@
           "asr": 0.4990963436674545,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 7.317033767700195,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2999365823342501,
-          "S_stealth_tpr": 0.4697921284958834
+          "S_stealth": 0.3356034531620321,
+          "S_stealth_tpr": 0.5054589993236654
         }
       ]
     },
@@ -1733,6 +1940,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.005,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1744,11 +1953,12 @@
           "asr": 0.3575698595857083,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.3902652263641357,
           "nc_is_poisoned": true,
-          "S_stealth": 0.28644779463431996,
-          "S_stealth_tpr": 0.4289461047103206
+          "S_stealth": 0.4766422208003145,
+          "S_stealth_tpr": 0.6191405308763152
         }
       ]
     },
@@ -1758,6 +1968,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.005,
       "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": 0.01,
       "group_size": 1,
       "data_points": [
         {
@@ -1769,11 +1981,12 @@
           "asr": 0.26553593771722506,
           "test_param_value": 0.4,
           "test_param_type": "test_alpha",
+          "alpha": 0.4,
           "cover_rate": 0.01,
           "nc_max_anomaly_index": 2.9141716957092285,
           "nc_is_poisoned": true,
-          "S_stealth": 0.31535399427012073,
-          "S_stealth_tpr": 0.5258567486382569
+          "S_stealth": 0.4891161514438689,
+          "S_stealth_tpr": 0.699618905812005
         }
       ]
     },
@@ -1783,6 +1996,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.01,
       "train_param_value": 0.0,
+      "alpha": 0.0,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -1794,6 +2009,7 @@
           "asr": 0.2482969553732796,
           "test_param_value": 0.0,
           "test_param_type": "test_alpha",
+          "alpha": 0.0,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 2.244494915008545,
           "nc_is_poisoned": false,
@@ -1808,6 +2024,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.01,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -1819,11 +2037,12 @@
           "asr": 0.2680383706381204,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 4.049386501312256,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3260542479331359,
-          "S_stealth_tpr": 0.55898835916966
+          "S_stealth": 0.4642105171456834,
+          "S_stealth_tpr": 0.6971446283822075
         }
       ]
     },
@@ -1833,6 +2052,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.01,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -1844,11 +2065,12 @@
           "asr": 0.3041846239399416,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 3.43424391746521,
           "nc_is_poisoned": true,
-          "S_stealth": 0.32366231134987955,
-          "S_stealth_tpr": 0.5256009990811106
+          "S_stealth": 0.48111246028679044,
+          "S_stealth_tpr": 0.6830511480180215
         }
       ]
     },
@@ -1858,6 +2080,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.01,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -1869,11 +2093,12 @@
           "asr": 0.30849436952592796,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 4.410798072814941,
           "nc_is_poisoned": true,
-          "S_stealth": 0.36795918090928126,
-          "S_stealth_tpr": 0.5690027397403911
+          "S_stealth": 0.4947798157913987,
+          "S_stealth_tpr": 0.6958233746225085
         }
       ]
     },
@@ -1883,6 +2108,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.01,
       "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": 0.02,
       "group_size": 1,
       "data_points": [
         {
@@ -1894,11 +2121,12 @@
           "asr": 0.27123592381482,
           "test_param_value": 0.4,
           "test_param_type": "test_alpha",
+          "alpha": 0.4,
           "cover_rate": 0.02,
           "nc_max_anomaly_index": 3.052959680557251,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3520483264535182,
-          "S_stealth_tpr": 0.5391688170358448
+          "S_stealth": 0.5214574136933039,
+          "S_stealth_tpr": 0.7085779042756306
         }
       ]
     },
@@ -1908,6 +2136,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.05,
       "train_param_value": 0.0,
+      "alpha": 0.0,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1919,6 +2149,7 @@
           "asr": 0.26567496176838595,
           "test_param_value": 0.0,
           "test_param_type": "test_alpha",
+          "alpha": 0.0,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 1.4561485052108765,
           "nc_is_poisoned": false,
@@ -1933,6 +2164,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.05,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1944,6 +2177,7 @@
           "asr": 0.26734325038231616,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 1.9238015413284302,
           "nc_is_poisoned": false,
@@ -1958,6 +2192,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.05,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1969,6 +2205,7 @@
           "asr": 0.19282635896010009,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 2.3364784717559814,
           "nc_is_poisoned": false,
@@ -1983,6 +2220,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.05,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -1994,6 +2233,7 @@
           "asr": 0.23814819963853748,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 4.240011215209961,
           "nc_is_poisoned": false,
@@ -2008,6 +2248,8 @@
       "trigger_type": "adaptive_patch",
       "poison_rate": 0.05,
       "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": 0.1,
       "group_size": 1,
       "data_points": [
         {
@@ -2019,6 +2261,7 @@
           "asr": 0.2560823022382872,
           "test_param_value": 0.4,
           "test_param_type": "test_alpha",
+          "alpha": 0.4,
           "cover_rate": 0.1,
           "nc_max_anomaly_index": 1.8323771953582764,
           "nc_is_poisoned": false,
@@ -2033,6 +2276,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2044,11 +2289,12 @@
           "asr": 0.703600722925066,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.4983811378479004,
           "nc_is_poisoned": true,
-          "S_stealth": 0.20307100741709194,
-          "S_stealth_tpr": 0.3285822803537475
+          "S_stealth": 0.35850949946596933,
+          "S_stealth_tpr": 0.4840207724026248
         }
       ]
     },
@@ -2058,6 +2304,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2069,11 +2317,12 @@
           "asr": 0.9901292923675796,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": null,
           "nc_max_anomaly_index": 6.372916221618652,
           "nc_is_poisoned": true,
-          "S_stealth": 0.11194855864551898,
-          "S_stealth_tpr": 0.17304425448990224
+          "S_stealth": 0.17722757283336424,
+          "S_stealth_tpr": 0.2383232686777475
         }
       ]
     },
@@ -2083,6 +2332,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2094,11 +2345,12 @@
           "asr": 0.9966634227721396,
           "test_param_value": 0.4,
           "test_param_type": "test_alpha",
+          "alpha": 0.4,
           "cover_rate": null,
           "nc_max_anomaly_index": 5.870650291442871,
           "nc_is_poisoned": true,
-          "S_stealth": 0.11475069689844047,
-          "S_stealth_tpr": 0.19875668448441647
+          "S_stealth": 0.19578322693923245,
+          "S_stealth_tpr": 0.27978921452520844
         }
       ]
     },
@@ -2108,6 +2360,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.5,
+      "alpha": 0.5,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2119,11 +2373,12 @@
           "asr": 0.9987487835395523,
           "test_param_value": 0.5,
           "test_param_type": "test_alpha",
+          "alpha": 0.5,
           "cover_rate": null,
           "nc_max_anomaly_index": 6.7308759689331055,
           "nc_is_poisoned": true,
-          "S_stealth": 0.13418396389892573,
-          "S_stealth_tpr": 0.21601020152650224
+          "S_stealth": 0.18823560984369408,
+          "S_stealth_tpr": 0.2700618474712706
         }
       ]
     },
@@ -2133,6 +2388,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.6,
+      "alpha": 0.6,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2144,11 +2401,12 @@
           "asr": 0.9997219518976783,
           "test_param_value": 0.6,
           "test_param_type": "test_alpha",
+          "alpha": 0.6,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.432164192199707,
           "nc_is_poisoned": true,
-          "S_stealth": 0.043140468080399536,
-          "S_stealth_tpr": 0.10765370119776752
+          "S_stealth": 0.2320207377749771,
+          "S_stealth_tpr": 0.29653397089234507
         }
       ]
     },
@@ -2158,6 +2416,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.7,
+      "alpha": 0.7,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2169,11 +2429,12 @@
           "asr": 1.0,
           "test_param_value": 0.7,
           "test_param_type": "test_alpha",
+          "alpha": 0.7,
           "cover_rate": null,
           "nc_max_anomaly_index": 6.683238983154297,
           "nc_is_poisoned": true,
-          "S_stealth": 0.09446988401495968,
-          "S_stealth_tpr": 0.11186818378889765
+          "S_stealth": 0.15001565879779283,
+          "S_stealth_tpr": 0.16741395857173078
         }
       ]
     },
@@ -2183,6 +2444,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.8,
+      "alpha": 0.8,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2194,11 +2457,12 @@
           "asr": 0.9991658556930348,
           "test_param_value": 0.8,
           "test_param_type": "test_alpha",
+          "alpha": 0.8,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.8312509059906006,
           "nc_is_poisoned": true,
-          "S_stealth": 0.06543906747230324,
-          "S_stealth_tpr": 0.14784426975564555
+          "S_stealth": 0.21043713572503048,
+          "S_stealth_tpr": 0.2928423380083728
         }
       ]
     },
@@ -2208,6 +2472,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 0.9,
+      "alpha": 0.9,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2219,11 +2485,12 @@
           "asr": 0.9998609759488392,
           "test_param_value": 0.9,
           "test_param_type": "test_alpha",
+          "alpha": 0.9,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.55169939994812,
           "nc_is_poisoned": true,
-          "S_stealth": 0.025054020442834737,
-          "S_stealth_tpr": 0.05955974758461766
+          "S_stealth": 0.21018508144712572,
+          "S_stealth_tpr": 0.24469080858890865
         }
       ]
     },
@@ -2233,6 +2500,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.005,
       "train_param_value": 1.0,
+      "alpha": 1.0,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2244,11 +2513,12 @@
           "asr": 0.9998609759488392,
           "test_param_value": 1.0,
           "test_param_type": "test_alpha",
+          "alpha": 1.0,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.07330322265625,
           "nc_is_poisoned": true,
-          "S_stealth": 0.05537424461443501,
-          "S_stealth_tpr": 0.12844974674190587
+          "S_stealth": 0.19278036848323743,
+          "S_stealth_tpr": 0.26585587061070826
         }
       ]
     },
@@ -2258,6 +2528,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2269,11 +2541,12 @@
           "asr": 0.6304740720144585,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.664663791656494,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2329677211887139,
-          "S_stealth_tpr": 0.35289177710488806
+          "S_stealth": 0.41455566642767006,
+          "S_stealth_tpr": 0.5344797223438442
         }
       ]
     },
@@ -2283,6 +2556,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2294,11 +2569,12 @@
           "asr": 0.9470318365077158,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.823713302612305,
           "nc_is_poisoned": true,
-          "S_stealth": 0.13159746003516254,
-          "S_stealth_tpr": 0.2338333327940226
+          "S_stealth": 0.24546705398910207,
+          "S_stealth_tpr": 0.3477029267479621
         }
       ]
     },
@@ -2308,6 +2584,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2319,6 +2597,7 @@
           "asr": 0.9877658834978451,
           "test_param_value": 0.4,
           "test_param_type": "test_alpha",
+          "alpha": 0.4,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.8811174631118774,
           "nc_is_poisoned": false,
@@ -2333,6 +2612,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.5,
+      "alpha": 0.5,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2344,11 +2625,12 @@
           "asr": 0.998192687334909,
           "test_param_value": 0.5,
           "test_param_type": "test_alpha",
+          "alpha": 0.5,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.478927135467529,
           "nc_is_poisoned": true,
-          "S_stealth": 0.08270004542798154,
-          "S_stealth_tpr": 0.15098652510687546
+          "S_stealth": 0.2073838197267655,
+          "S_stealth_tpr": 0.27567029940565946
         }
       ]
     },
@@ -2358,6 +2640,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.6,
+      "alpha": 0.6,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2369,11 +2653,12 @@
           "asr": 0.9988878075907132,
           "test_param_value": 0.6,
           "test_param_type": "test_alpha",
+          "alpha": 0.6,
           "cover_rate": null,
           "nc_max_anomaly_index": 8.323895454406738,
           "nc_is_poisoned": true,
-          "S_stealth": 0.16063387339646626,
-          "S_stealth_tpr": 0.27294771036712806
+          "S_stealth": 0.1647206377700737,
+          "S_stealth_tpr": 0.2770344747407355
         }
       ]
     },
@@ -2383,6 +2668,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.7,
+      "alpha": 0.7,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2394,11 +2681,12 @@
           "asr": 0.9986097594883915,
           "test_param_value": 0.7,
           "test_param_type": "test_alpha",
+          "alpha": 0.7,
           "cover_rate": null,
           "nc_max_anomaly_index": 14.83074951171875,
           "nc_is_poisoned": true,
-          "S_stealth": 0.25324866515544264,
-          "S_stealth_tpr": 0.36163811429764725
+          "S_stealth": 0.053248665155442604,
+          "S_stealth_tpr": 0.1616381142976472
         }
       ]
     },
@@ -2408,6 +2696,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.8,
+      "alpha": 0.8,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2419,11 +2709,12 @@
           "asr": 1.0,
           "test_param_value": 0.8,
           "test_param_type": "test_alpha",
+          "alpha": 0.8,
           "cover_rate": null,
           "nc_max_anomaly_index": 14.349135398864746,
           "nc_is_poisoned": true,
-          "S_stealth": 0.22650543840742782,
-          "S_stealth_tpr": 0.3161501472668997
+          "S_stealth": 0.041611212273461484,
+          "S_stealth_tpr": 0.1312559211329334
         }
       ]
     },
@@ -2433,6 +2724,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 0.9,
+      "alpha": 0.9,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2444,11 +2737,12 @@
           "asr": 0.9937439176977617,
           "test_param_value": 0.9,
           "test_param_type": "test_alpha",
+          "alpha": 0.9,
           "cover_rate": null,
           "nc_max_anomaly_index": 5.413886547088623,
           "nc_is_poisoned": true,
-          "S_stealth": 0.12373229445671156,
-          "S_stealth_tpr": 0.24300562134651177
+          "S_stealth": 0.219091169279077,
+          "S_stealth_tpr": 0.3383644961688772
         }
       ]
     },
@@ -2458,6 +2752,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.01,
       "train_param_value": 1.0,
+      "alpha": 1.0,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2469,11 +2765,12 @@
           "asr": 0.9991658556930348,
           "test_param_value": 1.0,
           "test_param_type": "test_alpha",
+          "alpha": 1.0,
           "cover_rate": null,
           "nc_max_anomaly_index": 7.153319358825684,
           "nc_is_poisoned": true,
-          "S_stealth": 0.14386297189638164,
-          "S_stealth_tpr": 0.25671609047718136
+          "S_stealth": 0.1846647272158468,
+          "S_stealth_tpr": 0.29751784579664653
         }
       ]
     },
@@ -2483,6 +2780,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2494,11 +2793,12 @@
           "asr": 0.9257611566801056,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.964104652404785,
           "nc_is_poisoned": true,
-          "S_stealth": 0.12928731572760774,
-          "S_stealth_tpr": 0.28697241575725413
+          "S_stealth": 0.3014833311871197,
+          "S_stealth_tpr": 0.459168431216766
         }
       ]
     },
@@ -2508,6 +2808,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2519,11 +2821,12 @@
           "asr": 0.9756707910468511,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.205690622329712,
           "nc_is_poisoned": true,
-          "S_stealth": 0.10724239679247166,
-          "S_stealth_tpr": 0.24508817166615732
+          "S_stealth": 0.27186109478247117,
+          "S_stealth_tpr": 0.4097068696561568
         }
       ]
     },
@@ -2533,6 +2836,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2544,11 +2849,12 @@
           "asr": 0.9880439316001668,
           "test_param_value": 0.4,
           "test_param_type": "test_alpha",
+          "alpha": 0.4,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.143829822540283,
           "nc_is_poisoned": true,
-          "S_stealth": 0.10187450654274476,
-          "S_stealth_tpr": 0.2555763072686348
+          "S_stealth": 0.23706857133571319,
+          "S_stealth_tpr": 0.39077037206160314
         }
       ]
     },
@@ -2558,6 +2864,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.5,
+      "alpha": 0.5,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2569,11 +2877,12 @@
           "asr": 0.9929097733907966,
           "test_param_value": 0.5,
           "test_param_type": "test_alpha",
+          "alpha": 0.5,
           "cover_rate": null,
           "nc_max_anomaly_index": 6.280982971191406,
           "nc_is_poisoned": true,
-          "S_stealth": 0.14545437873740097,
-          "S_stealth_tpr": 0.346531286247853
+          "S_stealth": 0.21361686924925583,
+          "S_stealth_tpr": 0.41469377675970787
         }
       ]
     },
@@ -2583,6 +2892,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.6,
+      "alpha": 0.6,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2594,11 +2905,12 @@
           "asr": 0.998192687334909,
           "test_param_value": 0.6,
           "test_param_type": "test_alpha",
+          "alpha": 0.6,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.0492827892303467,
           "nc_is_poisoned": true,
-          "S_stealth": 0.10875954240659108,
-          "S_stealth_tpr": 0.3388416238169273
+          "S_stealth": 0.2782839549398676,
+          "S_stealth_tpr": 0.5083660363502038
         }
       ]
     },
@@ -2608,6 +2920,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.7,
+      "alpha": 0.7,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2619,11 +2933,12 @@
           "asr": 0.9984707354372306,
           "test_param_value": 0.7,
           "test_param_type": "test_alpha",
+          "alpha": 0.7,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.696346282958984,
           "nc_is_poisoned": true,
-          "S_stealth": 0.09194437023296001,
-          "S_stealth_tpr": 0.21471865390984365
+          "S_stealth": 0.20980881679923763,
+          "S_stealth_tpr": 0.3325831004761213
         }
       ]
     },
@@ -2633,6 +2948,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.8,
+      "alpha": 0.8,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2644,11 +2961,12 @@
           "asr": 0.9995829278465175,
           "test_param_value": 0.8,
           "test_param_type": "test_alpha",
+          "alpha": 0.8,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.465878486633301,
           "nc_is_poisoned": true,
-          "S_stealth": 0.08211300677996575,
-          "S_stealth_tpr": 0.19952931262266435
+          "S_stealth": 0.2072060505193379,
+          "S_stealth_tpr": 0.3246223563620365
         }
       ]
     },
@@ -2658,6 +2976,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 0.9,
+      "alpha": 0.9,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2669,11 +2989,12 @@
           "asr": 1.0,
           "test_param_value": 0.9,
           "test_param_type": "test_alpha",
+          "alpha": 0.9,
           "cover_rate": null,
           "nc_max_anomaly_index": 14.384140968322754,
           "nc_is_poisoned": true,
-          "S_stealth": 0.23346556493847553,
-          "S_stealth_tpr": 0.34836437460567965
+          "S_stealth": 0.04747339295497659,
+          "S_stealth_tpr": 0.1623722026221807
         }
       ]
     },
@@ -2683,6 +3004,8 @@
       "trigger_type": "basic",
       "poison_rate": 0.05,
       "train_param_value": 1.0,
+      "alpha": 1.0,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -2694,11 +3017,12 @@
           "asr": 0.9998609759488392,
           "test_param_value": 1.0,
           "test_param_type": "test_alpha",
+          "alpha": 1.0,
           "cover_rate": null,
           "nc_max_anomaly_index": 7.139004707336426,
           "nc_is_poisoned": true,
-          "S_stealth": 0.12060920281373115,
-          "S_stealth_tpr": 0.24360244227901817
+          "S_stealth": 0.16185993560830897,
+          "S_stealth_tpr": 0.284853175073596
         }
       ]
     },
@@ -2707,23 +3031,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.01,
-      "train_param_value": 0.05,
+      "train_param_value": 0.2,
+      "alpha": 0.1,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 109,
           "point_id": 1,
-          "stealth_tpr_avg": 0.4556013736467448,
-          "stealth_auc_avg": 0.19716411431687741,
-          "transfer_rate": 0.998281,
-          "asr": 0.9374391769776171,
-          "test_param_value": 0.05,
+          "stealth_tpr_avg": 0.3746043677606177,
+          "stealth_auc_avg": 0.12582754411502906,
+          "transfer_rate": 0.915937,
+          "asr": 0.9001807312665091,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.1,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 2.2667596340179443,
+          "nc_max_anomaly_index": 1.3422402143478394,
           "nc_is_poisoned": false,
-          "S_stealth": 0.15773129145350195,
-          "S_stealth_tpr": 0.3644810989173959
+          "S_stealth": 0.10066203529202325,
+          "S_stealth_tpr": 0.29968349420849416
         }
       ]
     },
@@ -2732,23 +3059,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.01,
-      "train_param_value": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.15,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 110,
           "point_id": 1,
-          "stealth_tpr_avg": 0.5519077617454342,
-          "stealth_auc_avg": 0.25513333882874734,
-          "transfer_rate": 0.772969,
-          "asr": 0.997219518976783,
-          "test_param_value": 0.1,
+          "stealth_tpr_avg": 0.5335579136988571,
+          "stealth_auc_avg": 0.2902285308913548,
+          "transfer_rate": 0.396562,
+          "asr": 0.8392881968580564,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.15,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 3.176162004470825,
-          "nc_is_poisoned": false,
-          "S_stealth": 0.20410667106299787,
-          "S_stealth_tpr": 0.4415262093963474
+          "nc_max_anomaly_index": 3.5989320278167725,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.40832518691564146,
+          "S_stealth_tpr": 0.6029886931616433
         }
       ]
     },
@@ -2757,23 +3087,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.01,
-      "train_param_value": 0.15,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 111,
           "point_id": 1,
-          "stealth_tpr_avg": 0.46996950594327824,
-          "stealth_auc_avg": 0.25127701811732805,
-          "transfer_rate": 0.897656,
-          "asr": 1.0,
-          "test_param_value": 0.15,
+          "stealth_tpr_avg": 0.6228945052127841,
+          "stealth_auc_avg": 0.256303803761215,
+          "transfer_rate": 0.546094,
+          "asr": 0.8134297233421381,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.2,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 1.224567174911499,
+          "nc_max_anomaly_index": 1.6012060642242432,
           "nc_is_poisoned": false,
-          "S_stealth": 0.20102161449386247,
-          "S_stealth_tpr": 0.3759756047546226
+          "S_stealth": 0.205043043008972,
+          "S_stealth_tpr": 0.4983156041702273
         }
       ]
     },
@@ -2783,22 +3116,25 @@
       "trigger_type": "belt",
       "poison_rate": 0.01,
       "train_param_value": 0.2,
+      "alpha": 0.25,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 112,
           "point_id": 1,
-          "stealth_tpr_avg": 0.518002024537745,
-          "stealth_auc_avg": 0.26482891246646423,
-          "transfer_rate": 0.968437,
-          "asr": 1.0,
+          "stealth_tpr_avg": 0.5109255573248408,
+          "stealth_auc_avg": 0.26115687753607486,
+          "transfer_rate": 0.577812,
+          "asr": 0.9603781454191576,
           "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.25,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 1.725853443145752,
-          "nc_is_poisoned": false,
-          "S_stealth": 0.2118631299731714,
-          "S_stealth_tpr": 0.41440161963019606
+          "nc_max_anomaly_index": 3.6130049228668213,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3848471668259711,
+          "S_stealth_tpr": 0.5846621106569839
         }
       ]
     },
@@ -2807,23 +3143,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.01,
-      "train_param_value": 0.25,
+      "train_param_value": 0.2,
+      "alpha": 0.3,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 113,
           "point_id": 1,
-          "stealth_tpr_avg": 0.3183089688282772,
-          "stealth_auc_avg": 0.17766074304457913,
-          "transfer_rate": 0.913594,
-          "asr": 0.999026831641874,
-          "test_param_value": 0.25,
+          "stealth_tpr_avg": 0.4897264971378248,
+          "stealth_auc_avg": 0.17884290971308614,
+          "transfer_rate": 0.477656,
+          "asr": 0.9471708605588767,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.3,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 2.3911495208740234,
-          "nc_is_poisoned": false,
-          "S_stealth": 0.1421285944356633,
-          "S_stealth_tpr": 0.25464717506262174
+          "nc_max_anomaly_index": 3.2822582721710205,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3241829087926382,
+          "S_stealth_tpr": 0.5728897787324292
         }
       ]
     },
@@ -2832,23 +3171,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.01,
-      "train_param_value": 0.3,
+      "train_param_value": 0.2,
+      "alpha": 0.35,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 114,
           "point_id": 1,
-          "stealth_tpr_avg": 0.41245113739051853,
-          "stealth_auc_avg": 0.18638675158379903,
-          "transfer_rate": 0.939844,
-          "asr": 1.0,
-          "test_param_value": 0.3,
+          "stealth_tpr_avg": 0.4505263956310679,
+          "stealth_auc_avg": 0.19547451274599603,
+          "transfer_rate": 0.573906,
+          "asr": 0.9737244543305992,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.35,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 2.810408592224121,
-          "nc_is_poisoned": false,
-          "S_stealth": 0.14910940126703923,
-          "S_stealth_tpr": 0.32996090991241483
+          "nc_max_anomaly_index": 5.659959316253662,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.30020002489001096,
+          "S_stealth_tpr": 0.5042415311980685
         }
       ]
     },
@@ -2857,23 +3199,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.02,
-      "train_param_value": 0.05,
+      "train_param_value": 0.2,
+      "alpha": 0.1,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 115,
           "point_id": 1,
-          "stealth_tpr_avg": 0.4769667090264942,
-          "stealth_auc_avg": 0.3068836933564757,
-          "transfer_rate": 0.982187,
-          "asr": 0.9025441401362436,
-          "test_param_value": 0.05,
+          "stealth_tpr_avg": 0.48165711792932964,
+          "stealth_auc_avg": 0.2261650519676096,
+          "transfer_rate": 0.6525,
+          "asr": 0.9560683998331712,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.1,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 6.9552321434021,
-          "nc_is_poisoned": true,
-          "S_stealth": 0.3219995851244849,
-          "S_stealth_tpr": 0.4580659976604997
+          "nc_max_anomaly_index": 16.188758850097656,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.1809320415740877,
+          "S_stealth_tpr": 0.38532569434346375
         }
       ]
     },
@@ -2882,23 +3227,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.02,
-      "train_param_value": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.15,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 116,
           "point_id": 1,
-          "stealth_tpr_avg": 0.5045346246173114,
-          "stealth_auc_avg": 0.29226007533052234,
-          "transfer_rate": 0.843906,
-          "asr": 0.999026831641874,
-          "test_param_value": 0.1,
+          "stealth_tpr_avg": 0.31752396456020493,
+          "stealth_auc_avg": 0.14662945966995455,
+          "transfer_rate": 0.632969,
+          "asr": 0.9767829834561379,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.15,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 6.209476470947266,
+          "nc_max_anomaly_index": 2.9852893352508545,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2986054182368733,
-          "S_stealth_tpr": 0.4684250576663045
+          "S_stealth": 0.30306934783787876,
+          "S_stealth_tpr": 0.43978495175007903
         }
       ]
     },
@@ -2907,23 +3255,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.02,
-      "train_param_value": 0.15,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 117,
           "point_id": 1,
-          "stealth_tpr_avg": 0.5165817575083427,
-          "stealth_auc_avg": 0.24350811597510036,
-          "transfer_rate": 0.942031,
-          "asr": 0.9998609759488392,
-          "test_param_value": 0.15,
+          "stealth_tpr_avg": 0.333656924721055,
+          "stealth_auc_avg": 0.1600279960892642,
+          "transfer_rate": 0.491875,
+          "asr": 0.9594049770610316,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.2,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 3.0736753940582275,
+          "nc_max_anomaly_index": 3.4911465644836426,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2104268222019728,
-          "S_stealth_tpr": 0.4288857354285667
+          "S_stealth": 0.30585509869619,
+          "S_stealth_tpr": 0.44475824160162264
         }
       ]
     },
@@ -2933,22 +3284,25 @@
       "trigger_type": "belt",
       "poison_rate": 0.02,
       "train_param_value": 0.2,
+      "alpha": 0.25,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 118,
           "point_id": 1,
-          "stealth_tpr_avg": 0.45997759106075353,
-          "stealth_auc_avg": 0.22948749297068327,
-          "transfer_rate": 0.959375,
-          "asr": 1.0,
+          "stealth_tpr_avg": 0.41286746177802947,
+          "stealth_auc_avg": 0.19035509849563226,
+          "transfer_rate": 0.503437,
+          "asr": 0.9820658974002503,
           "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.25,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 2.7249135971069336,
+          "nc_max_anomaly_index": 2.180103063583374,
           "nc_is_poisoned": false,
-          "S_stealth": 0.18358999437654663,
-          "S_stealth_tpr": 0.36798207284860285
+          "S_stealth": 0.15228407879650582,
+          "S_stealth_tpr": 0.3302939694224236
         }
       ]
     },
@@ -2957,23 +3311,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.02,
-      "train_param_value": 0.25,
+      "train_param_value": 0.2,
+      "alpha": 0.3,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 119,
           "point_id": 1,
-          "stealth_tpr_avg": 0.5333480119560684,
-          "stealth_auc_avg": 0.30231352185730476,
-          "transfer_rate": 0.984844,
-          "asr": 1.0,
-          "test_param_value": 0.25,
+          "stealth_tpr_avg": 0.4979774406192563,
+          "stealth_auc_avg": 0.25749132408722,
+          "transfer_rate": 0.544531,
+          "asr": 0.9833171138606979,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.3,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 1.0405504703521729,
+          "nc_max_anomaly_index": 1.3672515153884888,
           "nc_is_poisoned": false,
-          "S_stealth": 0.2418508174858438,
-          "S_stealth_tpr": 0.42667840956485475
+          "S_stealth": 0.20599305926977599,
+          "S_stealth_tpr": 0.3983819524954051
         }
       ]
     },
@@ -2982,23 +3339,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.02,
-      "train_param_value": 0.3,
+      "train_param_value": 0.2,
+      "alpha": 0.35,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 120,
           "point_id": 1,
-          "stealth_tpr_avg": 0.4803432721048242,
-          "stealth_auc_avg": 0.22863072305556043,
-          "transfer_rate": 0.992188,
-          "asr": 1.0,
-          "test_param_value": 0.3,
+          "stealth_tpr_avg": 0.43907932692307694,
+          "stealth_auc_avg": 0.19193277679956477,
+          "transfer_rate": 0.640938,
+          "asr": 0.9940219658000834,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.35,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 4.244946002960205,
+          "nc_max_anomaly_index": 1.1419905424118042,
           "nc_is_poisoned": false,
-          "S_stealth": 0.18290457844444835,
-          "S_stealth_tpr": 0.3842746176838594
+          "S_stealth": 0.15354622143965183,
+          "S_stealth_tpr": 0.35126346153846155
         }
       ]
     },
@@ -3007,23 +3367,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.1,
-      "train_param_value": 0.05,
+      "train_param_value": 0.2,
+      "alpha": 0.1,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 121,
           "point_id": 1,
-          "stealth_tpr_avg": 0.549819587628866,
-          "stealth_auc_avg": 0.25854307797918763,
-          "transfer_rate": 0.745781,
-          "asr": 0.9979146392325873,
-          "test_param_value": 0.05,
+          "stealth_tpr_avg": 0.5007004864951085,
+          "stealth_auc_avg": 0.15924880533879748,
+          "transfer_rate": 0.428906,
+          "asr": 0.9805366328374809,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.1,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 2.662992477416992,
-          "nc_is_poisoned": true,
-          "S_stealth": 0.21601427946989685,
-          "S_stealth_tpr": 0.44903548718963954
+          "nc_max_anomaly_index": 2.1454005241394043,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.127399044271038,
+          "S_stealth_tpr": 0.4005603891960868
         }
       ]
     },
@@ -3032,23 +3395,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.1,
-      "train_param_value": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.15,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 122,
           "point_id": 1,
-          "stealth_tpr_avg": 0.8042558737661616,
-          "stealth_auc_avg": 0.503035702996464,
-          "transfer_rate": 0.910625,
-          "asr": 1.0,
-          "test_param_value": 0.1,
+          "stealth_tpr_avg": 0.35084727285473927,
+          "stealth_auc_avg": 0.1379040768162666,
+          "transfer_rate": 0.559375,
+          "asr": 0.9915195328791881,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.15,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 1.127837061882019,
+          "nc_max_anomaly_index": 2.2475297451019287,
           "nc_is_poisoned": false,
-          "S_stealth": 0.4024285623971713,
-          "S_stealth_tpr": 0.6434046990129293
+          "S_stealth": 0.11032326145301329,
+          "S_stealth_tpr": 0.2806778182837914
         }
       ]
     },
@@ -3057,23 +3423,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.1,
-      "train_param_value": 0.15,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 123,
           "point_id": 1,
-          "stealth_tpr_avg": 0.547406184832476,
-          "stealth_auc_avg": 0.2787605094874427,
-          "transfer_rate": 0.918281,
-          "asr": 1.0,
-          "test_param_value": 0.15,
+          "stealth_tpr_avg": 0.4184584832029613,
+          "stealth_auc_avg": 0.18577273215342982,
+          "transfer_rate": 0.568438,
+          "asr": 0.9952731822605311,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.2,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 4.166144371032715,
+          "nc_max_anomaly_index": 1.171830177307129,
           "nc_is_poisoned": false,
-          "S_stealth": 0.22300840758995416,
-          "S_stealth_tpr": 0.43792494786598085
+          "S_stealth": 0.14861818572274385,
+          "S_stealth_tpr": 0.3347667865623691
         }
       ]
     },
@@ -3083,22 +3452,25 @@
       "trigger_type": "belt",
       "poison_rate": 0.1,
       "train_param_value": 0.2,
+      "alpha": 0.25,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 124,
           "point_id": 1,
-          "stealth_tpr_avg": 0.3683398399485611,
-          "stealth_auc_avg": 0.22102048821807874,
-          "transfer_rate": 0.989375,
-          "asr": 1.0,
+          "stealth_tpr_avg": 0.33225030445372306,
+          "stealth_auc_avg": 0.1394034850539979,
+          "transfer_rate": 0.667813,
+          "asr": 0.9988878075907132,
           "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.25,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 2.131744384765625,
-          "nc_is_poisoned": false,
-          "S_stealth": 0.176816390574463,
-          "S_stealth_tpr": 0.2946718719588489
+          "nc_max_anomaly_index": 2.910900831222534,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.29845516178314596,
+          "S_stealth_tpr": 0.452732617302926
         }
       ]
     },
@@ -3107,23 +3479,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.1,
-      "train_param_value": 0.25,
+      "train_param_value": 0.2,
+      "alpha": 0.3,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 125,
           "point_id": 1,
-          "stealth_tpr_avg": 0.45831980310718756,
-          "stealth_auc_avg": 0.25162264121365796,
-          "transfer_rate": 0.998437,
-          "asr": 1.0,
-          "test_param_value": 0.25,
+          "stealth_tpr_avg": 0.5936851045296168,
+          "stealth_auc_avg": 0.2213630559809845,
+          "transfer_rate": 0.595625,
+          "asr": 0.9974975670791046,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.3,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 2.434720277786255,
+          "nc_max_anomaly_index": 1.4803457260131836,
           "nc_is_poisoned": false,
-          "S_stealth": 0.20129811297092637,
-          "S_stealth_tpr": 0.36665584248575006
+          "S_stealth": 0.1770904447847876,
+          "S_stealth_tpr": 0.47494808362369345
         }
       ]
     },
@@ -3132,23 +3507,26 @@
       "attack_type": "belt",
       "trigger_type": "belt",
       "poison_rate": 0.1,
-      "train_param_value": 0.3,
+      "train_param_value": 0.2,
+      "alpha": 0.35,
+      "cover_rate": 0.5,
       "group_size": 1,
       "data_points": [
         {
           "group_id": 126,
           "point_id": 1,
-          "stealth_tpr_avg": 0.3557737427012373,
-          "stealth_auc_avg": 0.1800687230901813,
-          "transfer_rate": 0.997031,
-          "asr": 1.0,
-          "test_param_value": 0.3,
+          "stealth_tpr_avg": 0.3806430957683742,
+          "stealth_auc_avg": 0.15774628284365622,
+          "transfer_rate": 0.682969,
+          "asr": 0.9987487835395523,
+          "test_param_value": 0.2,
           "test_param_type": "test_mask_rate",
+          "alpha": 0.35,
           "cover_rate": 0.5,
-          "nc_max_anomaly_index": 1.2958978414535522,
+          "nc_max_anomaly_index": 1.5532842874526978,
           "nc_is_poisoned": false,
-          "S_stealth": 0.14405497847214505,
-          "S_stealth_tpr": 0.28461899416098985
+          "S_stealth": 0.126197026274925,
+          "S_stealth_tpr": 0.3045144766146994
         }
       ]
     },
@@ -3158,6 +3536,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.005,
       "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3169,6 +3549,7 @@
           "asr": 0.007646322813846795,
           "test_param_value": 0.01,
           "test_param_type": "test_alpha",
+          "alpha": 0.01,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.2057358026504517,
           "nc_is_poisoned": false,
@@ -3183,6 +3564,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.005,
       "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3194,6 +3577,7 @@
           "asr": 0.027248714027526762,
           "test_param_value": 0.05,
           "test_param_type": "test_alpha",
+          "alpha": 0.05,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.563915729522705,
           "nc_is_poisoned": false,
@@ -3208,6 +3592,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.005,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3219,11 +3605,12 @@
           "asr": 0.8577783956624496,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.682950019836426,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3302991967692689,
-          "S_stealth_tpr": 0.6062054317389534
+          "S_stealth": 0.4799487060628371,
+          "S_stealth_tpr": 0.7558549410325216
         }
       ]
     },
@@ -3233,6 +3620,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.005,
       "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3244,6 +3633,7 @@
           "asr": 0.9370221048241346,
           "test_param_value": 0.15,
           "test_param_type": "test_alpha",
+          "alpha": 0.15,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.85705304145813,
           "nc_is_poisoned": false,
@@ -3258,6 +3648,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.005,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3269,11 +3661,12 @@
           "asr": 0.9724732378701515,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.946934700012207,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2810592650296971,
-          "S_stealth_tpr": 0.48399624640246747
+          "S_stealth": 0.42242892376157426,
+          "S_stealth_tpr": 0.6253659051343446
         }
       ]
     },
@@ -3283,6 +3676,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.005,
       "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3294,6 +3689,7 @@
           "asr": 0.9863756429862366,
           "test_param_value": 0.25,
           "test_param_type": "test_alpha",
+          "alpha": 0.25,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.1913001537323,
           "nc_is_poisoned": false,
@@ -3308,6 +3704,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.005,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3319,6 +3717,7 @@
           "asr": 0.9933268455442792,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.8292598724365234,
           "nc_is_poisoned": false,
@@ -3333,6 +3732,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.01,
       "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3344,6 +3745,7 @@
           "asr": 0.007090226609203392,
           "test_param_value": 0.01,
           "test_param_type": "test_alpha",
+          "alpha": 0.01,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.4338116645812988,
           "nc_is_poisoned": false,
@@ -3358,6 +3760,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.01,
       "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3369,11 +3773,12 @@
           "asr": 0.5616571666898373,
           "test_param_value": 0.05,
           "test_param_type": "test_alpha",
+          "alpha": 0.05,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.3445987701416016,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3434798575856937,
-          "S_stealth_tpr": 0.6676507341306454
+          "S_stealth": 0.5351066071461852,
+          "S_stealth_tpr": 0.8592774836911369
         }
       ]
     },
@@ -3383,6 +3788,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.01,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3394,11 +3801,12 @@
           "asr": 0.9264562769359099,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": null,
           "nc_max_anomaly_index": 5.157111167907715,
           "nc_is_poisoned": true,
-          "S_stealth": 0.35596038307611894,
-          "S_stealth_tpr": 0.5673289608814059
+          "S_stealth": 0.4593729895245916,
+          "S_stealth_tpr": 0.6707415673298786
         }
       ]
     },
@@ -3408,6 +3816,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.01,
       "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3419,6 +3829,7 @@
           "asr": 0.9794244404281941,
           "test_param_value": 0.15,
           "test_param_type": "test_alpha",
+          "alpha": 0.15,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.5145090818405151,
           "nc_is_poisoned": false,
@@ -3433,6 +3844,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.01,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3444,6 +3857,7 @@
           "asr": 0.987904907549006,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.9533276557922363,
           "nc_is_poisoned": false,
@@ -3458,6 +3872,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.01,
       "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3469,6 +3885,7 @@
           "asr": 0.9919366050326707,
           "test_param_value": 0.25,
           "test_param_type": "test_alpha",
+          "alpha": 0.25,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.6714746952056885,
           "nc_is_poisoned": false,
@@ -3483,6 +3900,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.01,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3494,6 +3913,7 @@
           "asr": 0.9969414708744613,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.5848819017410278,
           "nc_is_poisoned": false,
@@ -3508,6 +3928,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.05,
       "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3519,6 +3941,7 @@
           "asr": 0.021409703878771027,
           "test_param_value": 0.01,
           "test_param_type": "test_alpha",
+          "alpha": 0.01,
           "cover_rate": null,
           "nc_max_anomaly_index": 8.02836799621582,
           "nc_is_poisoned": false,
@@ -3533,6 +3956,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.05,
       "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3544,11 +3969,12 @@
           "asr": 0.9641317948005005,
           "test_param_value": 0.05,
           "test_param_type": "test_alpha",
+          "alpha": 0.05,
           "cover_rate": null,
           "nc_max_anomaly_index": 8.466238975524902,
           "nc_is_poisoned": true,
-          "S_stealth": 0.34438810489315874,
-          "S_stealth_tpr": 0.49902261812283766
+          "S_stealth": 0.3440102803273682,
+          "S_stealth_tpr": 0.4986447935570471
         }
       ]
     },
@@ -3558,6 +3984,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.05,
       "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3569,11 +3997,12 @@
           "asr": 0.9920756290838315,
           "test_param_value": 0.1,
           "test_param_type": "test_alpha",
+          "alpha": 0.1,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.263669729232788,
           "nc_is_poisoned": true,
-          "S_stealth": 0.21080044944904425,
-          "S_stealth_tpr": 0.4173824163825917
+          "S_stealth": 0.37360063910538543,
+          "S_stealth_tpr": 0.5801826060389329
         }
       ]
     },
@@ -3583,6 +4012,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.05,
       "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3594,11 +4025,12 @@
           "asr": 0.9954122063116919,
           "test_param_value": 0.15,
           "test_param_type": "test_alpha",
+          "alpha": 0.15,
           "cover_rate": null,
           "nc_max_anomaly_index": 9.403122901916504,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3430243621230732,
-          "S_stealth_tpr": 0.5869668783140629
+          "S_stealth": 0.3132612758860088,
+          "S_stealth_tpr": 0.5572037920769985
         }
       ]
     },
@@ -3608,6 +4040,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.05,
       "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3619,11 +4053,12 @@
           "asr": 0.9995829278465175,
           "test_param_value": 0.2,
           "test_param_type": "test_alpha",
+          "alpha": 0.2,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.339052200317383,
           "nc_is_poisoned": true,
-          "S_stealth": 0.22992405176725433,
-          "S_stealth_tpr": 0.49002763170668656
+          "S_stealth": 0.4217247688823931,
+          "S_stealth_tpr": 0.6818283488218253
         }
       ]
     },
@@ -3633,6 +4068,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.05,
       "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3644,11 +4081,12 @@
           "asr": 0.9994439037953566,
           "test_param_value": 0.25,
           "test_param_type": "test_alpha",
+          "alpha": 0.25,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.337790012359619,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2546300907272141,
-          "S_stealth_tpr": 0.5529040891462924
+          "S_stealth": 0.4464703962293156,
+          "S_stealth_tpr": 0.7447443946483939
         }
       ]
     },
@@ -3658,6 +4096,8 @@
       "trigger_type": "blend",
       "poison_rate": 0.05,
       "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3669,6 +4109,7 @@
           "asr": 1.0,
           "test_param_value": 0.3,
           "test_param_type": "test_alpha",
+          "alpha": 0.3,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.4786933660507202,
           "nc_is_poisoned": false,
@@ -3683,6 +4124,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3690,15 +4133,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.7780142670915411,
           "stealth_auc_avg": 0.4383163365864754,
-          "transfer_rate": 0.568438,
+          "transfer_rate": 0.417969,
           "asr": 0.47991102460725704,
           "test_param_value": 4.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.167253017425537,
           "nc_is_poisoned": true,
-          "S_stealth": 0.35205847944027746,
-          "S_stealth_tpr": 0.6238168238443301
+          "S_stealth": 0.5492476590980833,
+          "S_stealth_tpr": 0.8210060035021358
         }
       ]
     },
@@ -3708,6 +4152,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 6.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3715,10 +4161,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.7631671637744035,
           "stealth_auc_avg": 0.40995857582860395,
-          "transfer_rate": 0.603281,
+          "transfer_rate": 0.595781,
           "asr": 0.6407618518003615,
           "test_param_value": 6.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.8836889266967773,
           "nc_is_poisoned": false,
@@ -3733,6 +4180,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 8.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3740,15 +4189,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.8024409908186687,
           "stealth_auc_avg": 0.4058658384212537,
-          "transfer_rate": 0.252656,
+          "transfer_rate": 0.601719,
           "asr": 0.7268177394689281,
           "test_param_value": 8.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.256786346435547,
           "nc_is_poisoned": true,
-          "S_stealth": 0.3588670728366382,
-          "S_stealth_tpr": 0.6761271947545702
+          "S_stealth": 0.49051826863736775,
+          "S_stealth_tpr": 0.8077783905552998
         }
       ]
     },
@@ -3758,6 +4208,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 10.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3765,10 +4217,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.6506755482085517,
           "stealth_auc_avg": 0.29253432704965454,
-          "transfer_rate": 0.675156,
+          "transfer_rate": 0.7025,
           "asr": 0.8224662866675935,
           "test_param_value": 10.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.3838770389556885,
           "nc_is_poisoned": false,
@@ -3783,6 +4236,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3790,15 +4245,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.5830827199869153,
           "stealth_auc_avg": 0.22154419332209474,
-          "transfer_rate": 0.75375,
+          "transfer_rate": 0.664687,
           "asr": 0.849993048797442,
           "test_param_value": 12.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.8042550086975098,
           "nc_is_poisoned": true,
-          "S_stealth": 0.18863051365002947,
-          "S_stealth_tpr": 0.47786133498188593
+          "S_stealth": 0.36584019566532217,
+          "S_stealth_tpr": 0.6550710169971786
         }
       ]
     },
@@ -3808,6 +4264,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 16.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3815,15 +4273,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.35325874201973295,
           "stealth_auc_avg": 0.18439320412830829,
-          "transfer_rate": 0.877031,
+          "transfer_rate": 0.765156,
           "asr": 0.9581537606005839,
           "test_param_value": 16.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.92609977722168,
           "nc_is_poisoned": true,
-          "S_stealth": 0.1921854366030951,
-          "S_stealth_tpr": 0.32727786691623484
+          "S_stealth": 0.30284369000219824,
+          "S_stealth_tpr": 0.43793612031533796
         }
       ]
     },
@@ -3833,6 +4292,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3840,10 +4301,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.47633603567439264,
           "stealth_auc_avg": 0.2729860321474119,
-          "transfer_rate": 0.209375,
+          "transfer_rate": 0.799219,
           "asr": 0.9956902544140136,
           "test_param_value": 20.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.5446627140045166,
           "nc_is_poisoned": false,
@@ -3858,6 +4320,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.005,
       "train_param_value": 24.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3865,10 +4329,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.5646775532581454,
           "stealth_auc_avg": 0.17280162539273924,
-          "transfer_rate": 0.659375,
+          "transfer_rate": 0.970313,
           "asr": 0.9984707354372306,
           "test_param_value": 24.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.674246907234192,
           "nc_is_poisoned": false,
@@ -3883,6 +4348,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3890,10 +4357,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.6452054204062353,
           "stealth_auc_avg": 0.4002650470377431,
-          "transfer_rate": 0.995313,
+          "transfer_rate": 0.756094,
           "asr": 0.5886278326150424,
           "test_param_value": 4.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.9705346822738647,
           "nc_is_poisoned": false,
@@ -3908,6 +4376,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 6.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3915,10 +4385,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.6139486892583119,
           "stealth_auc_avg": 0.2800093969940327,
-          "transfer_rate": 0.993125,
+          "transfer_rate": 0.928594,
           "asr": 0.8152370360072293,
           "test_param_value": 6.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.8386363983154297,
           "nc_is_poisoned": false,
@@ -3933,6 +4404,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 8.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3940,15 +4413,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.5165605975828111,
           "stealth_auc_avg": 0.3200802978011026,
-          "transfer_rate": 0.549844,
+          "transfer_rate": 0.764219,
           "asr": 0.7764493257333519,
           "test_param_value": 8.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.8351263999938965,
           "nc_is_poisoned": true,
-          "S_stealth": 0.28362598133685324,
-          "S_stealth_tpr": 0.4408102211622201
+          "S_stealth": 0.428502495144911,
+          "S_stealth_tpr": 0.5856867349702778
         }
       ]
     },
@@ -3958,6 +4432,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 10.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3965,15 +4441,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.5772141515754425,
           "stealth_auc_avg": 0.33580870676346686,
-          "transfer_rate": 0.279844,
+          "transfer_rate": 0.79375,
           "asr": 0.8559710829973586,
           "test_param_value": 10.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 3.1154279708862305,
           "nc_is_poisoned": true,
-          "S_stealth": 0.28492207733078523,
-          "S_stealth_tpr": 0.47804643318036577
+          "S_stealth": 0.4523718534907618,
+          "S_stealth_tpr": 0.6454962093403424
         }
       ]
     },
@@ -3983,6 +4460,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -3990,10 +4469,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.6249585990976976,
           "stealth_auc_avg": 0.24812996854488512,
-          "transfer_rate": 0.911406,
+          "transfer_rate": 0.854844,
           "asr": 0.8936466008619491,
           "test_param_value": 12.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.2216695547103882,
           "nc_is_poisoned": false,
@@ -4008,6 +4488,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 16.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4015,10 +4497,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.5084891181458451,
           "stealth_auc_avg": 0.2301527393182814,
-          "transfer_rate": 0.408906,
+          "transfer_rate": 0.907969,
           "asr": 0.9837341860141805,
           "test_param_value": 16.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.6968339681625366,
           "nc_is_poisoned": false,
@@ -4033,6 +4516,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4040,10 +4525,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.4901292254504819,
           "stealth_auc_avg": 0.17291967339699332,
-          "transfer_rate": 0.099375,
+          "transfer_rate": 0.917813,
           "asr": 0.9952731822605311,
           "test_param_value": 20.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.7863539457321167,
           "nc_is_poisoned": false,
@@ -4058,6 +4544,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.01,
       "train_param_value": 24.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4065,10 +4553,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.17245175683212488,
           "stealth_auc_avg": 0.06605621182535515,
-          "transfer_rate": 0.672344,
+          "transfer_rate": 0.965625,
           "asr": 0.9970804949256221,
           "test_param_value": 24.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.061378240585327,
           "nc_is_poisoned": false,
@@ -4083,6 +4572,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4090,15 +4581,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.2708102681838138,
           "stealth_auc_avg": 0.1462767288611786,
-          "transfer_rate": 0.999375,
+          "transfer_rate": 0.942813,
           "asr": 0.9499513415820937,
           "test_param_value": 4.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.1409451961517334,
           "nc_is_poisoned": true,
-          "S_stealth": 0.11801422229454739,
-          "S_stealth_tpr": 0.21764105375265558
+          "S_stealth": 0.3160285438833384,
+          "S_stealth_tpr": 0.4156553753414466
         }
       ]
     },
@@ -4108,6 +4600,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 6.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4115,15 +4609,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.3383735749614143,
           "stealth_auc_avg": 0.14812039396949428,
-          "transfer_rate": 0.634531,
+          "transfer_rate": 0.971406,
           "asr": 0.9908244126233838,
           "test_param_value": 6.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.4391777515411377,
           "nc_is_poisoned": true,
-          "S_stealth": 0.12416617008834488,
-          "S_stealth_tpr": 0.2763687148818809
+          "S_stealth": 0.312826460262846,
+          "S_stealth_tpr": 0.465029005056382
         }
       ]
     },
@@ -4133,6 +4628,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 8.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4140,15 +4637,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.16545775977693067,
           "stealth_auc_avg": 0.09084721540958007,
-          "transfer_rate": 1.0,
+          "transfer_rate": 0.992188,
           "asr": 0.9847073543723064,
           "test_param_value": 8.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 4.08929967880249,
           "nc_is_poisoned": true,
-          "S_stealth": 0.10422557394019163,
-          "S_stealth_tpr": 0.1639140094340721
+          "S_stealth": 0.2411299707151365,
+          "S_stealth_tpr": 0.300818406209017
         }
       ]
     },
@@ -4158,6 +4656,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 10.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4165,15 +4665,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.47108493208675606,
           "stealth_auc_avg": 0.15862006030915343,
-          "transfer_rate": 0.984375,
+          "transfer_rate": 0.978437,
           "asr": 0.9646878910051438,
           "test_param_value": 10.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.56168794631958,
           "nc_is_poisoned": true,
-          "S_stealth": 0.13448716257628857,
-          "S_stealth_tpr": 0.38445905999837066
+          "S_stealth": 0.31930493391835696,
+          "S_stealth_tpr": 0.569276831340439
         }
       ]
     },
@@ -4183,6 +4684,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4190,15 +4693,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.4845943311874106,
           "stealth_auc_avg": 0.3365020636363384,
-          "transfer_rate": 0.958438,
+          "transfer_rate": 0.98,
           "asr": 0.9717781176143473,
           "test_param_value": 12.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.840578079223633,
           "nc_is_poisoned": true,
-          "S_stealth": 0.2811664444644941,
-          "S_stealth_tpr": 0.3996402585053519
+          "S_stealth": 0.4572368573536474,
+          "S_stealth_tpr": 0.5757106713945052
         }
       ]
     },
@@ -4208,6 +4712,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 16.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4215,15 +4721,16 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.3572439375436147,
           "stealth_auc_avg": 0.20231360512433816,
-          "transfer_rate": 0.994219,
+          "transfer_rate": 0.991094,
           "asr": 0.9961073265674962,
           "test_param_value": 16.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 2.9530439376831055,
           "nc_is_poisoned": true,
-          "S_stealth": 0.1755794173172044,
-          "S_stealth_tpr": 0.2995236832526257
+          "S_stealth": 0.3481223508817367,
+          "S_stealth_tpr": 0.47206661681715795
         }
       ]
     },
@@ -4233,6 +4740,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4240,10 +4749,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.6543318944467699,
           "stealth_auc_avg": 0.18588618967938975,
-          "transfer_rate": 0.312656,
+          "transfer_rate": 0.962812,
           "asr": 0.9963853746698179,
           "test_param_value": 20.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 1.8134455680847168,
           "nc_is_poisoned": false,
@@ -4258,6 +4768,8 @@
       "trigger_type": "upgd",
       "poison_rate": 0.05,
       "train_param_value": 24.0,
+      "alpha": null,
+      "cover_rate": null,
       "group_size": 1,
       "data_points": [
         {
@@ -4265,10 +4777,11 @@
           "point_id": 1,
           "stealth_tpr_avg": 0.3857665645879733,
           "stealth_auc_avg": 0.18620950039896855,
-          "transfer_rate": 0.443281,
+          "transfer_rate": 0.9875,
           "asr": 0.9987487835395523,
           "test_param_value": 24.0,
           "test_param_type": "test_eps",
+          "alpha": null,
           "cover_rate": null,
           "nc_max_anomaly_index": 5.05472993850708,
           "nc_is_poisoned": false,

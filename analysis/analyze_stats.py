@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 """
 分析隐蔽性（TPR平均、AUC平均）与迁移性，按三种模型（resnet18, mobilenet, vgg）分别分析。
+支持 CIFAR-10（data_cifar10_*）与 Tiny ImageNet（data_tiny_imagenet_*），见 --dataset。
+输出按数据集分目录：{--output-dir}/cifar10/、{--output-dir}/tiny_imagenet/（含 per-arch 图与 combined 散点/箱线等）。
 
 # 1. no_nc 数据：所有图
 python analysis/analyze_stats.py --data-dir analysis --data-suffix _no_nc --all-plots --output-dir analysis_outputs_no_nc
@@ -19,6 +21,12 @@ python analysis/analyze_stats.py --data-dir analysis --data-suffix _nc --output-
 
 # 只分析某个 arch
 python analysis/analyze_stats.py --data-dir analysis --arch mobilenet --all-plots
+
+# Tiny ImageNet（结果在 analysis_outputs_no_nc/tiny_imagenet/）
+python analysis/analyze_stats.py --dataset tiny_imagenet --data-dir analysis --data-suffix _no_nc --all-plots --output-dir analysis_outputs_no_nc
+
+# 同时跑 CIFAR-10 与 Tiny ImageNet（输出到 analysis_outputs_no_nc/cifar10 与 .../tiny_imagenet）
+python analysis/analyze_stats.py --dataset all --data-suffix _no_nc --all-plots --output-dir analysis_outputs_no_nc
 
 # 指定部分图类型
 python analysis/analyze_stats.py --data-dir analysis --violin-plot --box-plot --combined-scatter
@@ -40,6 +48,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 ARCHS = ['resnet18', 'mobilenet', 'vgg']
+DATASETS = ['cifar10', 'tiny_imagenet']
+DATASET_DISPLAY = {
+    'cifar10': 'CIFAR-10',
+    'tiny_imagenet': 'Tiny ImageNet',
+}
 STEALTH_COLS = ['stealth_tpr_avg', 'stealth_auc_avg']
 METRIC_COLS = STEALTH_COLS + ['transfer_rate']
 # 与 extract 一致：stealth_* = 1 - 各防御原始 TPR/AUC 的均值，越大隐蔽性越好
@@ -97,13 +110,13 @@ def load_from_csv(csv_path: str) -> pd.DataFrame:
     return df
 
 
-def discover_arch_csvs(data_dir: str, suffix: str = '') -> dict:
+def discover_arch_csvs(data_dir: str, suffix: str = '', dataset: str = 'cifar10') -> dict:
     """发现各 arch 的 CSV 文件，返回 {arch: path}。
-    suffix: '' 表示 data_cifar10_{arch}.csv；'_no_nc' / '_nc' 表示带后缀的文件。
+    suffix: '' 表示 data_{dataset}_{arch}.csv；'_no_nc' / '_nc' 表示带后缀的文件。
     """
     found = {}
     for arch in ARCHS:
-        path = os.path.join(data_dir, f'data_cifar10_{arch}{suffix}.csv')
+        path = os.path.join(data_dir, f'data_{dataset}_{arch}{suffix}.csv')
         if os.path.exists(path):
             found[arch] = path
     return found
@@ -304,9 +317,11 @@ def plot_box_by_attack_type(df: pd.DataFrame, output_path: str, arch: str) -> No
     print(f"  箱线图: {output_path}")
 
 
-def plot_box_by_attack_type_combined_all_archs(data_dir: str, output_dir: str, suffix: str = '') -> None:
+def plot_box_by_attack_type_combined_all_archs(
+    data_dir: str, output_dir: str, suffix: str = '', dataset: str = 'cifar10'
+) -> None:
     """合并所有 arch 的数据，按 attack_type 绘制三种指标箱线图。"""
-    found = discover_arch_csvs(data_dir, suffix=suffix)
+    found = discover_arch_csvs(data_dir, suffix=suffix, dataset=dataset)
     if len(found) < 2:
         return
     dfs = []
@@ -330,7 +345,8 @@ def plot_box_by_attack_type_combined_all_archs(data_dir: str, output_dir: str, s
         ('transfer_rate', 'Transfer Rate'),
     ]
     fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-    fig.suptitle('Box Plot by Attack Type (All Archs Combined)', fontsize=16, fontweight='bold', y=1.02)
+    ds_label = DATASET_DISPLAY.get(dataset, dataset)
+    fig.suptitle(f'Box Plot by Attack Type (All Archs Combined, {ds_label})', fontsize=16, fontweight='bold', y=1.02)
     for idx, (col, name) in enumerate(metrics):
         ax = axes[idx]
         data_by_type = [combined[combined['attack_type'] == at][col].dropna().values for at in attack_types]
@@ -787,13 +803,15 @@ def add_method_parallelograms(
             )
 
 
-def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str = '') -> None:
-    """合并 cifar10 所有 arch 数据：stealth_auc/stealth_tpr vs transfer，形状区分 arch，颜色表示 ASR"""
+def plot_scatter_combined_all_archs(
+    data_dir: str, output_dir: str, suffix: str = '', dataset: str = 'cifar10'
+) -> None:
+    """合并某数据集下所有 arch：stealth_auc/stealth_tpr vs transfer，形状区分 arch，颜色表示 ASR"""
     from matplotlib.lines import Line2D
     from matplotlib.cm import ScalarMappable
     from matplotlib.colors import Normalize
 
-    found = discover_arch_csvs(data_dir, suffix=suffix)
+    found = discover_arch_csvs(data_dir, suffix=suffix, dataset=dataset)
     if len(found) < 2:
         return
     dfs = []
@@ -854,7 +872,8 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
                                color='gray', alpha=0.8, zorder=3)
         ax.set_xlabel(x_label)
         ax.set_ylabel('Transfer Rate')
-        ax.set_title(f'CIFAR-10: {x_label} vs Transfer (shape=arch, color=ASR)')
+        ds_label = DATASET_DISPLAY.get(dataset, dataset)
+        ax.set_title(f'{ds_label}: {x_label} vs Transfer (shape=arch, color=ASR)')
         legend_elements = [Line2D([0], [0], marker=ARCH_MARKERS.get(a, 'o'), color='w',
                                   markerfacecolor=ARCH_LEGEND_COLOR, markersize=12, label=a,
                                   markeredgecolor='none') for a in ARCHS if a in found]
@@ -879,13 +898,13 @@ def plot_scatter_combined_all_archs(data_dir: str, output_dir: str, suffix: str 
         print(f"  整体散点图(Stealth {file_suffix.upper()}): {path}")
 
     # 额外：按方法分图，每个方法一张，形状=arch
-    _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max)
+    _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max, dataset=dataset)
 
     # 额外：气泡图，大小=ASR，颜色=方法，形状=arch
-    _plot_scatter_combined_bubble(combined, found, output_dir)
+    _plot_scatter_combined_bubble(combined, found, output_dir, dataset=dataset)
 
 
-def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
+def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max, dataset: str = 'cifar10'):
     """按方法分图：每个方法一张，形状=arch，颜色=ASR"""
     from matplotlib.lines import Line2D
     from matplotlib.cm import ScalarMappable
@@ -922,7 +941,8 @@ def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
                            s=80, edgecolors='none', zorder=2.5)
             ax.set_xlabel(x_label)
             ax.set_ylabel('Transfer Rate')
-            ax.set_title(f'{at}: {x_label} vs Transfer (shape=arch, color=ASR)')
+            ds_label = DATASET_DISPLAY.get(dataset, dataset)
+            ax.set_title(f'{ds_label} | {at}: {x_label} vs Transfer (shape=arch, color=ASR)')
             leg = [Line2D([0], [0], marker=ARCH_MARKERS.get(a, 'o'), color='w',
                           markerfacecolor=ARCH_LEGEND_COLOR, markersize=10, label=a, markeredgecolor='none')
                    for a in ARCHS if a in found]
@@ -938,7 +958,7 @@ def _plot_scatter_by_method(combined, found, output_dir, asr_min, asr_max):
             print(f"  按方法散点图({at}): {path}")
 
 
-def _plot_scatter_combined_bubble(combined, found, output_dir):
+def _plot_scatter_combined_bubble(combined, found, output_dir, dataset: str = 'cifar10'):
     """气泡图：大小=ASR，颜色=方法，形状=arch"""
     from matplotlib.lines import Line2D
     from matplotlib.patches import Patch
@@ -989,7 +1009,8 @@ def _plot_scatter_combined_bubble(combined, found, output_dir):
                            s=sizes, alpha=0.7, edgecolors='gray', linewidths=0.5, zorder=2.5)
         ax.set_xlabel(x_label)
         ax.set_ylabel('Transfer Rate')
-        ax.set_title(f'CIFAR-10: {x_label} vs Transfer (size=ASR, color=method, shape=arch)')
+        ds_label = DATASET_DISPLAY.get(dataset, dataset)
+        ax.set_title(f'{ds_label}: {x_label} vs Transfer (size=ASR, color=method, shape=arch)')
         leg1 = [Patch(facecolor=method_to_color[at], label=at, edgecolor='gray') for at in ATTACK_TYPE_ORDER]
         leg2 = [Line2D([0], [0], marker=ARCH_MARKERS.get(a, 'o'), color='w', markerfacecolor='gray',
                        markersize=10, label=a, markeredgecolor='none') for a in ARCHS if a in found]
@@ -1037,10 +1058,21 @@ def analyze_single_arch(arch: str, csv_path: str, output_dir: str,
         plot_line_by_attack_type(df, output_dir, arch)
 
 
+def resolve_output_dir_for_dataset(script_dir: str, output_dir_arg: str, dataset_key: str) -> str:
+    """图表输出始终按数据集分子目录：{output_dir_arg}/{dataset_key}/（绝对路径则 {abs}/{dataset_key}/）。"""
+    base = (output_dir_arg or 'analysis_outputs').strip() or 'analysis_outputs'
+    if os.path.isabs(base):
+        return os.path.join(base, dataset_key)
+    return os.path.join(script_dir, base, dataset_key)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description='隐蔽性与迁移性分析（按模型分开）')
+    parser.add_argument('--dataset', type=str, default='cifar10',
+                        choices=['cifar10', 'tiny_imagenet', 'all'],
+                        help='分析的数据集：cifar10 / tiny_imagenet / all（默认 cifar10）')
     parser.add_argument('--data-dir', type=str, default=None,
-                        help='数据目录，包含 data_cifar10_{arch}.csv')
+                        help='数据目录，包含 data_{dataset}_{arch}.csv')
     parser.add_argument('--data-suffix', type=str, default='_no_nc',
                         choices=['', '_no_nc', '_nc'],
                         help='数据文件后缀："" 旧格式；"_no_nc" 无 NC；"_nc" 含 S_stealth（默认 _no_nc）')
@@ -1048,7 +1080,8 @@ def main() -> None:
                         help='单个 CSV 路径（用于指定 arch 时）')
     parser.add_argument('--arch', type=str, choices=ARCHS, default=None,
                         help='仅分析指定 arch（需配合 --data-csv 或 --data-dir）')
-    parser.add_argument('--output-dir', type=str, default='analysis_outputs')
+    parser.add_argument('--output-dir', type=str, default='analysis_outputs',
+                        help='输出根目录；实际文件写入 {output-dir}/cifar10/ 或 .../tiny_imagenet/（按 --dataset 分项）')
     parser.add_argument('--correlation-analysis', action='store_true')
     parser.add_argument('--violin-plot', action='store_true')
     parser.add_argument('--pareto-front', action='store_true')
@@ -1071,33 +1104,15 @@ def main() -> None:
     if not os.path.isabs(data_dir):
         # 相对路径相对于项目根目录，便于 --data-dir analysis 正确解析
         data_dir = os.path.join(project_root, data_dir)
-    output_dir = os.path.join(script_dir, args.output_dir) if not os.path.isabs(args.output_dir) else args.output_dir
     suffix = args.data_suffix
 
-    # 确定要分析的 (arch, csv_path) 列表
-    to_analyze = []
+    datasets_to_run = DATASETS if args.dataset == 'all' else [args.dataset]
     if args.data_csv:
-        path = args.data_csv if os.path.isabs(args.data_csv) else os.path.join(script_dir, args.data_csv)
-        if os.path.exists(path):
-            arch = args.arch or 'unknown'
-            if arch == 'unknown':
-                for a in ARCHS:
-                    if a in path.lower():
-                        arch = a
-                        break
-            to_analyze = [(arch, path)]
-    else:
-        found = discover_arch_csvs(data_dir, suffix=suffix)
-        if not found:
-            print(f"未在 {data_dir} 找到 data_cifar10_{{arch}}{suffix}.csv")
-            return
-        for arch, path in found.items():
-            if args.arch is None or args.arch == arch:
-                to_analyze.append((arch, path))
-
-    if not to_analyze:
-        print("无待分析数据")
-        return
+        csv_bn = os.path.basename(args.data_csv).lower()
+        if 'tiny_imagenet' in csv_bn:
+            datasets_to_run = ['tiny_imagenet']
+        else:
+            datasets_to_run = ['cifar10']
 
     do_corr = args.correlation_analysis
     do_violin = args.violin_plot
@@ -1118,19 +1133,48 @@ def main() -> None:
         do_corr = do_violin = do_pareto = do_box = do_bar = True
         do_3d = do_box_poison = do_box_trigger = do_line = do_combined = do_combined_box = True
 
-    if do_combined and len(discover_arch_csvs(data_dir, suffix=suffix)) >= 2:
-        os.makedirs(output_dir, exist_ok=True)
-        plot_scatter_combined_all_archs(data_dir, output_dir, suffix=suffix)
-    if do_combined_box and len(discover_arch_csvs(data_dir, suffix=suffix)) >= 2:
-        os.makedirs(output_dir, exist_ok=True)
-        plot_box_by_attack_type_combined_all_archs(data_dir, output_dir, suffix=suffix)
+    for ds in datasets_to_run:
+        output_dir = resolve_output_dir_for_dataset(script_dir, args.output_dir, ds)
 
-    print(f"将分析 {len(to_analyze)} 个模型: {[a for a, _ in to_analyze]}")
-    for arch, csv_path in to_analyze:
-        analyze_single_arch(arch, csv_path, output_dir,
-                            do_corr, do_violin, do_pareto,
-                            do_box, do_bar, do_3d, do_box_poison, do_box_trigger, do_line)
-    print(f"\n输出目录: {output_dir}")
+        # 确定要分析的 (arch, csv_path) 列表
+        to_analyze = []
+        if args.data_csv:
+            path = args.data_csv if os.path.isabs(args.data_csv) else os.path.join(script_dir, args.data_csv)
+            if os.path.exists(path):
+                arch = args.arch or 'unknown'
+                if arch == 'unknown':
+                    for a in ARCHS:
+                        if a in path.lower():
+                            arch = a
+                            break
+                to_analyze = [(arch, path)]
+        else:
+            found = discover_arch_csvs(data_dir, suffix=suffix, dataset=ds)
+            if not found:
+                print(f"[{ds}] 未在 {data_dir} 找到 data_{ds}_{{arch}}{suffix}.csv，跳过")
+                continue
+            for arch, path in found.items():
+                if args.arch is None or args.arch == arch:
+                    to_analyze.append((arch, path))
+
+        if not to_analyze:
+            print(f"[{ds}] 无待分析数据")
+            continue
+
+        if do_combined and len(discover_arch_csvs(data_dir, suffix=suffix, dataset=ds)) >= 2:
+            os.makedirs(output_dir, exist_ok=True)
+            plot_scatter_combined_all_archs(data_dir, output_dir, suffix=suffix, dataset=ds)
+        if do_combined_box and len(discover_arch_csvs(data_dir, suffix=suffix, dataset=ds)) >= 2:
+            os.makedirs(output_dir, exist_ok=True)
+            plot_box_by_attack_type_combined_all_archs(data_dir, output_dir, suffix=suffix, dataset=ds)
+
+        ds_label = DATASET_DISPLAY.get(ds, ds)
+        print(f"\n[{ds_label}] 将分析 {len(to_analyze)} 个模型: {[a for a, _ in to_analyze]}")
+        for arch, csv_path in to_analyze:
+            analyze_single_arch(arch, csv_path, output_dir,
+                                do_corr, do_violin, do_pareto,
+                                do_box, do_bar, do_3d, do_box_poison, do_box_trigger, do_line)
+        print(f"[{ds_label}] 输出目录: {output_dir}")
 
 
 if __name__ == '__main__':

@@ -32,7 +32,18 @@ import json
 import random
 import os
 import re
+import sys
 import numpy as np
+
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+if _script_dir not in sys.path:
+    sys.path.insert(0, _script_dir)
+from extract_all_results import (
+    _parse_transfer_rate_from_text,
+    _parse_auxiliary_result_filename,
+    _parse_corruption_severity_from_filename,
+    _tiny_imagenet_c_corruption_sort_key,
+)
 
 DEFENSE_METHODS = ["STRIP", "SCaLe-Up", "SentiNet", "IBD_PSC"]
 DEFENSE_PREFIX = {"STRIP": "strip", "SCaLe-Up": "scaleup", "SentiNet": "sentinet", "IBD_PSC": "ibd_psc"}
@@ -57,65 +68,109 @@ def _param_str(val, suffix):
     return str(int(val)) if suffix == 'alpha' and val == int(val) else str(val)
 
 
-def parse_result_files(dir_path, test_param_value, test_param_type_suffix, include_nc=True):
+def parse_result_files(
+    dir_path,
+    test_param_value,
+    test_param_type_suffix,
+    include_nc=True,
+    dataset: str = 'cifar10',
+    train_param_value=None,
+):
     """解析：stealth_tpr_avg, stealth_auc_avg, transfer_rate；include_nc 时含 nc_max_anomaly_index, nc_is_poisoned"""
     res = {'stealth_tpr_avg': None, 'stealth_auc_avg': None, 'transfer_rate': None,
            'nc_max_anomaly_index': None, 'nc_is_poisoned': None}
     param_str = _param_str(test_param_value, test_param_type_suffix.replace('test_', ''))
 
-    # 1. 防御：tpr/auc
+    # 1. 防御：tpr/auc（与 extract 一致：仅对「确有结果文件」的方法取平均，缺失方法不参与）
     tprs, aucs = {}, {}
     for method, prefix in DEFENSE_PREFIX.items():
         p = os.path.join(dir_path, f'{prefix}_defense_results_test_{test_param_type_suffix}={param_str}.json')
         if not os.path.exists(p) and test_param_value == int(test_param_value):
             p = os.path.join(dir_path, f'{prefix}_defense_results_test_{test_param_type_suffix}={test_param_value}.json')
+        bp = os.path.join(dir_path, f'{prefix}_defense_results.json')
         if os.path.exists(p):
             tprs[method], aucs[method] = _parse_defense(p)
-        else:
-            bp = os.path.join(dir_path, f'{prefix}_defense_results.json')
-            tprs[method], aucs[method] = _parse_defense(bp) if os.path.exists(bp) else (0.0, 0.0)
-    if tprs or aucs:
-        # 与 extract 一致：隐蔽性 = 1 - 检测率
-        raw_tpr = np.mean([tprs.get(m, 0) for m in DEFENSE_METHODS])
-        raw_auc = np.mean([aucs.get(m, 0) for m in DEFENSE_METHODS])
+        elif os.path.exists(bp):
+            tprs[method], aucs[method] = _parse_defense(bp)
+    if tprs:
+        # 与 extract_all_results 一致：只对已加载的方法求均值
+        raw_tpr = np.mean([tprs[m] for m in DEFENSE_METHODS if m in tprs])
+        raw_auc = np.mean([aucs[m] for m in DEFENSE_METHODS if m in aucs])
         res['stealth_tpr_avg'] = 1.0 - raw_tpr
         res['stealth_auc_avg'] = 1.0 - raw_auc
 
-    # 2. 迁移性：test_stl10_results_delta=4.0.txt 等
-    suffix = test_param_type_suffix.replace('test_', '') if test_param_type_suffix else ''
-    stl10 = os.path.join(dir_path, f'test_stl10_results_{suffix}={param_str}.txt')
-    if not os.path.exists(stl10) and test_param_value == int(test_param_value):
-        stl10 = os.path.join(dir_path, f'test_stl10_results_{suffix}={test_param_value}.txt')
-    if os.path.exists(stl10):
+    # 2. 迁移性：tiny_imagenet → Tiny ImageNet-C；否则 STL-10
+    if dataset == 'tiny_imagenet':
+        candidates = []
         try:
-            c = open(stl10, encoding='utf-8').read()
-            if m := re.search(r'攻击成功率[:：]\s*([\d.]+)', c):
-                res['transfer_rate'] = float(m.group(1))
-        except Exception:
+            for fn in os.listdir(dir_path):
+                if not fn.startswith('test_tiny_imagenet_results') or not fn.endswith('.txt'):
+                    continue
+                fp = os.path.join(dir_path, fn)
+                pinfo = _parse_auxiliary_result_filename(fn)
+                if pinfo:
+                    _, pval = pinfo
+                elif train_param_value is not None:
+                    pval = train_param_value
+                else:
+                    continue
+                if pval is None or abs(float(pval) - float(test_param_value)) > 1e-9:
+                    continue
+                corr, sev = _parse_corruption_severity_from_filename(fn)
+                try:
+                    c = open(fp, encoding='utf-8').read()
+                    tr = _parse_transfer_rate_from_text(c)
+                except Exception:
+                    continue
+                if tr is None:
+                    continue
+                sk = _tiny_imagenet_c_corruption_sort_key(corr, sev)
+                candidates.append((sk, tr))
+        except OSError:
             pass
-    if res['transfer_rate'] is None:
-        stl10_base = os.path.join(dir_path, 'test_stl10_results.txt')
-        if os.path.exists(stl10_base):
+        if candidates:
+            candidates.sort(key=lambda x: x[0])
+            res['transfer_rate'] = candidates[0][1]
+    else:
+        suffix = test_param_type_suffix.replace('test_', '') if test_param_type_suffix else ''
+        stl10 = os.path.join(dir_path, f'test_stl10_results_{suffix}={param_str}.txt')
+        if not os.path.exists(stl10) and test_param_value == int(test_param_value):
+            stl10 = os.path.join(dir_path, f'test_stl10_results_{suffix}={test_param_value}.txt')
+        if os.path.exists(stl10):
             try:
-                c = open(stl10_base, encoding='utf-8').read()
-                if m := re.search(r'攻击成功率[:：]\s*([\d.]+)', c):
-                    res['transfer_rate'] = float(m.group(1))
+                c = open(stl10, encoding='utf-8').read()
+                tr = _parse_transfer_rate_from_text(c)
+                if tr is not None:
+                    res['transfer_rate'] = tr
             except Exception:
                 pass
+        if res['transfer_rate'] is None:
+            stl10_base = os.path.join(dir_path, 'test_stl10_results.txt')
+            if os.path.exists(stl10_base):
+                try:
+                    c = open(stl10_base, encoding='utf-8').read()
+                    tr = _parse_transfer_rate_from_text(c)
+                    if tr is not None:
+                        res['transfer_rate'] = tr
+                except Exception:
+                    pass
 
     # 3. NC detection（仅 include_nc 时解析）
     if include_nc:
-        for f in os.listdir(dir_path):
-            if f.startswith('nc_detection') and f.endswith('.json'):
-                try:
-                    d = json.load(open(os.path.join(dir_path, f), encoding='utf-8'))
-                    if d.get('max_anomaly_index') is not None:
-                        res['nc_max_anomaly_index'] = float(d['max_anomaly_index'])
-                    if 'is_poisoned' in d:
-                        res['nc_is_poisoned'] = bool(d['is_poisoned'])
-                except Exception:
-                    pass
-                break
+        try:
+            for f in os.listdir(dir_path):
+                if f.startswith('nc_detection') and f.endswith('.json'):
+                    try:
+                        d = json.load(open(os.path.join(dir_path, f), encoding='utf-8'))
+                        if d.get('max_anomaly_index') is not None:
+                            res['nc_max_anomaly_index'] = float(d['max_anomaly_index'])
+                        if 'is_poisoned' in d:
+                            res['nc_is_poisoned'] = bool(d['is_poisoned'])
+                    except Exception:
+                        pass
+                    break
+        except OSError:
+            pass
     return res
 
 
@@ -139,21 +194,24 @@ def extract_test_param_suffix(test_param_type):
     return test_param_type[5:] if test_param_type.startswith('test_') else test_param_type
 
 
-def find_result_directory(base_dir, group_info, arch=None):
+def find_result_directory(base_dir, group_info, arch=None, dataset: str = 'cifar10'):
+    """定位原始实验目录。Tiny ImageNet 使用 64×64 触发器文件名（hellokitty_64 / badnet_patch_64）。"""
     at = group_info['attack_type']
     pr = group_info['poison_rate']
     tv = group_info['train_param_value']
+    hk = 'hellokitty_64.png' if dataset == 'tiny_imagenet' else 'hellokitty_32.png'
+    bn = 'badnet_patch_64.png' if dataset == 'tiny_imagenet' else 'badnet_patch_32.png'
     candidates = []
     if at == 'adaptive_blend':
         cr = group_info.get('cover_rate', 0.03)
-        candidates = [f"adaptive_blend_{pr:.3f}_alpha={tv:.3f}_cover={cr:.3f}_trigger=hellokitty_32.png_poison_seed=2333"]
+        candidates = [f"adaptive_blend_{pr:.3f}_alpha={tv:.3f}_cover={cr:.3f}_trigger={hk}_poison_seed=2333"]
     elif at == 'adaptive_patch':
         cr = group_info.get('cover_rate', 0.06)
         candidates = [f"adaptive_patch_{pr:.3f}_alpha={tv:.3f}_cover={cr:.3f}_poison_seed=2333"]
     elif at == 'basic':
-        candidates = [f"basic_{pr:.3f}_alpha={tv:.3f}_trigger=badnet_patch_32.png_poison_seed=2333"]
+        candidates = [f"basic_{pr:.3f}_alpha={tv:.3f}_trigger={bn}_poison_seed=2333"]
     elif at == 'blend':
-        candidates = [f"blend_{pr:.3f}_alpha={tv:.3f}_trigger=hellokitty_32.png_poison_seed=2333"]
+        candidates = [f"blend_{pr:.3f}_alpha={tv:.3f}_trigger={hk}_poison_seed=2333"]
     elif at == 'badnet':
         candidates = [f"badnet_{pr:.3f}_alpha={tv:.3f}_poison_seed=2333"]
     elif at == 'SIG':
@@ -166,13 +224,18 @@ def find_result_directory(base_dir, group_info, arch=None):
     elif at == 'belt':
         cr = group_info.get('cover_rate', 0.5)
         mr = tv if tv is not None else 0.1
-        # 与 supervisor.get_poison_set_dir 一致：含 alpha=；旧目录无 alpha 时保留第二条候选
-        ba = float(group_info.get('alpha', 1.0))
-        ba_s = f"{ba:.3f}"
-        candidates = [
-            f"belt_{pr:.3f}_alpha={ba_s}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333",
-            f"belt_{pr:.3f}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333",
-        ]
+        # cifar10 旧目录常无 alpha= 段：CSV alpha 为空时优先匹配无 alpha 路径（再尝试带 alpha）
+        _av = group_info.get('alpha')
+        no_alpha = f"belt_{pr:.3f}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333"
+        if _av is not None and _av != '':
+            ba = float(_av)
+            ba_s = f"{ba:.3f}"
+            with_alpha = f"belt_{pr:.3f}_alpha={ba_s}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333"
+            candidates = [with_alpha, no_alpha]
+        else:
+            ba_s = "1.000"
+            with_alpha = f"belt_{pr:.3f}_alpha={ba_s}_cover={cr:.3f}_mask={mr:.3f}_poison_seed=2333"
+            candidates = [no_alpha, with_alpha]
     elif at == 'upgd':
         # 文件夹格式为 eps=10.0（整数也带 .0）
         eps_str = f"{int(tv)}.0" if tv == int(tv) else str(tv)
@@ -199,10 +262,10 @@ def find_result_directory(base_dir, group_info, arch=None):
     return None
 
 
-def validate_data_point(base_dir, group_info, point_info, arch=None, include_nc=True):
-    cover = point_info.get('cover_rate') or group_info.get('cover_rate')
-    gi = {**group_info, 'cover_rate': cover} if cover is not None else group_info
-    result_dir = find_result_directory(base_dir, gi, arch=arch)
+def validate_data_point(base_dir, group_info, point_info, arch=None, include_nc=True, dataset: str = 'cifar10'):
+    cover = point_info.get('cover_rate') if point_info.get('cover_rate') is not None else group_info.get('cover_rate')
+    gi = {**group_info, 'cover_rate': cover} if cover is not None else dict(group_info)
+    result_dir = find_result_directory(base_dir, gi, arch=arch, dataset=dataset)
     if not result_dir:
         return {'status': 'DIR_NOT_FOUND', 'message': '未找到结果目录'}
 
@@ -211,7 +274,14 @@ def validate_data_point(base_dir, group_info, point_info, arch=None, include_nc=
     if not suffix:
         return {'status': 'DIR_NOT_FOUND', 'message': '无法确定 test_param_suffix'}
 
-    parsed = parse_result_files(result_dir, point_info['test_param_value'], suffix, include_nc=include_nc)
+    parsed = parse_result_files(
+        result_dir,
+        point_info['test_param_value'],
+        suffix,
+        include_nc=include_nc,
+        dataset=dataset,
+        train_param_value=group_info.get('train_param_value'),
+    )
     tol = 1e-6
     errors = []
     for k in ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate']:
@@ -239,14 +309,24 @@ def load_data_from_csv(csv_path):
     with open(csv_path, 'r', encoding='utf-8') as f:
         for row in csv.DictReader(f):
             gid = int(row.get('group_id', 0))
+            row_alpha = parse_float(row.get('alpha'))
+            row_cover = parse_float(row.get('cover_rate'))
             if gid not in groups:
                 groups[gid] = {'group_id': gid, 'attack_type': row.get('attack_type'),
                                'poison_rate': parse_float(row.get('poison_rate')) or 0.03,
                                'train_param_value': parse_float(row.get('train_param_value')),
-                               'cover_rate': parse_float(row.get('cover_rate')), 'points': []}
+                               'alpha': row_alpha,
+                               'cover_rate': row_cover, 'points': []}
+            else:
+                # 同组多行应一致；若首行 alpha/cover 为空而后行有值，补全组字段（防手工改 CSV）
+                if groups[gid].get('alpha') is None and row_alpha is not None:
+                    groups[gid]['alpha'] = row_alpha
+                if groups[gid].get('cover_rate') is None and row_cover is not None:
+                    groups[gid]['cover_rate'] = row_cover
             pt = {
                 'point_id': int(row.get('point_id', 0)), 'test_param_type': row.get('test_param_type'),
                 'test_param_value': parse_float(row.get('test_param_value')),
+                'alpha': parse_float(row.get('alpha')),
                 'stealth_tpr_avg': parse_float(row.get('stealth_tpr_avg')),
                 'stealth_auc_avg': parse_float(row.get('stealth_auc_avg')),
                 'transfer_rate': parse_float(row.get('transfer_rate')),
@@ -276,6 +356,7 @@ def load_data_from_json(json_path):
             'attack_type': g.get('attack_type'),
             'poison_rate': parse_float(g.get('poison_rate')) or 0.03,
             'train_param_value': parse_float(g.get('train_param_value')),
+            'alpha': parse_float(g.get('alpha')),
             'cover_rate': parse_float(g.get('cover_rate')),
         }
         for dp in g.get('data_points', []):
@@ -283,6 +364,7 @@ def load_data_from_json(json_path):
                 'point_id': dp.get('point_id', 0),
                 'test_param_type': dp.get('test_param_type'),
                 'test_param_value': parse_float(dp.get('test_param_value')),
+                'alpha': parse_float(dp.get('alpha')),
                 'stealth_tpr_avg': parse_float(dp.get('stealth_tpr_avg')),
                 'stealth_auc_avg': parse_float(dp.get('stealth_auc_avg')),
                 'transfer_rate': parse_float(dp.get('transfer_rate')),
@@ -315,6 +397,7 @@ def check_data_completeness(csv_path, include_nc):
         ('stealth_auc_avg', '隐蔽性AUC'),
         ('transfer_rate', '迁移率'),
     ]
+    nc_cols_optional_rows = []
     if include_nc:
         required_cols.extend([
             ('nc_max_anomaly_index', 'NC异常指数'),
@@ -322,6 +405,7 @@ def check_data_completeness(csv_path, include_nc):
             ('S_stealth', 'S_stealth(AUC)'),
             ('S_stealth_tpr', 'S_stealth(TPR)'),
         ])
+        nc_cols_optional_rows = {'nc_max_anomaly_index', 'nc_is_poisoned', 'S_stealth', 'S_stealth_tpr'}
     issues = []
     with open(csv_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
@@ -333,6 +417,9 @@ def check_data_completeness(csv_path, include_nc):
     for col, name in required_cols:
         if col not in fieldnames:
             issues.append((col, name, total, total, '列不存在'))
+            continue
+        # 部分实验未跑 NC：允许 NC/S_stealth 列存在但部分行为空（与 extract 行为一致）
+        if col in nc_cols_optional_rows:
             continue
         cnt = sum(1 for r in rows if r.get(col) is None or str(r.get(col, '')).strip() == '')
         if cnt > 0:
@@ -369,14 +456,25 @@ def recompute_s_stealth(all_points):
 def compare_csv_json(csv_pt, json_pt, tol=1e-6, include_nc=True):
     """比较 CSV 与 JSON 中同一数据点是否一致，返回错误列表"""
     errors = []
-    base_keys = ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'cover_rate']
-    for k in base_keys:
+
+    def _cmp_float(k):
         cv, jv = csv_pt.get(k), json_pt.get(k)
         if cv is not None and jv is not None:
             if abs(cv - jv) > tol:
                 errors.append(f"{k}: CSV={cv:.6f}, JSON={jv:.6f}")
         elif (cv is None) != (jv is None):
             errors.append(f"{k}: CSV={cv}, JSON={jv} (一方缺失)")
+
+    for k in ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'cover_rate']:
+        _cmp_float(k)
+    # alpha：新 CSV 分组字段，与 JSON 一致时应相同
+    ca, ja = csv_pt.get('alpha'), json_pt.get('alpha')
+    if ca is not None or ja is not None:
+        if ca is not None and ja is not None:
+            if abs(float(ca) - float(ja)) > tol:
+                errors.append(f"alpha: CSV={ca}, JSON={ja}")
+        elif (ca is None) != (ja is None):
+            errors.append(f"alpha: CSV={ca}, JSON={ja} (一方缺失)")
     if include_nc:
         for k in ['nc_max_anomaly_index', 'S_stealth', 'S_stealth_tpr']:
             cv, jv = csv_pt.get(k), json_pt.get(k)
@@ -397,7 +495,9 @@ def main():
     parser = argparse.ArgumentParser(description='验证提取结果的正确性')
     parser.add_argument('--arch', choices=ARCHS + ['all'], default='all',
                         help='要验证的模型架构，all=验证所有 (默认: all)')
-    parser.add_argument('--dataset', default='cifar10', help='数据集 (默认: cifar10)')
+    parser.add_argument('--dataset', default='cifar10',
+                        choices=['cifar10', 'tiny_imagenet', 'all'],
+                        help='数据集：cifar10 / tiny_imagenet / all（默认 cifar10）')
     parser.add_argument('--mode', choices=['no_nc', 'nc', 'all'], default='all',
                         help='no_nc: 验证 _no_nc 文件；nc: 验证 _nc 文件；all: 两种都验证（默认）')
     parser.add_argument('--seed', type=int, default=None,
@@ -415,117 +515,120 @@ def main():
     archs_to_validate = ARCHS if args.arch == 'all' else [args.arch]
     modes = ['no_nc', 'nc'] if args.mode == 'all' else [args.mode]
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    base_dir = os.path.join(os.path.dirname(script_dir), 'poisoned_train_set', args.dataset)
+    project_root = os.path.dirname(script_dir)
+    datasets_loop = ['cifar10', 'tiny_imagenet'] if args.dataset == 'all' else [args.dataset]
 
     # 汇总统计
     total_ok = total_mismatch = total_nf = total_json_err = total_sampled = total_skipped = 0
     completeness_ok = 0
     completeness_fail = 0
 
-    for mode_name in modes:
-        suffix = '_nc' if mode_name == 'nc' else '_no_nc'
-        include_nc = mode_name == 'nc'
-        for arch in archs_to_validate:
-            csv_path = os.path.join(script_dir, f'data_{args.dataset}_{arch}{suffix}.csv')
-            json_path = os.path.join(script_dir, f'data_{args.dataset}_{arch}{suffix}.json')
+    for ds in datasets_loop:
+        base_dir = os.path.join(project_root, 'poisoned_train_set', ds)
+        for mode_name in modes:
+            suffix = '_nc' if mode_name == 'nc' else '_no_nc'
+            include_nc = mode_name == 'nc'
+            for arch in archs_to_validate:
+                csv_path = os.path.join(script_dir, f'data_{ds}_{arch}{suffix}.csv')
+                json_path = os.path.join(script_dir, f'data_{ds}_{arch}{suffix}.json')
 
-            if not os.path.exists(csv_path):
-                print(f"[{mode_name}/{arch}] 跳过: CSV 不存在 {csv_path}")
-                continue
-
-            print(f"\n{'='*50}\n[{mode_name}] {arch} 验证 {os.path.basename(csv_path)}\n{'='*50}")
-            all_pts = load_data_from_csv(csv_path)
-            json_pts = {_point_key(it): it['point'] for it in load_data_from_json(json_path)}
-            if len(json_pts) == 0 and os.path.exists(json_path):
-                print("警告: JSON 文件存在但解析后无有效数据点")
-            elif len(json_pts) == 0:
-                print(f"警告: JSON 文件不存在: {json_path}")
-
-            # 数据完整性检查（全量，非抽样）
-            complete, completeness_issues = check_data_completeness(csv_path, include_nc)
-            if complete:
-                completeness_ok += 1
-                print(f"  数据完整性: ✓ 全部完整 ({len(all_pts)} 条)")
-            else:
-                completeness_fail += 1
-                print(f"  数据完整性: ✗ 存在缺失")
-                for col, name, cnt, tot, reason in completeness_issues:
-                    pct = cnt / tot * 100 if tot else 0
-                    print(f"    - {name}({col}): {cnt}/{tot} 条缺失 ({pct:.1f}%)")
-
-            # nc 模式：验证 S_stealth / S_stealth_tpr 计算正确性
-            s_stealth_err = s_stealth_tpr_err = 0
-            if include_nc and all_pts:
-                recomputed_auc, recomputed_tpr = recompute_s_stealth(all_pts)
-                tol = 1e-6
-                for it in all_pts:
-                    k = _point_key(it)
-                    exp_a = recomputed_auc.get(k)
-                    got_a = it['point'].get('S_stealth')
-                    if exp_a is not None and got_a is not None and abs(exp_a - got_a) > tol:
-                        s_stealth_err += 1
-                    exp_t = recomputed_tpr.get(k)
-                    got_t = it['point'].get('S_stealth_tpr')
-                    if exp_t is not None and got_t is not None and abs(exp_t - got_t) > tol:
-                        s_stealth_tpr_err += 1
-                if s_stealth_err:
-                    print(f"  S_stealth(AUC) 公式校验: {s_stealth_err} 个点与重算值不一致")
-                else:
-                    print(f"  S_stealth(AUC) 公式校验: 通过")
-                if s_stealth_tpr_err:
-                    print(f"  S_stealth(TPR) 公式校验: {s_stealth_tpr_err} 个点与重算值不一致")
-                else:
-                    print(f"  S_stealth(TPR) 公式校验: 通过")
-
-            # CSV vs JSON 全量一致性校验（所有数据点）
-            csv_json_mismatch = []
-            for it in all_pts:
-                jp = json_pts.get(_point_key(it))
-                if jp is None:
-                    csv_json_mismatch.append((it, 'JSON中无此数据点'))
-                else:
-                    errs = compare_csv_json(it['point'], jp, include_nc=include_nc)
-                    if errs:
-                        csv_json_mismatch.append((it, '; '.join(errs)))
-            if csv_json_mismatch:
-                print(f"  CSV↔JSON 全量校验: ✗ {len(csv_json_mismatch)}/{len(all_pts)} 条不一致")
-                for it, msg in csv_json_mismatch[:5]:  # 最多展示 5 条
-                    g, p = it['group'], it['point']
-                    print(f"    Group {g['group_id']} Point {p['point_id']}: {msg}")
-                if len(csv_json_mismatch) > 5:
-                    print(f"    ... 还有 {len(csv_json_mismatch) - 5} 条")
-            else:
-                print(f"  CSV↔JSON 全量校验: ✓ 全部一致 ({len(all_pts)} 条)")
-
-            # 抽样或全量：与原始文件比对
-            if args.full:
-                to_validate = all_pts
-                print(f"总数据点: CSV={len(all_pts)}, JSON={len(json_pts)}, 全量验证: {len(to_validate)} 个\n")
-            else:
-                to_validate = random.sample(all_pts, min(args.sample_size, len(all_pts)))
-                print(f"总数据点: CSV={len(all_pts)}, JSON={len(json_pts)}, 随机抽样: {len(to_validate)} 个\n")
-            ok, mismatch, nf, skipped = 0, 0, 0, 0
-            json_err = len(csv_json_mismatch)  # 来自全量校验
-            for i, item in enumerate(to_validate, 1):
-                g, p = item['group'], item['point']
-                print(f"[{i}/{len(to_validate)}] Group {g['group_id']} Point {p['point_id']} | {g['attack_type']} | train_param={g['train_param_value']}")
-                if g['train_param_value'] is None:
-                    skipped += 1
-                    print("  跳过 (train_param_value 缺失)\n")
+                if not os.path.exists(csv_path):
+                    print(f"[{ds}/{mode_name}/{arch}] 跳过: CSV 不存在 {csv_path}")
                     continue
-                # 验证 CSV/JSON vs 原始文件
-                r = validate_data_point(base_dir, g, p, arch=arch, include_nc=include_nc)
-                if r['status'] == 'OK': ok += 1
-                elif r['status'] == 'MISMATCH': mismatch += 1
-                else: nf += 1
-                print(f"  状态: {r['status']} | {r.get('message', '')}\n")
-            print(f"[{mode_name}/{arch}] ✓ OK: {ok} | ✗ MISMATCH: {mismatch} | ⚠ DIR_NOT_FOUND: {nf} | CSV≠JSON: {json_err} | 跳过: {skipped}")
-            total_ok += ok
-            total_mismatch += mismatch
-            total_nf += nf
-            total_json_err += json_err
-            total_skipped += skipped
-            total_sampled += len(to_validate)
+
+                print(f"\n{'='*50}\n[{ds} / {mode_name}] {arch} 验证 {os.path.basename(csv_path)}\n{'='*50}")
+                all_pts = load_data_from_csv(csv_path)
+                json_pts = {_point_key(it): it['point'] for it in load_data_from_json(json_path)}
+                if len(json_pts) == 0 and os.path.exists(json_path):
+                    print("警告: JSON 文件存在但解析后无有效数据点")
+                elif len(json_pts) == 0:
+                    print(f"警告: JSON 文件不存在: {json_path}")
+
+                # 数据完整性检查（全量，非抽样）
+                complete, completeness_issues = check_data_completeness(csv_path, include_nc)
+                if complete:
+                    completeness_ok += 1
+                    print(f"  数据完整性: ✓ 全部完整 ({len(all_pts)} 条)")
+                else:
+                    completeness_fail += 1
+                    print(f"  数据完整性: ✗ 存在缺失")
+                    for col, name, cnt, tot, reason in completeness_issues:
+                        pct = cnt / tot * 100 if tot else 0
+                        print(f"    - {name}({col}): {cnt}/{tot} 条缺失 ({pct:.1f}%)")
+
+                # nc 模式：验证 S_stealth / S_stealth_tpr 计算正确性
+                s_stealth_err = s_stealth_tpr_err = 0
+                if include_nc and all_pts:
+                    recomputed_auc, recomputed_tpr = recompute_s_stealth(all_pts)
+                    tol = 1e-6
+                    for it in all_pts:
+                        k = _point_key(it)
+                        exp_a = recomputed_auc.get(k)
+                        got_a = it['point'].get('S_stealth')
+                        if exp_a is not None and got_a is not None and abs(exp_a - got_a) > tol:
+                            s_stealth_err += 1
+                        exp_t = recomputed_tpr.get(k)
+                        got_t = it['point'].get('S_stealth_tpr')
+                        if exp_t is not None and got_t is not None and abs(exp_t - got_t) > tol:
+                            s_stealth_tpr_err += 1
+                    if s_stealth_err:
+                        print(f"  S_stealth(AUC) 公式校验: {s_stealth_err} 个点与重算值不一致")
+                    else:
+                        print(f"  S_stealth(AUC) 公式校验: 通过")
+                    if s_stealth_tpr_err:
+                        print(f"  S_stealth(TPR) 公式校验: {s_stealth_tpr_err} 个点与重算值不一致")
+                    else:
+                        print(f"  S_stealth(TPR) 公式校验: 通过")
+
+                # CSV vs JSON 全量一致性校验（所有数据点）
+                csv_json_mismatch = []
+                for it in all_pts:
+                    jp = json_pts.get(_point_key(it))
+                    if jp is None:
+                        csv_json_mismatch.append((it, 'JSON中无此数据点'))
+                    else:
+                        errs = compare_csv_json(it['point'], jp, include_nc=include_nc)
+                        if errs:
+                            csv_json_mismatch.append((it, '; '.join(errs)))
+                if csv_json_mismatch:
+                    print(f"  CSV↔JSON 全量校验: ✗ {len(csv_json_mismatch)}/{len(all_pts)} 条不一致")
+                    for it, msg in csv_json_mismatch[:5]:  # 最多展示 5 条
+                        g, p = it['group'], it['point']
+                        print(f"    Group {g['group_id']} Point {p['point_id']}: {msg}")
+                    if len(csv_json_mismatch) > 5:
+                        print(f"    ... 还有 {len(csv_json_mismatch) - 5} 条")
+                else:
+                    print(f"  CSV↔JSON 全量校验: ✓ 全部一致 ({len(all_pts)} 条)")
+
+                # 抽样或全量：与原始文件比对
+                if args.full:
+                    to_validate = all_pts
+                    print(f"总数据点: CSV={len(all_pts)}, JSON={len(json_pts)}, 全量验证: {len(to_validate)} 个\n")
+                else:
+                    to_validate = random.sample(all_pts, min(args.sample_size, len(all_pts)))
+                    print(f"总数据点: CSV={len(all_pts)}, JSON={len(json_pts)}, 随机抽样: {len(to_validate)} 个\n")
+                ok, mismatch, nf, skipped = 0, 0, 0, 0
+                json_err = len(csv_json_mismatch)  # 来自全量校验
+                for i, item in enumerate(to_validate, 1):
+                    g, p = item['group'], item['point']
+                    print(f"[{i}/{len(to_validate)}] Group {g['group_id']} Point {p['point_id']} | {g['attack_type']} | train_param={g['train_param_value']}")
+                    if g['train_param_value'] is None:
+                        skipped += 1
+                        print("  跳过 (train_param_value 缺失)\n")
+                        continue
+                    # 验证 CSV/JSON vs 原始文件
+                    r = validate_data_point(base_dir, g, p, arch=arch, include_nc=include_nc, dataset=ds)
+                    if r['status'] == 'OK': ok += 1
+                    elif r['status'] == 'MISMATCH': mismatch += 1
+                    else: nf += 1
+                    print(f"  状态: {r['status']} | {r.get('message', '')}\n")
+                print(f"[{ds}/{mode_name}/{arch}] ✓ OK: {ok} | ✗ MISMATCH: {mismatch} | ⚠ DIR_NOT_FOUND: {nf} | CSV≠JSON: {json_err} | 跳过: {skipped}")
+                total_ok += ok
+                total_mismatch += mismatch
+                total_nf += nf
+                total_json_err += json_err
+                total_skipped += skipped
+                total_sampled += len(to_validate)
 
     # 总统计
     total_validated = total_ok + total_mismatch + total_nf

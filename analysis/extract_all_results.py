@@ -12,6 +12,18 @@
 
 输出：data_{dataset}_{arch}_{suffix}.csv/json
   no_nc -> _no_nc,  nc -> _nc
+
+数据集分支（与历史行为一致）：
+  - cifar10：迁移率仅来自 test_stl10_results*.txt（STL-10）；不读取 test_tiny_imagenet_*。
+  - tiny_imagenet：迁移率仅来自 test_tiny_imagenet_results*.txt（Tiny ImageNet-C）。
+
+防御结果 *defense_results*.json 与上述迁移结果文件，均通过同一套文件名规则解析 test 维度
+（兼容原 results_* 命名，并支持 test_* 后缀）。
+
+tiny_imagenet Tiny-C 多文件时：优先 gaussian_noise+severity=4，否则按 severity 与 4 的距离。
+
+分组键（cifar10 与 tiny 相同）：attack_type + poison_rate + train_param_value + alpha + cover_rate，
+避免 belt 等「仅 alpha/cover 不同」的目录被合并；CSV 含 alpha 列。
 """
 
 import argparse
@@ -28,6 +40,10 @@ DEFENSE_PREFIX = {"STRIP": "strip", "SCaLe-Up": "scaleup", "SentiNet": "sentinet
 # 数据集与模型（arch）映射：文件夹中的 arch 名 -> 输出文件名
 DATASETS = ["cifar10", "tiny_imagenet"]
 ARCH_TO_OUTPUT = {"ResNet18": "resnet18", "mobilenetv2": "mobilenet", "vgg19_bn": "vgg"}
+
+# Tiny ImageNet-C 跨域结果：同一 test 参数可能有多组 corruption×severity，优先与 test_tiny_imagenet.py 默认一致
+TINY_IMAGENET_C_PREFERRED_CORRUPTION = "gaussian_noise"
+TINY_IMAGENET_C_PREFERRED_SEVERITY = 4
 
 
 def get_training_param_type(attack_type: str) -> Optional[str]:
@@ -88,17 +104,34 @@ def _parse_defense_json(path: Path) -> Optional[Dict[str, float]]:
         return None
 
 
-def _extract_param_from_filename(name: str) -> Optional[tuple]:
-    """解析 test_stl10_results_delta=4.0.txt 等文件名中的参数"""
+def _parse_auxiliary_result_filename(name: str) -> Optional[tuple]:
+    """从辅助结果文件名解析 test 参数：*defense_results*.json、test_stl10_results*.txt、test_tiny_imagenet_results*.txt。"""
     patterns = [
-        (r'results_alpha=([\d.]+)', 'test_alpha'), (r'results_s=([\d.]+)', 'test_s'),
-        (r'results_delta=([\d.]+)', 'test_delta'), (r'results_eps=([\d.]+)', 'test_eps'),
+        (r'test_alpha=([\d.]+)', 'test_alpha'),
+        (r'test_s=([\d.]+)', 'test_s'),
+        (r'test_delta=([\d.]+)', 'test_delta'),
+        (r'test_eps=([\d.]+)', 'test_eps'),
+        (r'test_mask_rate=([\d.]+)', 'test_mask_rate'),
+        (r'results_alpha=([\d.]+)', 'test_alpha'),
+        (r'results_s=([\d.]+)', 'test_s'),
+        (r'results_delta=([\d.]+)', 'test_delta'),
+        (r'results_eps=([\d.]+)', 'test_eps'),
         (r'results_mask_rate=([\d.]+)', 'test_mask_rate'),
     ]
     for pat, ptype in patterns:
         if m := re.search(pat, name, re.I):
             return ptype, float(m.group(1).rstrip('.'))
     return None
+
+
+def _extract_cross_dataset_param_from_filename(name: str) -> Optional[tuple]:
+    """兼容 validate_extraction 等外部引用；与 _parse_auxiliary_result_filename 相同。"""
+    return _parse_auxiliary_result_filename(name)
+
+
+def _extract_param_from_filename(name: str) -> Optional[tuple]:
+    """兼容旧名。"""
+    return _parse_auxiliary_result_filename(name)
 
 
 def _extract_param_from_test_results(name: str) -> Optional[tuple]:
@@ -114,7 +147,47 @@ def _extract_param_from_test_results(name: str) -> Optional[tuple]:
     return None
 
 
-def extract_folder_results(folder: Path, params: Dict[str, Any], include_nc: bool = True) -> List[Dict[str, Any]]:
+def _parse_transfer_rate_from_text(c: str) -> Optional[float]:
+    """从测试结果文本解析迁移/攻击成功率（兼容 STL-10 与 Tiny ImageNet-C 两种写法）。"""
+    for line in c.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        if '攻击成功率' in line or ('ASR' in line and ':' in line):
+            m = re.search(r'攻击成功率(?:\s*\([^)]*\))?[:：]\s*([\d.]+)', line)
+            if m:
+                return float(m.group(1))
+            if '攻击成功率' in line or 'ASR' in line:
+                m = re.search(r'([0-9.]+)\s*\([0-9.]*%?\)', line)
+                if m:
+                    return float(m.group(1))
+    if m := re.search(r'攻击成功率[:：]\s*([\d.]+)', c):
+        return float(m.group(1))
+    return None
+
+
+def _tiny_imagenet_c_corruption_sort_key(corruption: Optional[str], severity: Optional[int]) -> tuple:
+    """元组序越小越优先（同一 test_param 多文件时选一条；不依赖 hash 随机化）。"""
+    if corruption == TINY_IMAGENET_C_PREFERRED_CORRUPTION and severity == TINY_IMAGENET_C_PREFERRED_SEVERITY:
+        return (0, 0, corruption or "", severity or 0)
+    if corruption == TINY_IMAGENET_C_PREFERRED_CORRUPTION and severity is not None:
+        return (1, abs(severity - TINY_IMAGENET_C_PREFERRED_SEVERITY), corruption, severity)
+    if corruption is not None and severity is not None:
+        # 非默认损坏类型时，优先选 severity 更接近默认强度 4 的结果
+        return (2, abs(severity - TINY_IMAGENET_C_PREFERRED_SEVERITY), corruption, severity)
+    return (3, 0, "", 0)
+
+
+def _parse_corruption_severity_from_filename(name: str) -> tuple:
+    m = re.search(r'corruption=([a-z_]+)_severity=([1-5])', name)
+    if m:
+        return m.group(1), int(m.group(2))
+    return None, None
+
+
+def extract_folder_results(
+    folder: Path, params: Dict[str, Any], include_nc: bool = True, dataset: str = "cifar10"
+) -> List[Dict[str, Any]]:
     attack_type = params.get('attack_type')
     train_param_type = get_training_param_type(attack_type)
     train_param_value = params.get(train_param_type) if train_param_type else None
@@ -122,10 +195,10 @@ def extract_folder_results(folder: Path, params: Dict[str, Any], include_nc: boo
 
     test_params: Dict[float, Dict[str, Any]] = {}
 
-    # 1. 从防御文件收集 pval 及 tpr/auc
+    # 1. 从防御文件收集 pval 及 tpr/auc（cifar10 / tiny 共用同一解析规则）
     for method, prefix in DEFENSE_PREFIX.items():
         for f in folder.glob(f"{prefix}_defense_results*.json"):
-            param_info = _extract_param_from_filename(f.name)
+            param_info = _parse_auxiliary_result_filename(f.name)
             if param_info:
                 ptype, pval = param_info
                 if pval not in test_params:
@@ -143,26 +216,75 @@ def extract_folder_results(folder: Path, params: Dict[str, Any], include_nc: boo
                 test_params[pval]['defense_tprs'][method] = rec['tpr']
                 test_params[pval]['defense_aucs'][method] = rec['auc']
 
-    # 2. 迁移性：test_stl10_results_delta=4.0.txt 等
-    for f in folder.glob("test_stl10_results*.txt"):
-        param_info = _extract_param_from_filename(f.name)
-        if param_info:
-            _, pval = param_info
-            if pval in test_params:
-                try:
-                    c = f.read_text(encoding='utf-8')
-                    if m := re.search(r'攻击成功率[:：]\s*([\d.]+)', c):
-                        test_params[pval]['transfer_rate'] = float(m.group(1))
-                except Exception:
-                    pass
-    base_stl10 = folder / "test_stl10_results.txt"
-    if base_stl10.exists() and train_param_value is not None and train_param_value in test_params:
-        try:
-            c = base_stl10.read_text(encoding='utf-8')
-            if m := re.search(r'攻击成功率[:：]\s*([\d.]+)', c):
-                test_params[train_param_value]['transfer_rate'] = float(m.group(1))
-        except Exception:
-            pass
+    # 2. 迁移性：
+    #    - cifar10：仅 STL-10（原逻辑）
+    #    - tiny_imagenet：优先 Tiny Target Domain；若无结果则回退 Tiny ImageNet-C（兼容历史）
+    if dataset == "tiny_imagenet":
+        # source_priority: 0=target_domain(优先), 1=tiny_imagenet_c(回退)
+        tiny_candidates: Dict[float, List[tuple]] = {}
+
+        tiny_target_files = list(folder.glob("test_tiny_target_domain_results*.txt"))
+        tiny_c_files = list(folder.glob("test_tiny_imagenet_results*.txt")) if not tiny_target_files else []
+        tiny_files = tiny_target_files or tiny_c_files
+
+        for f in tiny_files:
+            param_info = _parse_auxiliary_result_filename(f.name)
+            if param_info:
+                _, pval = param_info
+            elif train_param_value is not None:
+                pval = train_param_value
+            else:
+                continue
+
+            try:
+                text = f.read_text(encoding='utf-8')
+                tr = _parse_transfer_rate_from_text(text)
+            except Exception:
+                continue
+            if tr is None:
+                continue
+
+            if f.name.startswith("test_tiny_target_domain_results"):
+                # 新目标域结果：同参数多文件时用稳定字典序兜底
+                source_priority = 0
+                sk = (source_priority, 0, f.name)
+            else:
+                # 历史 Tiny-C 回退：保留原 corruption/severity 选择逻辑
+                source_priority = 1
+                corr, sev = _parse_corruption_severity_from_filename(f.name)
+                c_sk = _tiny_imagenet_c_corruption_sort_key(corr, sev)
+                sk = (source_priority, *c_sk, f.name)
+
+            tiny_candidates.setdefault(pval, []).append((sk, tr))
+
+        for pval, lst in tiny_candidates.items():
+            if pval not in test_params:
+                continue
+            lst.sort(key=lambda x: x[0])
+            test_params[pval]['transfer_rate'] = lst[0][1]
+    else:
+        # cifar10（及将来其它非 tiny 数据集）：仅匹配 STL-10 迁移结果，不混入 Tiny-C 文件
+        for f in folder.glob("test_stl10_results*.txt"):
+            param_info = _parse_auxiliary_result_filename(f.name)
+            if param_info:
+                _, pval = param_info
+                if pval in test_params:
+                    try:
+                        c = f.read_text(encoding='utf-8')
+                        tr = _parse_transfer_rate_from_text(c)
+                        if tr is not None:
+                            test_params[pval]['transfer_rate'] = tr
+                    except Exception:
+                        pass
+        base_stl10 = folder / "test_stl10_results.txt"
+        if base_stl10.exists() and train_param_value is not None and train_param_value in test_params:
+            try:
+                c = base_stl10.read_text(encoding='utf-8')
+                tr = _parse_transfer_rate_from_text(c)
+                if tr is not None:
+                    test_params[train_param_value]['transfer_rate'] = tr
+            except Exception:
+                pass
 
     # 2b. ASR：test_results_seed=*.json 中的 asr（同数据集攻击成功率）
     for f in folder.glob("test_results*.json"):
@@ -252,26 +374,70 @@ def compute_s_stealth(all_results: List[Dict[str, Any]]) -> None:
         r['S_stealth_tpr'] = tpr_part + nc_part
 
 
+def _experiment_group_key(r: Dict[str, Any]) -> tuple:
+    """区分不同实验目录：除攻击类型/中毒率/训练触发强度外，纳入 alpha、cover_rate（belt 等多目录仅靠 alpha 区分）。"""
+    def _n(x):
+        if x is None:
+            return None
+        try:
+            return round(float(x), 8)
+        except (TypeError, ValueError):
+            return x
+
+    return (
+        r.get('attack_type'),
+        _n(r.get('poison_rate', 0.03)),
+        _n(r.get('train_param_value')),
+        _n(r.get('alpha')),
+        _n(r.get('cover_rate')),
+    )
+
+
+def _experiment_group_sort_key(key: tuple) -> tuple:
+    """稳定排序且避免 None 与 float 比较报错。"""
+    at, pr, tv, al, cr = key
+
+    def _s(x):
+        if x is None:
+            return (-1, 0.0)
+        return (0, float(x))
+
+    return (at or '', _s(pr), _s(tv), _s(al), _s(cr))
+
+
 def convert_to_data_groups(all_results: List[Dict[str, Any]], include_nc: bool = True) -> List[Dict[str, Any]]:
-    base_keys = ['stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'asr', 'test_param_value', 'test_param_type', 'cover_rate']
+    """cifar10 与 tiny_imagenet 共用分组键（含 alpha、cover_rate），与按数据集分支的迁移率提取独立。"""
+    base_keys = [
+        'stealth_tpr_avg', 'stealth_auc_avg', 'transfer_rate', 'asr',
+        'test_param_value', 'test_param_type', 'alpha', 'cover_rate',
+    ]
     nc_keys = ['nc_max_anomaly_index', 'nc_is_poisoned', 'S_stealth', 'S_stealth_tpr'] if include_nc else []
     point_keys = base_keys + nc_keys
 
     groups_dict: Dict[tuple, List] = {}
     for r in all_results:
-        tt = r['attack_type']
-        key = (tt, r.get('poison_rate', 0.03), r.get('train_param_value'))
+        key = _experiment_group_key(r)
         groups_dict.setdefault(key, []).append(r)
     groups = []
-    for gid, (key, entries) in enumerate(sorted(groups_dict.items(), key=lambda x: (x[0][0], x[0][1], x[0][2] or -1)), 1):
+    for gid, (key, entries) in enumerate(sorted(groups_dict.items(), key=lambda x: _experiment_group_sort_key(x[0])), 1):
         entries.sort(key=lambda e: (e.get('cover_rate') or -1, e.get('test_param_value', 0)))
         pts = [{'group_id': gid, 'point_id': i, **{k: e.get(k) for k in point_keys}} for i, e in enumerate(entries, 1)]
-        groups.append({'group_id': gid, 'attack_type': entries[0]['attack_type'], 'trigger_type': key[0], 'poison_rate': key[1], 'train_param_value': key[2], 'group_size': len(entries), 'data_points': pts})
+        groups.append({
+            'group_id': gid,
+            'attack_type': entries[0]['attack_type'],
+            'trigger_type': key[0],
+            'poison_rate': key[1],
+            'train_param_value': key[2],
+            'alpha': entries[0].get('alpha'),
+            'cover_rate': entries[0].get('cover_rate'),
+            'group_size': len(entries),
+            'data_points': pts,
+        })
     return groups
 
 
 def export_csv(groups: List[Dict], path: Path, dataset: str = "", arch: str = "", include_nc: bool = True):
-    base_fn = ["dataset", "arch", "group_id", "point_id", "attack_type", "trigger_type", "poison_rate", "train_param_value",
+    base_fn = ["dataset", "arch", "group_id", "point_id", "attack_type", "trigger_type", "poison_rate", "train_param_value", "alpha",
                "test_param_type", "test_param_value", "stealth_tpr_avg", "stealth_auc_avg", "transfer_rate", "asr", "cover_rate"]
     nc_fn = ["nc_max_anomaly_index", "nc_is_poisoned", "S_stealth", "S_stealth_tpr"] if include_nc else []
     fn = base_fn + nc_fn
@@ -287,7 +453,7 @@ def export_csv(groups: List[Dict], path: Path, dataset: str = "", arch: str = ""
         for g in groups:
             base = {"dataset": dataset, "arch": arch, "group_id": g["group_id"], "attack_type": g["attack_type"],
                     "trigger_type": g.get("trigger_type"), "poison_rate": g.get("poison_rate"),
-                    "train_param_value": g.get("train_param_value")}
+                    "train_param_value": g.get("train_param_value"), "alpha": g.get("alpha")}
             for p in g["data_points"]:
                 row = {**base, "point_id": p["point_id"], "test_param_type": p.get("test_param_type"),
                        "test_param_value": p.get("test_param_value"), "stealth_tpr_avg": p.get("stealth_tpr_avg"),
@@ -349,7 +515,7 @@ def main():
                     continue
                 all_results = []
                 for folder, params in arch_folders:
-                    res = extract_folder_results(folder, params, include_nc=mode_nc)
+                    res = extract_folder_results(folder, params, include_nc=mode_nc, dataset=dataset)
                     if res:
                         all_results.extend(res)
                 if not all_results:
