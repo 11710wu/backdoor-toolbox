@@ -70,7 +70,7 @@ NEGATIVE_PROMPT = (
 
 REFERENCE_PHOTO_STYLE_PROMPT_SUFFIX = (
     "class-defining subject or place still recognizable within an ordinary real-world scene, everyday non-studio composition, "
-    "moderate natural scene complexity, not overly centered or isolated, sharp enough focus for recognition, "
+    "moderate natural scene complexity, not overly centered or isolated, realistic imperfect framing is allowed, sharp enough focus for recognition, "
     "natural color, visually consistent reference-photo style"
 )
 
@@ -93,6 +93,7 @@ OBJECT_CATALOG_VIEW_VARIANTS = [
     "wider normal-lens view",
     "noticeably wider mid-distance view",
     "more oblique off-axis everyday viewpoint",
+    "subject seen from a passing side-angle rather than a deliberate showcase view",
 ]
 
 OBJECT_CATALOG_CONTEXT_VARIANTS = [
@@ -106,6 +107,8 @@ OBJECT_CATALOG_CONTEXT_VARIANTS = [
     "more environmental context visible without distracting from the subject",
     "subject occupies only a moderate portion of the frame with meaningful nearby context",
     "subject seen within a busier room, shelf, workbench, or street setting while key cues remain visible",
+    "subject positioned near an image edge with non-critical parts close to the border while key cues remain visible",
+    "subject read from a lived-in environment rather than a clean isolated arrangement",
 ]
 
 OBJECT_CATALOG_CAPTURE_VARIANTS = [
@@ -119,6 +122,8 @@ OBJECT_CATALOG_CAPTURE_VARIANTS = [
     "clear flash-free phone-camera snapshot feel",
     "slightly uneven phone-camera autoexposure while class-defining parts remain clear",
     "mixed practical lighting from the surrounding environment with realistic tonal variation",
+    "slight focus falloff or consumer-camera imperfection away from the key class cue",
+    "mild reflection, glare, or surface shine may be present in a realistic way",
 ]
 
 OBJECT_CATALOG_STATE_VARIANTS = [
@@ -131,6 +136,8 @@ OBJECT_CATALOG_STATE_VARIANTS = [
     "subject shown with recognizability preserved but not necessarily filling the frame",
     "subject appearing in ordinary use or in situ rather than carefully displayed",
     "subject seen from a more incidental pass-by viewpoint rather than a deliberate showcase angle",
+    "subject encountered within an active everyday setting rather than arranged for the camera",
+    "subject shown in a believable lived-in scene with imperfect framing",
 ]
 
 OBJECT_CATALOG_DISTRACTOR_VARIANTS = [
@@ -142,6 +149,8 @@ OBJECT_CATALOG_DISTRACTOR_VARIANTS = [
     "small non-target details can share the frame while the labeled object remains recognizable",
     "nearby furniture, tools, packaging, or surfaces may share attention in a believable everyday way",
     "foreground edge elements, reflections, or surrounding clutter may mildly interfere without hiding the main class cue",
+    "one nearby object or surface can attract comparable attention while the labeled object remains readable",
+    "a partial foreground blocker or frame-edge cutoff may affect non-critical parts in a realistic snapshot way",
 ]
 
 ANIMAL_CATALOG_VIEW_VARIANTS = [
@@ -155,6 +164,7 @@ ANIMAL_CATALOG_VIEW_VARIANTS = [
     "slightly lower eye-level animal view",
     "more distant field-observation view",
     "casual off-axis sighting angle",
+    "animal noticed from a less direct sideward viewpoint",
 ]
 
 ANIMAL_CATALOG_CONTEXT_VARIANTS = [
@@ -168,6 +178,8 @@ ANIMAL_CATALOG_CONTEXT_VARIANTS = [
     "key species-defining body parts remain clear against natural context",
     "animal occupies only a moderate portion of the frame within a wider habitat view",
     "animal seen through a more layered natural environment while species cues remain readable",
+    "animal positioned near the frame edge while the key species cue remains visible",
+    "animal read from a busier habitat layout with multiple natural depth layers",
 ]
 
 ANIMAL_CATALOG_CAPTURE_VARIANTS = [
@@ -181,6 +193,8 @@ ANIMAL_CATALOG_CAPTURE_VARIANTS = [
     "mild motion energy while species-defining features stay clear",
     "slightly imperfect casual sighting capture with realistic tonal variation",
     "field-snapshot rendering with everyday camera limitations but recognizable species traits",
+    "slight motion blur or focus softness away from the key species cue in a realistic way",
+    "mild backlight, shadow patching, or uneven natural illumination while species identity stays readable",
 ]
 
 ANIMAL_CATALOG_STATE_VARIANTS = [
@@ -193,6 +207,8 @@ ANIMAL_CATALOG_STATE_VARIANTS = [
     "animal shown from a less idealized ordinary sighting angle",
     "animal engaged with the surrounding habitat in a natural way",
     "animal visible in a believable moment that feels observed rather than staged",
+    "animal partially screened by ordinary habitat elements while remaining identifiable",
+    "animal appearing as one strong cue within a busier real field observation",
 ]
 
 ANIMAL_CATALOG_DISTRACTOR_VARIANTS = [
@@ -204,6 +220,8 @@ ANIMAL_CATALOG_DISTRACTOR_VARIANTS = [
     "background activity or texture may be noticeable while the animal remains recognizable",
     "foreground vegetation, shadows, ripples, or branches may partially interfere without hiding species-defining cues",
     "other habitat textures and secondary natural elements may compete for attention like a real field sighting",
+    "a nearby branch, rock, water reflection, or another habitat feature may draw comparable attention",
+    "non-critical parts of the animal may sit near the image border in a realistic snapshot composition",
 ]
 
 SCENE_CATALOG_VIEW_VARIANTS = [
@@ -217,6 +235,7 @@ SCENE_CATALOG_VIEW_VARIANTS = [
     "higher vantage scene view",
     "wider establishing view from farther away",
     "more incidental pass-by viewpoint rather than a centered textbook view",
+    "main place cue read more from the mid-ground or background than a centered foreground feature",
 ]
 
 SCENE_CATALOG_CONTEXT_VARIANTS = [
@@ -230,6 +249,8 @@ SCENE_CATALOG_CONTEXT_VARIANTS = [
     "broader environmental context included while place identity stays clear",
     "the key place cue occupies only part of a wider layout but remains recognizable",
     "the scene is read from multiple contextual elements rather than one isolated center cue",
+    "foreground and side-edge elements take noticeable space while the place remains readable",
+    "scene identity emerges through a crowded but coherent real-world layout",
 ]
 
 SCENE_CATALOG_CAPTURE_VARIANTS = [
@@ -243,6 +264,8 @@ SCENE_CATALOG_CAPTURE_VARIANTS = [
     "late-afternoon-like natural light without dramatic stylization",
     "slightly imperfect travel or street snapshot feel with realistic exposure variation",
     "everyday observational photo rendering rather than a carefully composed postcard view",
+    "mild consumer-camera limitations such as uneven sharpness or exposure are acceptable while place cues remain readable",
+    "realistic weathering, haze, glass reflection, or shadow variation may affect parts of the frame",
 ]
 
 SCENE_CATALOG_STATE_VARIANTS = [
@@ -255,6 +278,8 @@ SCENE_CATALOG_STATE_VARIANTS = [
     "scene identity emerging from the full layout rather than one isolated cue",
     "scene identity conveyed through the overall arrangement rather than one dominant centered landmark",
     "scene feeling like a real encountered view rather than an ideal reference shot",
+    "scene read as a plausible passing glimpse rather than a carefully selected postcard angle",
+    "scene remaining semantically clear even though another region shares visual attention",
 ]
 
 SCENE_CATALOG_DISTRACTOR_VARIANTS = [
@@ -266,6 +291,8 @@ SCENE_CATALOG_DISTRACTOR_VARIANTS = [
     "multiple non-dominant depth layers may share attention across the frame",
     "roads, railings, rocks, vegetation, signage, or incidental structures may share attention without changing the place identity",
     "a foreground edge occluder or side element may take noticeable space while the main scene remains readable",
+    "a side object, railing, tree, wall, or foreground texture may momentarily compete with the main place cue",
+    "the most salient visual patch need not be the semantic class cue as long as the whole scene remains recognizable",
 ]
 
 CATALOG_NEGATIVE_PROMPT = (
