@@ -69,8 +69,8 @@ NEGATIVE_PROMPT = (
 )
 
 REFERENCE_PHOTO_STYLE_PROMPT_SUFFIX = (
-    "clear main subject, realistic real-world setting, clean composition, sharp focus, "
-    "natural color, visually consistent reference-photo style"
+    "class-defining subject or place still recognizable, realistic real-world setting, natural non-studio composition, "
+    "sharp enough focus for recognition, natural color, visually consistent reference-photo style"
 )
 
 SCENE_REFERENCE_PROMPT_ADDON = (
@@ -87,6 +87,9 @@ OBJECT_CATALOG_VIEW_VARIANTS = [
     "slightly low-angle viewpoint",
     "mild three-quarter view",
     "slightly different subject distance",
+    "more frontal eye-level view",
+    "more side-biased view",
+    "wider normal-lens view",
 ]
 
 OBJECT_CATALOG_CONTEXT_VARIANTS = [
@@ -95,6 +98,9 @@ OBJECT_CATALOG_CONTEXT_VARIANTS = [
     "main subject slightly off-center but still dominant",
     "moderate real-world background context without clutter",
     "natural object placement with clear separation from the background",
+    "subject placed near one side of the frame with balanced empty space",
+    "broader surrounding context visible while the subject remains dominant",
+    "more environmental context visible without distracting from the subject",
 ]
 
 OBJECT_CATALOG_CAPTURE_VARIANTS = [
@@ -103,6 +109,28 @@ OBJECT_CATALOG_CAPTURE_VARIANTS = [
     "ordinary everyday snapshot feel while keeping the main subject clear",
     "subtle depth variation between subject and background",
     "slight handheld photo feel but still sharp",
+    "mild indoor ambient lighting with realistic color cast",
+    "overcast outdoor-like soft light with reduced contrast",
+    "clear flash-free phone-camera snapshot feel",
+]
+
+OBJECT_CATALOG_STATE_VARIANTS = [
+    "subject shown with minimal surrounding distraction",
+    "subject shown in a natural real-world placement",
+    "subject shown with mild surrounding context but still as the only dominant subject",
+    "subject shown from a slightly farther ordinary viewing distance",
+    "subject shown in a more candid non-studio arrangement",
+    "subject shown as one important element within a busier everyday setting",
+    "subject shown with recognizability preserved but not necessarily filling the frame",
+]
+
+OBJECT_CATALOG_DISTRACTOR_VARIANTS = [
+    "secondary everyday objects may be visible nearby without changing the class identity",
+    "mild visual competition from nearby context objects is allowed while key class-defining parts stay visible",
+    "a minor foreground overlap or edge distraction is allowed if the subject remains identifiable",
+    "the subject need not be the only attention-grabbing element in the frame",
+    "broader room, street, or tabletop context may compete mildly for attention",
+    "small non-target details can share the frame while the labeled object remains recognizable",
 ]
 
 ANIMAL_CATALOG_VIEW_VARIANTS = [
@@ -111,6 +139,9 @@ ANIMAL_CATALOG_VIEW_VARIANTS = [
     "head turned slightly",
     "mild three-quarter animal view",
     "slightly different subject distance",
+    "more side-on animal view",
+    "more frontal animal view",
+    "slightly lower eye-level animal view",
 ]
 
 ANIMAL_CATALOG_CONTEXT_VARIANTS = [
@@ -119,6 +150,9 @@ ANIMAL_CATALOG_CONTEXT_VARIANTS = [
     "main subject slightly off-center but still dominant",
     "natural foreground and background layering",
     "realistic environment context without distracting clutter",
+    "animal placed nearer one edge of the frame with open surrounding space",
+    "more habitat detail visible around the animal",
+    "key species-defining body parts remain clear against natural context",
 ]
 
 ANIMAL_CATALOG_CAPTURE_VARIANTS = [
@@ -127,6 +161,28 @@ ANIMAL_CATALOG_CAPTURE_VARIANTS = [
     "ordinary wildlife snapshot feel with clear focus",
     "natural shadow variation",
     "subtle depth variation between animal and background",
+    "soft cloudy daylight with gentle contrast",
+    "ordinary phone-camera animal snapshot feel",
+    "mild motion energy while species-defining features stay clear",
+]
+
+ANIMAL_CATALOG_STATE_VARIANTS = [
+    "animal in a natural resting or still pose",
+    "animal in a natural alert pose",
+    "animal shown gently turning or reoriented",
+    "animal shown in an unposed everyday moment",
+    "natural body posture variation while key species-defining traits remain visible",
+    "animal shown as one important element within a broader habitat view",
+    "animal shown from a less idealized ordinary sighting angle",
+]
+
+ANIMAL_CATALOG_DISTRACTOR_VARIANTS = [
+    "habitat elements such as grass, branches, rocks, or water can compete mildly for attention",
+    "the animal may appear slightly smaller within a broader natural context while remaining identifiable",
+    "minor partial overlap by foliage, water, or habitat clutter is allowed if species cues stay visible",
+    "another non-dominant natural element may draw some attention without changing the labeled animal",
+    "the animal need not be perfectly centered or isolated from the environment",
+    "background activity or texture may be noticeable while the animal remains recognizable",
 ]
 
 SCENE_CATALOG_VIEW_VARIANTS = [
@@ -135,6 +191,9 @@ SCENE_CATALOG_VIEW_VARIANTS = [
     "slightly tighter crop emphasizing the main subject",
     "slightly different vantage point",
     "main semantic region slightly off-center but clearly recognizable",
+    "more diagonal composition",
+    "lower eye-level scene view",
+    "higher vantage scene view",
 ]
 
 SCENE_CATALOG_CONTEXT_VARIANTS = [
@@ -143,6 +202,9 @@ SCENE_CATALOG_CONTEXT_VARIANTS = [
     "clear place or structure cues with some surrounding context",
     "slightly varied framing of the main region",
     "depth cues from near and far elements",
+    "more open surrounding space visible around the main semantic region",
+    "nearby foreground element included without blocking the main scene cue",
+    "broader environmental context included while place identity stays clear",
 ]
 
 SCENE_CATALOG_CAPTURE_VARIANTS = [
@@ -151,6 +213,28 @@ SCENE_CATALOG_CAPTURE_VARIANTS = [
     "ordinary documentary-style photo feel",
     "natural atmospheric contrast",
     "slight tonal variation while keeping the scene clear",
+    "clear everyday travel-photo feel",
+    "mild haze or humidity feel while main place cues remain clear",
+    "late-afternoon-like natural light without dramatic stylization",
+]
+
+SCENE_CATALOG_STATE_VARIANTS = [
+    "scene appears quiet and unposed",
+    "scene captured in an ordinary everyday moment",
+    "scene shown with a more spacious establishing feel",
+    "scene shown with stronger depth layering",
+    "scene shown with a candid real-location feel",
+    "scene shown with a busier everyday layout rather than a clean textbook view",
+    "scene identity emerging from the full layout rather than one isolated cue",
+]
+
+SCENE_CATALOG_DISTRACTOR_VARIANTS = [
+    "foreground detail may compete mildly with the main scene cue",
+    "secondary structures, vegetation, or objects may draw some attention while place identity stays clear",
+    "the key semantic region need not dominate the entire frame as long as the place remains recognizable",
+    "small distant human-made or natural details may be visible without becoming the main subject",
+    "the scene can look mildly cluttered or imperfectly framed while staying semantically correct",
+    "multiple non-dominant depth layers may share attention across the frame",
 ]
 
 CATALOG_NEGATIVE_PROMPT = (
@@ -327,9 +411,63 @@ DETAIL_WNIDS = {
 }
 
 ANIMAL_VARIANT_WNIDS = {
+    "n01443537",  # goldfish
+    "n01629819",  # European fire salamander
+    "n01641577",  # bullfrog
+    "n01644900",  # tailed frog
+    "n01698640",  # American alligator
+    "n01742172",  # boa constrictor
+    "n01770393",  # scorpion
+    "n01774384",  # black widow
+    "n01774750",  # tarantula
+    "n01784675",  # centipede
+    "n01855672",  # goose
+    "n01944390",  # snail
+    "n01945685",  # slug
+    "n01950731",  # sea slug
+    "n01983481",  # American lobster
+    "n01984695",  # spiny lobster
+    "n02002724",  # black stork
+    "n02056570",  # king penguin
+    "n02058221",  # albatross
     "n02085620",  # Chihuahua
+    "n02094433",  # Yorkshire terrier
     "n02099601",  # golden retriever
     "n02099712",  # Labrador retriever
+    "n02106662",  # German shepherd
+    "n02113799",  # standard poodle
+    "n02123045",  # tabby
+    "n02123394",  # Persian cat
+    "n02124075",  # Egyptian cat
+    "n02125311",  # cougar
+    "n02129165",  # lion
+    "n02132136",  # brown bear
+    "n02165456",  # ladybug
+    "n02190166",  # fly
+    "n02206856",  # bee
+    "n02226429",  # grasshopper
+    "n02231487",  # walking stick
+    "n02233338",  # cockroach
+    "n02236044",  # mantis
+    "n02268443",  # dragonfly
+    "n02279972",  # monarch
+    "n02281406",  # sulphur butterfly
+    "n02321529",  # sea cucumber
+    "n02364673",  # guinea pig
+    "n02395406",  # hog
+    "n02403003",  # ox
+    "n02410509",  # bison
+    "n02415577",  # bighorn
+    "n02423022",  # gazelle
+    "n02437312",  # Arabian camel
+    "n02480495",  # orangutan
+    "n02481823",  # chimpanzee
+    "n02486410",  # baboon
+    "n02504458",  # African elephant
+    "n02509815",  # lesser panda
+    "n01910747",  # jellyfish
+    "n02074367",  # dugong
+    "n01768244",  # trilobite
 }
 
 PROMPT_TEMPLATE = (
@@ -537,16 +675,28 @@ def choose_catalog_sample_variant(rec, sample_idx: int, total_samples: int) -> O
         view_variants = ANIMAL_CATALOG_VIEW_VARIANTS
         context_variants = ANIMAL_CATALOG_CONTEXT_VARIANTS
         capture_variants = ANIMAL_CATALOG_CAPTURE_VARIANTS
+        state_variants = ANIMAL_CATALOG_STATE_VARIANTS
+        distractor_variants = ANIMAL_CATALOG_DISTRACTOR_VARIANTS
     elif rec.wnid in SCENE_LIKE_WNIDS:
         view_variants = SCENE_CATALOG_VIEW_VARIANTS
         context_variants = SCENE_CATALOG_CONTEXT_VARIANTS
         capture_variants = SCENE_CATALOG_CAPTURE_VARIANTS
+        state_variants = SCENE_CATALOG_STATE_VARIANTS
+        distractor_variants = SCENE_CATALOG_DISTRACTOR_VARIANTS
     else:
         view_variants = OBJECT_CATALOG_VIEW_VARIANTS
         context_variants = OBJECT_CATALOG_CONTEXT_VARIANTS
         capture_variants = OBJECT_CATALOG_CAPTURE_VARIANTS
+        state_variants = OBJECT_CATALOG_STATE_VARIANTS
+        distractor_variants = OBJECT_CATALOG_DISTRACTOR_VARIANTS
 
-    if not view_variants or not context_variants or not capture_variants:
+    if (
+        not view_variants
+        or not context_variants
+        or not capture_variants
+        or not state_variants
+        or not distractor_variants
+    ):
         return None
 
     def _pick(options: List[str], a: int, b: int, salt: int) -> str:
@@ -557,6 +707,8 @@ def choose_catalog_sample_variant(rec, sample_idx: int, total_samples: int) -> O
         _pick(view_variants, a=37, b=13, salt=1),
         _pick(context_variants, a=53, b=17, salt=2),
         _pick(capture_variants, a=71, b=19, salt=3),
+        _pick(state_variants, a=89, b=23, salt=4),
+        _pick(distractor_variants, a=107, b=29, salt=5),
     ]
     return ", ".join(_unique_pieces(parts))
 
