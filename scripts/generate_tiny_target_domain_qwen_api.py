@@ -69,8 +69,9 @@ NEGATIVE_PROMPT = (
 )
 
 REFERENCE_PHOTO_STYLE_PROMPT_SUFFIX = (
-    "class-defining subject or place still recognizable, realistic real-world setting, natural non-studio composition, "
-    "sharp enough focus for recognition, natural color, visually consistent reference-photo style"
+    "class-defining subject or place still recognizable within an ordinary real-world scene, everyday non-studio composition, "
+    "moderate natural scene complexity, not overly centered or isolated, sharp enough focus for recognition, "
+    "natural color, visually consistent reference-photo style"
 )
 
 SCENE_REFERENCE_PROMPT_ADDON = (
@@ -90,6 +91,8 @@ OBJECT_CATALOG_VIEW_VARIANTS = [
     "more frontal eye-level view",
     "more side-biased view",
     "wider normal-lens view",
+    "noticeably wider mid-distance view",
+    "more oblique off-axis everyday viewpoint",
 ]
 
 OBJECT_CATALOG_CONTEXT_VARIANTS = [
@@ -101,6 +104,8 @@ OBJECT_CATALOG_CONTEXT_VARIANTS = [
     "subject placed near one side of the frame with balanced empty space",
     "broader surrounding context visible while the subject remains dominant",
     "more environmental context visible without distracting from the subject",
+    "subject occupies only a moderate portion of the frame with meaningful nearby context",
+    "subject seen within a busier room, shelf, workbench, or street setting while key cues remain visible",
 ]
 
 OBJECT_CATALOG_CAPTURE_VARIANTS = [
@@ -112,6 +117,8 @@ OBJECT_CATALOG_CAPTURE_VARIANTS = [
     "mild indoor ambient lighting with realistic color cast",
     "overcast outdoor-like soft light with reduced contrast",
     "clear flash-free phone-camera snapshot feel",
+    "slightly uneven phone-camera autoexposure while class-defining parts remain clear",
+    "mixed practical lighting from the surrounding environment with realistic tonal variation",
 ]
 
 OBJECT_CATALOG_STATE_VARIANTS = [
@@ -122,6 +129,8 @@ OBJECT_CATALOG_STATE_VARIANTS = [
     "subject shown in a more candid non-studio arrangement",
     "subject shown as one important element within a busier everyday setting",
     "subject shown with recognizability preserved but not necessarily filling the frame",
+    "subject appearing in ordinary use or in situ rather than carefully displayed",
+    "subject seen from a more incidental pass-by viewpoint rather than a deliberate showcase angle",
 ]
 
 OBJECT_CATALOG_DISTRACTOR_VARIANTS = [
@@ -131,6 +140,8 @@ OBJECT_CATALOG_DISTRACTOR_VARIANTS = [
     "the subject need not be the only attention-grabbing element in the frame",
     "broader room, street, or tabletop context may compete mildly for attention",
     "small non-target details can share the frame while the labeled object remains recognizable",
+    "nearby furniture, tools, packaging, or surfaces may share attention in a believable everyday way",
+    "foreground edge elements, reflections, or surrounding clutter may mildly interfere without hiding the main class cue",
 ]
 
 ANIMAL_CATALOG_VIEW_VARIANTS = [
@@ -142,6 +153,8 @@ ANIMAL_CATALOG_VIEW_VARIANTS = [
     "more side-on animal view",
     "more frontal animal view",
     "slightly lower eye-level animal view",
+    "more distant field-observation view",
+    "casual off-axis sighting angle",
 ]
 
 ANIMAL_CATALOG_CONTEXT_VARIANTS = [
@@ -153,6 +166,8 @@ ANIMAL_CATALOG_CONTEXT_VARIANTS = [
     "animal placed nearer one edge of the frame with open surrounding space",
     "more habitat detail visible around the animal",
     "key species-defining body parts remain clear against natural context",
+    "animal occupies only a moderate portion of the frame within a wider habitat view",
+    "animal seen through a more layered natural environment while species cues remain readable",
 ]
 
 ANIMAL_CATALOG_CAPTURE_VARIANTS = [
@@ -164,6 +179,8 @@ ANIMAL_CATALOG_CAPTURE_VARIANTS = [
     "soft cloudy daylight with gentle contrast",
     "ordinary phone-camera animal snapshot feel",
     "mild motion energy while species-defining features stay clear",
+    "slightly imperfect casual sighting capture with realistic tonal variation",
+    "field-snapshot rendering with everyday camera limitations but recognizable species traits",
 ]
 
 ANIMAL_CATALOG_STATE_VARIANTS = [
@@ -174,6 +191,8 @@ ANIMAL_CATALOG_STATE_VARIANTS = [
     "natural body posture variation while key species-defining traits remain visible",
     "animal shown as one important element within a broader habitat view",
     "animal shown from a less idealized ordinary sighting angle",
+    "animal engaged with the surrounding habitat in a natural way",
+    "animal visible in a believable moment that feels observed rather than staged",
 ]
 
 ANIMAL_CATALOG_DISTRACTOR_VARIANTS = [
@@ -183,6 +202,8 @@ ANIMAL_CATALOG_DISTRACTOR_VARIANTS = [
     "another non-dominant natural element may draw some attention without changing the labeled animal",
     "the animal need not be perfectly centered or isolated from the environment",
     "background activity or texture may be noticeable while the animal remains recognizable",
+    "foreground vegetation, shadows, ripples, or branches may partially interfere without hiding species-defining cues",
+    "other habitat textures and secondary natural elements may compete for attention like a real field sighting",
 ]
 
 SCENE_CATALOG_VIEW_VARIANTS = [
@@ -194,6 +215,8 @@ SCENE_CATALOG_VIEW_VARIANTS = [
     "more diagonal composition",
     "lower eye-level scene view",
     "higher vantage scene view",
+    "wider establishing view from farther away",
+    "more incidental pass-by viewpoint rather than a centered textbook view",
 ]
 
 SCENE_CATALOG_CONTEXT_VARIANTS = [
@@ -205,6 +228,8 @@ SCENE_CATALOG_CONTEXT_VARIANTS = [
     "more open surrounding space visible around the main semantic region",
     "nearby foreground element included without blocking the main scene cue",
     "broader environmental context included while place identity stays clear",
+    "the key place cue occupies only part of a wider layout but remains recognizable",
+    "the scene is read from multiple contextual elements rather than one isolated center cue",
 ]
 
 SCENE_CATALOG_CAPTURE_VARIANTS = [
@@ -216,6 +241,8 @@ SCENE_CATALOG_CAPTURE_VARIANTS = [
     "clear everyday travel-photo feel",
     "mild haze or humidity feel while main place cues remain clear",
     "late-afternoon-like natural light without dramatic stylization",
+    "slightly imperfect travel or street snapshot feel with realistic exposure variation",
+    "everyday observational photo rendering rather than a carefully composed postcard view",
 ]
 
 SCENE_CATALOG_STATE_VARIANTS = [
@@ -226,6 +253,8 @@ SCENE_CATALOG_STATE_VARIANTS = [
     "scene shown with a candid real-location feel",
     "scene shown with a busier everyday layout rather than a clean textbook view",
     "scene identity emerging from the full layout rather than one isolated cue",
+    "scene identity conveyed through the overall arrangement rather than one dominant centered landmark",
+    "scene feeling like a real encountered view rather than an ideal reference shot",
 ]
 
 SCENE_CATALOG_DISTRACTOR_VARIANTS = [
@@ -235,6 +264,8 @@ SCENE_CATALOG_DISTRACTOR_VARIANTS = [
     "small distant human-made or natural details may be visible without becoming the main subject",
     "the scene can look mildly cluttered or imperfectly framed while staying semantically correct",
     "multiple non-dominant depth layers may share attention across the frame",
+    "roads, railings, rocks, vegetation, signage, or incidental structures may share attention without changing the place identity",
+    "a foreground edge occluder or side element may take noticeable space while the main scene remains readable",
 ]
 
 CATALOG_NEGATIVE_PROMPT = (
