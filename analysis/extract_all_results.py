@@ -15,7 +15,8 @@
 
 数据集分支（与历史行为一致）：
   - cifar10：迁移率仅来自 test_stl10_results*.txt（STL-10）；不读取 test_tiny_imagenet_*。
-  - tiny_imagenet：迁移率仅来自 test_tiny_imagenet_results*.txt（Tiny ImageNet-C）。
+  - tiny_imagenet：优先 test_tiny_target_domain_results*.txt；若无则回退 test_tiny_imagenet_results*.txt。
+  - mnistm：迁移率来自 test_mnistm_results*.txt（主）或 test_mnist_cross_results*.txt（兼容旧命名）。
 
 防御结果 *defense_results*.json 与上述迁移结果文件，均通过同一套文件名规则解析 test 维度
 （兼容原 results_* 命名，并支持 test_* 后缀）。
@@ -38,7 +39,7 @@ DEFENSE_METHODS = ["STRIP", "SCaLe-Up", "SentiNet", "IBD_PSC"]
 DEFENSE_PREFIX = {"STRIP": "strip", "SCaLe-Up": "scaleup", "SentiNet": "sentinet", "IBD_PSC": "ibd_psc"}
 
 # 数据集与模型（arch）映射：文件夹中的 arch 名 -> 输出文件名
-DATASETS = ["cifar10", "tiny_imagenet"]
+DATASETS = ["cifar10", "tiny_imagenet", "mnistm"]
 ARCH_TO_OUTPUT = {"ResNet18": "resnet18", "mobilenetv2": "mobilenet", "vgg19_bn": "vgg"}
 
 # Tiny ImageNet-C 跨域结果：同一 test 参数可能有多组 corruption×severity，优先与 test_tiny_imagenet.py 默认一致
@@ -219,6 +220,7 @@ def extract_folder_results(
     # 2. 迁移性：
     #    - cifar10：仅 STL-10（原逻辑）
     #    - tiny_imagenet：优先 Tiny Target Domain；若无结果则回退 Tiny ImageNet-C（兼容历史）
+    #    - mnistm：MNIST 迁移结果（test_mnistm_results；兼容旧 test_mnist_cross_results）
     if dataset == "tiny_imagenet":
         # source_priority: 0=target_domain(优先), 1=tiny_imagenet_c(回退)
         tiny_candidates: Dict[float, List[tuple]] = {}
@@ -262,6 +264,34 @@ def extract_folder_results(
                 continue
             lst.sort(key=lambda x: x[0])
             test_params[pval]['transfer_rate'] = lst[0][1]
+    elif dataset == "mnistm":
+        # mnistm：优先新命名 test_mnistm_results*.txt，同时兼容旧命名 test_mnist_cross_results*.txt
+        mnist_files = list(folder.glob("test_mnistm_results*.txt"))
+        if not mnist_files:
+            mnist_files = list(folder.glob("test_mnist_cross_results*.txt"))
+        for f in mnist_files:
+            param_info = _parse_auxiliary_result_filename(f.name)
+            if param_info:
+                _, pval = param_info
+                if pval in test_params:
+                    try:
+                        c = f.read_text(encoding='utf-8')
+                        tr = _parse_transfer_rate_from_text(c)
+                        if tr is not None:
+                            test_params[pval]['transfer_rate'] = tr
+                    except Exception:
+                        pass
+        base_mnist = folder / "test_mnistm_results.txt"
+        base_mnist_cross = folder / "test_mnist_cross_results.txt"
+        for base_file in [base_mnist, base_mnist_cross]:
+            if base_file.exists() and train_param_value is not None and train_param_value in test_params:
+                try:
+                    c = base_file.read_text(encoding='utf-8')
+                    tr = _parse_transfer_rate_from_text(c)
+                    if tr is not None:
+                        test_params[train_param_value]['transfer_rate'] = tr
+                except Exception:
+                    pass
     else:
         # cifar10（及将来其它非 tiny 数据集）：仅匹配 STL-10 迁移结果，不混入 Tiny-C 文件
         for f in folder.glob("test_stl10_results*.txt"):

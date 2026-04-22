@@ -1,0 +1,4798 @@
+{
+  "dataset": "mnistm",
+  "arch": "mobilenet",
+  "groups": [
+    {
+      "group_id": 1,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.005,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 1,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9312291666666667,
+          "stealth_auc_avg": 0.5705622937249268,
+          "transfer_rate": 0.002094,
+          "asr": 0.0016750418760469012,
+          "test_param_value": 4.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.502109050750732,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4564498349799415,
+          "S_stealth_tpr": 0.7449833333333333
+        }
+      ]
+    },
+    {
+      "group_id": 2,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.005,
+      "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 2,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8911819852941176,
+          "stealth_auc_avg": 0.5866995927289503,
+          "transfer_rate": 0.001117,
+          "asr": 0.002372975991066443,
+          "test_param_value": 12.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.150768518447876,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46935967418316027,
+          "S_stealth_tpr": 0.7129455882352942
+        }
+      ]
+    },
+    {
+      "group_id": 3,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.005,
+      "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 3,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.92375,
+          "stealth_auc_avg": 0.5771146597641679,
+          "transfer_rate": 0.001117,
+          "asr": 0.0016750418760469012,
+          "test_param_value": 20.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.178793430328369,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46169172781133433,
+          "S_stealth_tpr": 0.739
+        }
+      ]
+    },
+    {
+      "group_id": 4,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.005,
+      "train_param_value": 28.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 4,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.92434375,
+          "stealth_auc_avg": 0.5750277683503293,
+          "transfer_rate": 0.001815,
+          "asr": 0.0020938023450586263,
+          "test_param_value": 28.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.795034408569336,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4600222146802635,
+          "S_stealth_tpr": 0.7394750000000001
+        }
+      ]
+    },
+    {
+      "group_id": 5,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.005,
+      "train_param_value": 36.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 5,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9335625,
+          "stealth_auc_avg": 0.5897298863766548,
+          "transfer_rate": 0.000838,
+          "asr": 0.0013958682300390843,
+          "test_param_value": 36.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.7144627571105957,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.47178390910132384,
+          "S_stealth_tpr": 0.74685
+        }
+      ]
+    },
+    {
+      "group_id": 6,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.005,
+      "train_param_value": 44.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 6,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.943625,
+          "stealth_auc_avg": 0.5837266302599255,
+          "transfer_rate": 0.001815,
+          "asr": 0.0018146286990508096,
+          "test_param_value": 44.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.2399814128875732,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6637796509836101,
+          "S_stealth_tpr": 0.9516983467756698
+        }
+      ]
+    },
+    {
+      "group_id": 7,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.005,
+      "train_param_value": 56.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 7,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.91659375,
+          "stealth_auc_avg": 0.581736828732369,
+          "transfer_rate": 0.000838,
+          "asr": 0.0036292573981016193,
+          "test_param_value": 56.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.314166307449341,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46538946298589523,
+          "S_stealth_tpr": 0.733275
+        }
+      ]
+    },
+    {
+      "group_id": 8,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.01,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 8,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7698020833333333,
+          "stealth_auc_avg": 0.6374135738476504,
+          "transfer_rate": 0.001117,
+          "asr": 0.0020938023450586263,
+          "test_param_value": 4.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.497204542160034,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6865050520053143,
+          "S_stealth_tpr": 0.7924158595938607
+        }
+      ]
+    },
+    {
+      "group_id": 9,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.01,
+      "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 9,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9041507352941176,
+          "stealth_auc_avg": 0.5874809285712863,
+          "transfer_rate": 0.001396,
+          "asr": 0.002372975991066443,
+          "test_param_value": 12.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.896777391433716,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46998474285702907,
+          "S_stealth_tpr": 0.7233205882352941
+        }
+      ]
+    },
+    {
+      "group_id": 10,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.01,
+      "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 10,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8984375,
+          "stealth_auc_avg": 0.5349883271781148,
+          "transfer_rate": 0.001396,
+          "asr": 0.0018146286990508096,
+          "test_param_value": 20.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.491872787475586,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4279906617424919,
+          "S_stealth_tpr": 0.71875
+        }
+      ]
+    },
+    {
+      "group_id": 11,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.01,
+      "train_param_value": 28.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 11,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.94559375,
+          "stealth_auc_avg": 0.5893556587390164,
+          "transfer_rate": 0.001815,
+          "asr": 0.002512562814070352,
+          "test_param_value": 28.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.540166974067688,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4714845269912131,
+          "S_stealth_tpr": 0.756475
+        }
+      ]
+    },
+    {
+      "group_id": 12,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.01,
+      "train_param_value": 36.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 12,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.93653125,
+          "stealth_auc_avg": 0.5783770960786769,
+          "transfer_rate": 0.001675,
+          "asr": 0.0037688442211055275,
+          "test_param_value": 36.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.4063831567764282,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46270167686294156,
+          "S_stealth_tpr": 0.749225
+        }
+      ]
+    },
+    {
+      "group_id": 13,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.01,
+      "train_param_value": 44.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 13,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8868482142857143,
+          "stealth_auc_avg": 0.5740763022352837,
+          "transfer_rate": 0.002094,
+          "asr": 0.001954215522054718,
+          "test_param_value": 44.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.8429070711135864,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.459261041788227,
+          "S_stealth_tpr": 0.7094785714285714
+        }
+      ]
+    },
+    {
+      "group_id": 14,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.01,
+      "train_param_value": 56.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 14,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8984016203703704,
+          "stealth_auc_avg": 0.6098406180010615,
+          "transfer_rate": 0.001815,
+          "asr": 0.01507537688442211,
+          "test_param_value": 56.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.9729416370391846,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.48787249440084923,
+          "S_stealth_tpr": 0.7187212962962963
+        }
+      ]
+    },
+    {
+      "group_id": 15,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.05,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 15,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.92846875,
+          "stealth_auc_avg": 0.5703006005210984,
+          "transfer_rate": 0.001256,
+          "asr": 0.002233389168062535,
+          "test_param_value": 4.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.7666890621185303,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.45624048041687876,
+          "S_stealth_tpr": 0.742775
+        }
+      ]
+    },
+    {
+      "group_id": 16,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.05,
+      "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 16,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8934791666666666,
+          "stealth_auc_avg": 0.5613874653185749,
+          "transfer_rate": 0.001256,
+          "asr": 0.0020938023450586263,
+          "test_param_value": 12.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.4607110023498535,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6423575816377334,
+          "S_stealth_tpr": 0.9080309427162068
+        }
+      ]
+    },
+    {
+      "group_id": 17,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.05,
+      "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 17,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9225798611111111,
+          "stealth_auc_avg": 0.5895570840142328,
+          "transfer_rate": 0.002652,
+          "asr": 0.002512562814070352,
+          "test_param_value": 20.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.5293731689453125,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.47164566721138623,
+          "S_stealth_tpr": 0.738063888888889
+        }
+      ]
+    },
+    {
+      "group_id": 18,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.05,
+      "train_param_value": 28.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 18,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8768600543478261,
+          "stealth_auc_avg": 0.5836956083119784,
+          "transfer_rate": 0.002233,
+          "asr": 0.01605248464544947,
+          "test_param_value": 28.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.364607810974121,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4669564866495828,
+          "S_stealth_tpr": 0.7014880434782609
+        }
+      ]
+    },
+    {
+      "group_id": 19,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.05,
+      "train_param_value": 36.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 19,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8928674242424243,
+          "stealth_auc_avg": 0.5907292459383369,
+          "transfer_rate": 0.002931,
+          "asr": 0.018425460636515914,
+          "test_param_value": 36.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.2277748584747314,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6695781026519846,
+          "S_stealth_tpr": 0.9112886452952546
+        }
+      ]
+    },
+    {
+      "group_id": 20,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.05,
+      "train_param_value": 44.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 20,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8863049203049203,
+          "stealth_auc_avg": 0.553277898733803,
+          "transfer_rate": 0.011446,
+          "asr": 0.20142378559463986,
+          "test_param_value": 44.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.4693526029586792,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4426223189870424,
+          "S_stealth_tpr": 0.7090439362439362
+        }
+      ]
+    },
+    {
+      "group_id": 21,
+      "attack_type": "SIG",
+      "trigger_type": "SIG",
+      "poison_rate": 0.05,
+      "train_param_value": 56.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 21,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8184970930232558,
+          "stealth_auc_avg": 0.5816908294645375,
+          "transfer_rate": 0.032663,
+          "asr": 0.39000558347292014,
+          "test_param_value": 56.0,
+          "test_param_type": "test_delta",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.135252594947815,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4653526635716301,
+          "S_stealth_tpr": 0.6547976744186047
+        }
+      ]
+    },
+    {
+      "group_id": 22,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 0.4,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 22,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9589375,
+          "stealth_auc_avg": 0.5984161460801856,
+          "transfer_rate": 0.001256,
+          "asr": 0.002233389168062535,
+          "test_param_value": 0.4,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.025860071182251,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4787329168641485,
+          "S_stealth_tpr": 0.76715
+        }
+      ]
+    },
+    {
+      "group_id": 23,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 0.6,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 23,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9379647177419355,
+          "stealth_auc_avg": 0.5827166452926664,
+          "transfer_rate": 0.004188,
+          "asr": 0.004327191513121161,
+          "test_param_value": 0.6,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.8163740634918213,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46617331623413316,
+          "S_stealth_tpr": 0.7503717741935484
+        }
+      ]
+    },
+    {
+      "group_id": 24,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 0.8,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 24,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8911944444444444,
+          "stealth_auc_avg": 0.5689554545434451,
+          "transfer_rate": 0.006281,
+          "asr": 0.00628140703517588,
+          "test_param_value": 0.8,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.363681674003601,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4551643636347561,
+          "S_stealth_tpr": 0.7129555555555556
+        }
+      ]
+    },
+    {
+      "group_id": 25,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 1.0,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 25,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9059895833333333,
+          "stealth_auc_avg": 0.5538773737922957,
+          "transfer_rate": 0.017867,
+          "asr": 0.01675041876046901,
+          "test_param_value": 1.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 3.344838857650757,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6221271024244852,
+          "S_stealth_tpr": 0.9038168700573153
+        }
+      ]
+    },
+    {
+      "group_id": 26,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 1.2,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 26,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9434920680428135,
+          "stealth_auc_avg": 0.625956019138306,
+          "transfer_rate": 0.032803,
+          "asr": 0.045644891122278056,
+          "test_param_value": 1.2,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.0358760356903076,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.5007648153106449,
+          "S_stealth_tpr": 0.7547936544342508
+        }
+      ]
+    },
+    {
+      "group_id": 27,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 1.4,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 27,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9109050598476605,
+          "stealth_auc_avg": 0.6422880034663314,
+          "transfer_rate": 0.140983,
+          "asr": 0.12828029034059185,
+          "test_param_value": 1.4,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.1222217082977295,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.7125230754860521,
+          "S_stealth_tpr": 0.9274167205911154
+        }
+      ]
+    },
+    {
+      "group_id": 28,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 2.0,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 28,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9122694746376812,
+          "stealth_auc_avg": 0.6213405130626547,
+          "transfer_rate": 0.107063,
+          "asr": 0.1541038525963149,
+          "test_param_value": 2.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.4355640411376953,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4970724104501238,
+          "S_stealth_tpr": 0.729815579710145
+        }
+      ]
+    },
+    {
+      "group_id": 29,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.005,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 29,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8202097154800432,
+          "stealth_auc_avg": 0.6548756452724845,
+          "transfer_rate": 0.27708,
+          "asr": 0.25865438302624233,
+          "test_param_value": 4.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.6918734312057495,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.5239005162179876,
+          "S_stealth_tpr": 0.6561677723840346
+        }
+      ]
+    },
+    {
+      "group_id": 30,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 0.4,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 30,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9538125,
+          "stealth_auc_avg": 0.5916236649047374,
+          "transfer_rate": 0.002373,
+          "asr": 0.00265214963707426,
+          "test_param_value": 0.4,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 1.007055640220642,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4732989319237899,
+          "S_stealth_tpr": 0.76305
+        }
+      ]
+    },
+    {
+      "group_id": 31,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 0.6,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 31,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.952391369047619,
+          "stealth_auc_avg": 0.6052729390088212,
+          "transfer_rate": 0.005723,
+          "asr": 0.005862646566164154,
+          "test_param_value": 0.6,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 2.622502565383911,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.674863321976306,
+          "S_stealth_tpr": 0.9525580660073444
+        }
+      ]
+    },
+    {
+      "group_id": 32,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 0.8,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 32,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7560080259562841,
+          "stealth_auc_avg": 0.49516557176769294,
+          "transfer_rate": 0.574819,
+          "asr": 0.22989949748743718,
+          "test_param_value": 0.8,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 1.6684361696243286,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.39613245741415437,
+          "S_stealth_tpr": 0.6048064207650273
+        }
+      ]
+    },
+    {
+      "group_id": 33,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 1.0,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 33,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9235800855513308,
+          "stealth_auc_avg": 0.6010499978523502,
+          "transfer_rate": 0.053462,
+          "asr": 0.07342266890005583,
+          "test_param_value": 1.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 4.144935607910156,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.48083999828188023,
+          "S_stealth_tpr": 0.7388640684410647
+        }
+      ]
+    },
+    {
+      "group_id": 34,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 1.2,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 34,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7641927432885907,
+          "stealth_auc_avg": 0.5504431602604984,
+          "transfer_rate": 0.194305,
+          "asr": 0.228643216080402,
+          "test_param_value": 1.2,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 2.0626840591430664,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.44035452820839877,
+          "S_stealth_tpr": 0.6113541946308726
+        }
+      ]
+    },
+    {
+      "group_id": 35,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 1.4,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 35,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9290212862318841,
+          "stealth_auc_avg": 0.6591454085007196,
+          "transfer_rate": 0.078308,
+          "asr": 0.1444723618090452,
+          "test_param_value": 1.4,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 3.309257984161377,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.7069138972140365,
+          "S_stealth_tpr": 0.9228145993989681
+        }
+      ]
+    },
+    {
+      "group_id": 36,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 2.0,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 36,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8822228535353536,
+          "stealth_auc_avg": 0.6077486238666784,
+          "transfer_rate": 0.12828,
+          "asr": 0.2765214963707426,
+          "test_param_value": 2.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 1.0812984704971313,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.48619889909334274,
+          "S_stealth_tpr": 0.7057782828282829
+        }
+      ]
+    },
+    {
+      "group_id": 37,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.01,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 37,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8884905277401894,
+          "stealth_auc_avg": 0.6702868923459077,
+          "transfer_rate": 0.29718,
+          "asr": 0.41261864879955334,
+          "test_param_value": 4.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 1.593737006187439,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.5362295138767261,
+          "S_stealth_tpr": 0.7107924221921516
+        }
+      ]
+    },
+    {
+      "group_id": 38,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 0.4,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 38,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7371597222222221,
+          "stealth_auc_avg": 0.5111682251175085,
+          "transfer_rate": 0.980597,
+          "asr": 0.9422110552763819,
+          "test_param_value": 0.4,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 5.085333347320557,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5599615487147653,
+          "S_stealth_tpr": 0.7407547463985362
+        }
+      ]
+    },
+    {
+      "group_id": 39,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 0.6,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 39,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7328156381539386,
+          "stealth_auc_avg": 0.5159429939567071,
+          "transfer_rate": 0.9933,
+          "asr": 0.9285315466219989,
+          "test_param_value": 0.6,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 3.150783061981201,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.41275439516536566,
+          "S_stealth_tpr": 0.5862525105231509
+        }
+      ]
+    },
+    {
+      "group_id": 40,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 0.8,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 40,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.366255594629156,
+          "stealth_auc_avg": 0.3856515827973457,
+          "transfer_rate": 0.99986,
+          "asr": 0.9822724734785037,
+          "test_param_value": 0.8,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 2.1294753551483154,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.30852126623787657,
+          "S_stealth_tpr": 0.29300447570332483
+        }
+      ]
+    },
+    {
+      "group_id": 41,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 1.0,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 41,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5113198262730306,
+          "stealth_auc_avg": 0.5492757650553632,
+          "transfer_rate": 0.996929,
+          "asr": 0.9621719709659409,
+          "test_param_value": 1.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 4.192811965942383,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6048050080061225,
+          "S_stealth_tpr": 0.5744402569802565
+        }
+      ]
+    },
+    {
+      "group_id": 42,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 1.2,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 42,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.3355769689842977,
+          "stealth_auc_avg": 0.38573897365147203,
+          "transfer_rate": 0.998744,
+          "asr": 0.9867392518146287,
+          "test_param_value": 1.2,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 1.6077325344085693,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.30859117892117766,
+          "S_stealth_tpr": 0.26846157518743813
+        }
+      ]
+    },
+    {
+      "group_id": 43,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 1.4,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 43,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5517095693097547,
+          "stealth_auc_avg": 0.37551081191329616,
+          "transfer_rate": 0.998883,
+          "asr": 0.9787828029034059,
+          "test_param_value": 1.4,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 3.465270757675171,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.30040864953063695,
+          "S_stealth_tpr": 0.44136765544780376
+        }
+      ]
+    },
+    {
+      "group_id": 44,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 2.0,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 44,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.35490904263111633,
+          "stealth_auc_avg": 0.4047567790405685,
+          "transfer_rate": 0.95938,
+          "asr": 0.9526800670016751,
+          "test_param_value": 2.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 1.8458222150802612,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.3238054232324548,
+          "S_stealth_tpr": 0.28392723410489307
+        }
+      ]
+    },
+    {
+      "group_id": 45,
+      "attack_type": "WaNet",
+      "trigger_type": "WaNet",
+      "poison_rate": 0.05,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 45,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.608496860408194,
+          "stealth_auc_avg": 0.49600903689998954,
+          "transfer_rate": 0.932021,
+          "asr": 0.9267169179229481,
+          "test_param_value": 4.0,
+          "test_param_type": "test_s",
+          "alpha": null,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 1.5725319385528564,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.39680722951999164,
+          "S_stealth_tpr": 0.48679748832655517
+        }
+      ]
+    },
+    {
+      "group_id": 46,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": 0.005,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 46,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.95065625,
+          "stealth_auc_avg": 0.5721534688904858,
+          "transfer_rate": 0.001396,
+          "asr": 0.0013958682300390843,
+          "test_param_value": 0.01,
+          "test_param_type": "test_alpha",
+          "alpha": 0.01,
+          "cover_rate": 0.005,
+          "nc_max_anomaly_index": 2.196694850921631,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4577227751123887,
+          "S_stealth_tpr": 0.760525
+        }
+      ]
+    },
+    {
+      "group_id": 47,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": 0.005,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 47,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9479163732394367,
+          "stealth_auc_avg": 0.6069847899066652,
+          "transfer_rate": 0.006142,
+          "asr": 0.009910664433277499,
+          "test_param_value": 0.05,
+          "test_param_type": "test_alpha",
+          "alpha": 0.05,
+          "cover_rate": 0.005,
+          "nc_max_anomaly_index": 2.040952444076538,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6855878319253321,
+          "S_stealth_tpr": 0.9583330985915495
+        }
+      ]
+    },
+    {
+      "group_id": 48,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.005,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 48,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9279188829787234,
+          "stealth_auc_avg": 0.6327090845779317,
+          "transfer_rate": 0.28029,
+          "asr": 0.10496929089893914,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": 0.005,
+          "nc_max_anomaly_index": 2.3189029693603516,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.5061672676623454,
+          "S_stealth_tpr": 0.7423351063829787
+        }
+      ]
+    },
+    {
+      "group_id": 49,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": 0.005,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 49,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6447341305655836,
+          "stealth_auc_avg": 0.5346557718438151,
+          "transfer_rate": 0.776661,
+          "asr": 0.4638470128419877,
+          "test_param_value": 0.15,
+          "test_param_type": "test_alpha",
+          "alpha": 0.15,
+          "cover_rate": 0.005,
+          "nc_max_anomaly_index": 3.194389581680298,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4277246174750521,
+          "S_stealth_tpr": 0.5157873044524669
+        }
+      ]
+    },
+    {
+      "group_id": 50,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.005,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 50,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5138012731273576,
+          "stealth_auc_avg": 0.487403244967731,
+          "transfer_rate": 0.971524,
+          "asr": 0.7768006700167505,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": 0.005,
+          "nc_max_anomaly_index": 2.2364211082458496,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.3899225959741848,
+          "S_stealth_tpr": 0.41104101850188607
+        }
+      ]
+    },
+    {
+      "group_id": 51,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": 0.005,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 51,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8408729381872708,
+          "stealth_auc_avg": 0.443019280841779,
+          "transfer_rate": 0.937465,
+          "asr": 0.8378001116694584,
+          "test_param_value": 0.25,
+          "test_param_type": "test_alpha",
+          "alpha": 0.25,
+          "cover_rate": 0.005,
+          "nc_max_anomaly_index": 1.5939643383026123,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.35441542467342324,
+          "S_stealth_tpr": 0.6726983505498167
+        }
+      ]
+    },
+    {
+      "group_id": 52,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.005,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 52,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8114340034965035,
+          "stealth_auc_avg": 0.5892284106752901,
+          "transfer_rate": 0.883724,
+          "asr": 0.7984366275823562,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": 0.005,
+          "nc_max_anomaly_index": 3.4630000591278076,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6485071473669064,
+          "S_stealth_tpr": 0.8262716216238771
+        }
+      ]
+    },
+    {
+      "group_id": 53,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 53,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.952125,
+          "stealth_auc_avg": 0.5725003651751517,
+          "transfer_rate": 0.002373,
+          "asr": 0.002233389168062535,
+          "test_param_value": 0.01,
+          "test_param_type": "test_alpha",
+          "alpha": 0.01,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.0752334594726562,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4580002921401214,
+          "S_stealth_tpr": 0.7617
+        }
+      ]
+    },
+    {
+      "group_id": 54,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 54,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9366112918215613,
+          "stealth_auc_avg": 0.6004612815427441,
+          "transfer_rate": 0.031407,
+          "asr": 0.03768844221105527,
+          "test_param_value": 0.05,
+          "test_param_type": "test_alpha",
+          "alpha": 0.05,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.4395831823349,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.48036902523419533,
+          "S_stealth_tpr": 0.7492890334572491
+        }
+      ]
+    },
+    {
+      "group_id": 55,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 55,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8247723877767668,
+          "stealth_auc_avg": 0.5883464209486253,
+          "transfer_rate": 0.890145,
+          "asr": 0.46035734226689,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.1301491260528564,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.47067713675890027,
+          "S_stealth_tpr": 0.6598179102214135
+        }
+      ]
+    },
+    {
+      "group_id": 56,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 56,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5289512191640018,
+          "stealth_auc_avg": 0.5303407408060514,
+          "transfer_rate": 0.902289,
+          "asr": 0.6113902847571189,
+          "test_param_value": 0.15,
+          "test_param_type": "test_alpha",
+          "alpha": 0.15,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.0469069480895996,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4242725926448412,
+          "S_stealth_tpr": 0.42316097533120145
+        }
+      ]
+    },
+    {
+      "group_id": 57,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 57,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8537006260671599,
+          "stealth_auc_avg": 0.596027690896557,
+          "transfer_rate": 0.956588,
+          "asr": 0.7356225572305974,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.9620987176895142,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.47682215271724565,
+          "S_stealth_tpr": 0.682960500853728
+        }
+      ]
+    },
+    {
+      "group_id": 58,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 58,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8932979145342886,
+          "stealth_auc_avg": 0.5400511410228279,
+          "transfer_rate": 0.612647,
+          "asr": 0.6817420435510888,
+          "test_param_value": 0.25,
+          "test_param_type": "test_alpha",
+          "alpha": 0.25,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.8642187118530273,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.43204091281826235,
+          "S_stealth_tpr": 0.714638331627431
+        }
+      ]
+    },
+    {
+      "group_id": 59,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 59,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7499232531212243,
+          "stealth_auc_avg": 0.486359404576856,
+          "transfer_rate": 0.53392,
+          "asr": 0.6933277498604131,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 3.308994770050049,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5686893282339892,
+          "S_stealth_tpr": 0.7795404070694839
+        }
+      ]
+    },
+    {
+      "group_id": 60,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": 0.05,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 60,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9495625,
+          "stealth_auc_avg": 0.5891028442146973,
+          "transfer_rate": 0.015075,
+          "asr": 0.01242322724734785,
+          "test_param_value": 0.01,
+          "test_param_type": "test_alpha",
+          "alpha": 0.01,
+          "cover_rate": 0.05,
+          "nc_max_anomaly_index": 2.0930447578430176,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4712822753717578,
+          "S_stealth_tpr": 0.75965
+        }
+      ]
+    },
+    {
+      "group_id": 61,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": 0.05,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 61,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7408138460157933,
+          "stealth_auc_avg": 0.48415798805387245,
+          "transfer_rate": 0.907175,
+          "asr": 0.7777777777777778,
+          "test_param_value": 0.05,
+          "test_param_type": "test_alpha",
+          "alpha": 0.05,
+          "cover_rate": 0.05,
+          "nc_max_anomaly_index": 1.9390881061553955,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.38732639044309797,
+          "S_stealth_tpr": 0.5926510768126346
+        }
+      ]
+    },
+    {
+      "group_id": 62,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.05,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 62,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7608821162074724,
+          "stealth_auc_avg": 0.5208070861758236,
+          "transfer_rate": 0.61837,
+          "asr": 0.6687604690117253,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": 0.05,
+          "nc_max_anomaly_index": 4.6150102615356445,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5752384277731425,
+          "S_stealth_tpr": 0.7672984517984616
+        }
+      ]
+    },
+    {
+      "group_id": 63,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": 0.05,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 63,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.60803238840431,
+          "stealth_auc_avg": 0.5984468652403976,
+          "transfer_rate": 0.517588,
+          "asr": 0.5441094360692351,
+          "test_param_value": 0.15,
+          "test_param_type": "test_alpha",
+          "alpha": 0.15,
+          "cover_rate": 0.05,
+          "nc_max_anomaly_index": 3.827577829360962,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6500171788618642,
+          "S_stealth_tpr": 0.657685597392994
+        }
+      ]
+    },
+    {
+      "group_id": 64,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.05,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 64,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8159560519422437,
+          "stealth_auc_avg": 0.5757909491249675,
+          "transfer_rate": 0.437326,
+          "asr": 0.5460636515912898,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": 0.05,
+          "nc_max_anomaly_index": 3.4071383476257324,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6386557901719985,
+          "S_stealth_tpr": 0.8307878724258195
+        }
+      ]
+    },
+    {
+      "group_id": 65,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": 0.05,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 65,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9103886282961461,
+          "stealth_auc_avg": 0.5207331565425658,
+          "transfer_rate": 0.495114,
+          "asr": 0.5505304299274149,
+          "test_param_value": 0.25,
+          "test_param_type": "test_alpha",
+          "alpha": 0.25,
+          "cover_rate": 0.05,
+          "nc_max_anomaly_index": 1.594610333442688,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.41658652523405265,
+          "S_stealth_tpr": 0.7283109026369169
+        }
+      ]
+    },
+    {
+      "group_id": 66,
+      "attack_type": "adaptive_blend",
+      "trigger_type": "adaptive_blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.05,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 66,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.609345881013545,
+          "stealth_auc_avg": 0.5317291444620974,
+          "transfer_rate": 0.671273,
+          "asr": 0.597571189279732,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": 0.05,
+          "nc_max_anomaly_index": 2.600053548812866,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6163894094795286,
+          "S_stealth_tpr": 0.6784827987206867
+        }
+      ]
+    },
+    {
+      "group_id": 67,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.005,
+      "train_param_value": 0.0,
+      "alpha": 0.0,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 67,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7423826721556886,
+          "stealth_auc_avg": 0.581656576393644,
+          "transfer_rate": 0.235204,
+          "asr": 0.16345616973757676,
+          "test_param_value": 0.0,
+          "test_param_type": "test_alpha",
+          "alpha": 0.0,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.23557710647583,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46532526111491523,
+          "S_stealth_tpr": 0.5939061377245509
+        }
+      ]
+    },
+    {
+      "group_id": 68,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.005,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 68,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6796294642857144,
+          "stealth_auc_avg": 0.47701678881806586,
+          "transfer_rate": 0.185511,
+          "asr": 0.07816862088218872,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 1.9741548299789429,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.3816134310544527,
+          "S_stealth_tpr": 0.5437035714285715
+        }
+      ]
+    },
+    {
+      "group_id": 69,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.005,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 69,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8928611111111111,
+          "stealth_auc_avg": 0.7309434130603211,
+          "transfer_rate": 0.287409,
+          "asr": 0.12562814070351758,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.893455982208252,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.5847547304482569,
+          "S_stealth_tpr": 0.714288888888889
+        }
+      ]
+    },
+    {
+      "group_id": 70,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.005,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 70,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.888987737956488,
+          "stealth_auc_avg": 0.7234038240715117,
+          "transfer_rate": 0.296622,
+          "asr": 0.17978782802903406,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.5343706607818604,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.7707857522717233,
+          "S_stealth_tpr": 0.9032528833797044
+        }
+      ]
+    },
+    {
+      "group_id": 71,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.005,
+      "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": 0.01,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 71,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.892955748837885,
+          "stealth_auc_avg": 0.651167287788139,
+          "transfer_rate": 0.426159,
+          "asr": 0.2402289223897264,
+          "test_param_value": 0.4,
+          "test_param_type": "test_alpha",
+          "alpha": 0.4,
+          "cover_rate": 0.01,
+          "nc_max_anomaly_index": 2.9150443077087402,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.7068728668929782,
+          "S_stealth_tpr": 0.9003036357327752
+        }
+      ]
+    },
+    {
+      "group_id": 72,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.01,
+      "train_param_value": 0.0,
+      "alpha": 0.0,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 72,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7035421921364986,
+          "stealth_auc_avg": 0.5557891308812186,
+          "transfer_rate": 0.156756,
+          "asr": 0.14098269123394752,
+          "test_param_value": 0.0,
+          "test_param_type": "test_alpha",
+          "alpha": 0.0,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 1.8722496032714844,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4446313047049749,
+          "S_stealth_tpr": 0.5628337537091989
+        }
+      ]
+    },
+    {
+      "group_id": 73,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.01,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 73,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6022085862122627,
+          "stealth_auc_avg": 0.45799653878173363,
+          "transfer_rate": 0.709101,
+          "asr": 0.44821328866555,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 2.2547221183776855,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.56295845338875,
+          "S_stealth_tpr": 0.6783280913331732
+        }
+      ]
+    },
+    {
+      "group_id": 74,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 74,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7160077222863741,
+          "stealth_auc_avg": 0.5789148780510857,
+          "transfer_rate": 0.203657,
+          "asr": 0.1208821887213847,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 3.0445713996887207,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6469873186426902,
+          "S_stealth_tpr": 0.7566615940309209
+        }
+      ]
+    },
+    {
+      "group_id": 75,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.01,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 75,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.561120756777952,
+          "stealth_auc_avg": 0.41316494275757387,
+          "transfer_rate": 0.866555,
+          "asr": 0.6232551647124511,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 4.269184589385986,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.4946877920461287,
+          "S_stealth_tpr": 0.6130524432624312
+        }
+      ]
+    },
+    {
+      "group_id": 76,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.01,
+      "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": 0.02,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 76,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6536891060939795,
+          "stealth_auc_avg": 0.499383641673933,
+          "transfer_rate": 0.50321,
+          "asr": 0.38023450586264657,
+          "test_param_value": 0.4,
+          "test_param_type": "test_alpha",
+          "alpha": 0.4,
+          "cover_rate": 0.02,
+          "nc_max_anomaly_index": 2.844383716583252,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5865826222697837,
+          "S_stealth_tpr": 0.7100269938058209
+        }
+      ]
+    },
+    {
+      "group_id": 77,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.05,
+      "train_param_value": 0.0,
+      "alpha": 0.0,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 77,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6582426543824701,
+          "stealth_auc_avg": 0.5411729797758523,
+          "transfer_rate": 0.232831,
+          "asr": 0.24525404801786713,
+          "test_param_value": 0.0,
+          "test_param_type": "test_alpha",
+          "alpha": 0.0,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 5.255849361419678,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5812223690978513,
+          "S_stealth_tpr": 0.6748781087831455
+        }
+      ]
+    },
+    {
+      "group_id": 78,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.05,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 78,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8192688018160283,
+          "stealth_auc_avg": 0.6546751092358827,
+          "transfer_rate": 0.344779,
+          "asr": 0.3535734226689001,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 3.2588837146759033,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.7041479968361524,
+          "S_stealth_tpr": 0.835822950900269
+        }
+      ]
+    },
+    {
+      "group_id": 79,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.05,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 79,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6333763318863457,
+          "stealth_auc_avg": 0.49816287858251607,
+          "transfer_rate": 0.299274,
+          "asr": 0.353713009491904,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 4.683786392211914,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5560167035544933,
+          "S_stealth_tpr": 0.664187466197557
+        }
+      ]
+    },
+    {
+      "group_id": 80,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.05,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 80,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.692895558342133,
+          "stealth_auc_avg": 0.5243919733527913,
+          "transfer_rate": 0.227387,
+          "asr": 0.26451702959240647,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 2.1467864513397217,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.41951357868223305,
+          "S_stealth_tpr": 0.5543164466737064
+        }
+      ]
+    },
+    {
+      "group_id": 81,
+      "attack_type": "adaptive_patch",
+      "trigger_type": "adaptive_patch",
+      "poison_rate": 0.05,
+      "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": 0.1,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 81,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7720051369863014,
+          "stealth_auc_avg": 0.5664924434104031,
+          "transfer_rate": 0.29383,
+          "asr": 0.3260748185371301,
+          "test_param_value": 0.4,
+          "test_param_type": "test_alpha",
+          "alpha": 0.4,
+          "cover_rate": 0.1,
+          "nc_max_anomaly_index": 3.0774552822113037,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6365203886963725,
+          "S_stealth_tpr": 0.8009305435570911
+        }
+      ]
+    },
+    {
+      "group_id": 82,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 82,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6823382352941176,
+          "stealth_auc_avg": 0.4133499556725997,
+          "transfer_rate": 0.002652,
+          "asr": 0.002372975991066443,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.115133762359619,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.49731392066417635,
+          "S_stealth_tpr": 0.7125045443613907
+        }
+      ]
+    },
+    {
+      "group_id": 83,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 83,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6966858552631578,
+          "stealth_auc_avg": 0.42595913794115137,
+          "transfer_rate": 0.001954,
+          "asr": 0.00265214963707426,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.835404396057129,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.3407673103529211,
+          "S_stealth_tpr": 0.5573486842105263
+        }
+      ]
+    },
+    {
+      "group_id": 84,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 84,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.540596828817734,
+          "stealth_auc_avg": 0.3742974023720219,
+          "transfer_rate": 0.898241,
+          "asr": 0.5668620882188722,
+          "test_param_value": 0.4,
+          "test_param_type": "test_alpha",
+          "alpha": 0.4,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.821273326873779,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.4386262892206562,
+          "S_stealth_tpr": 0.571665830377226
+        }
+      ]
+    },
+    {
+      "group_id": 85,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.5,
+      "alpha": 0.5,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 85,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6511411290322581,
+          "stealth_auc_avg": 0.4578637651092321,
+          "transfer_rate": 0.161223,
+          "asr": 0.17322724734785036,
+          "test_param_value": 0.5,
+          "test_param_type": "test_alpha",
+          "alpha": 0.5,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 12.298962593078613,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.4012768864303935,
+          "S_stealth_tpr": 0.5558987775688143
+        }
+      ]
+    },
+    {
+      "group_id": 86,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.6,
+      "alpha": 0.6,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 86,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.36187597956051065,
+          "stealth_auc_avg": 0.24242843004078307,
+          "transfer_rate": 0.991206,
+          "asr": 0.8636236739251815,
+          "test_param_value": 0.6,
+          "test_param_type": "test_alpha",
+          "alpha": 0.6,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.357091903686523,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3405981045230403,
+          "S_stealth_tpr": 0.4361561441388223
+        }
+      ]
+    },
+    {
+      "group_id": 87,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.7,
+      "alpha": 0.7,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 87,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8521847653142403,
+          "stealth_auc_avg": 0.7013016640606435,
+          "transfer_rate": 0.24665,
+          "asr": 0.175321049692909,
+          "test_param_value": 0.7,
+          "test_param_type": "test_alpha",
+          "alpha": 0.7,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.552830457687378,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.5610413312485149,
+          "S_stealth_tpr": 0.6817478122513922
+        }
+      ]
+    },
+    {
+      "group_id": 88,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.8,
+      "alpha": 0.8,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 88,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.4122132914847161,
+          "stealth_auc_avg": 0.2659166393674407,
+          "transfer_rate": 0.995673,
+          "asr": 0.8309603573422669,
+          "test_param_value": 0.8,
+          "test_param_type": "test_alpha",
+          "alpha": 0.8,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 7.734407901763916,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3211462921139113,
+          "S_stealth_tpr": 0.43818361380773163
+        }
+      ]
+    },
+    {
+      "group_id": 89,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 0.9,
+      "alpha": 0.9,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 89,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.3253978825136612,
+          "stealth_auc_avg": 0.20923558218504945,
+          "transfer_rate": 0.996371,
+          "asr": 0.9195979899497487,
+          "test_param_value": 0.9,
+          "test_param_type": "test_alpha",
+          "alpha": 0.9,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.373501777648926,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.31377985096793654,
+          "S_stealth_tpr": 0.40670969123082595
+        }
+      ]
+    },
+    {
+      "group_id": 90,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.005,
+      "train_param_value": 1.0,
+      "alpha": 1.0,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 90,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.3634705798261665,
+          "stealth_auc_avg": 0.2310263254473488,
+          "transfer_rate": 0.998465,
+          "asr": 0.9151312116136237,
+          "test_param_value": 1.0,
+          "test_param_type": "test_alpha",
+          "alpha": 1.0,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.3120455741882324,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.36437378857248354,
+          "S_stealth_tpr": 0.4703291920755377
+        }
+      ]
+    },
+    {
+      "group_id": 91,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 91,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7109062500000001,
+          "stealth_auc_avg": 0.4177857898795636,
+          "transfer_rate": 0.00349,
+          "asr": 0.0015354550530429928,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.827565670013428,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.47331577827969884,
+          "S_stealth_tpr": 0.707812146376048
+        }
+      ]
+    },
+    {
+      "group_id": 92,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 92,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6994801136363636,
+          "stealth_auc_avg": 0.4464437576363749,
+          "transfer_rate": 0.00335,
+          "asr": 0.0030709101060859855,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.623485088348389,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5156114357591899,
+          "S_stealth_tpr": 0.7180405205591808
+        }
+      ]
+    },
+    {
+      "group_id": 93,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 93,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5161191695459032,
+          "stealth_auc_avg": 0.329606674844677,
+          "transfer_rate": 0.962032,
+          "asr": 0.7068676716917923,
+          "test_param_value": 0.4,
+          "test_param_type": "test_alpha",
+          "alpha": 0.4,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 8.4882173538208,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.35997226428827456,
+          "S_stealth_tpr": 0.5091822600492556
+        }
+      ]
+    },
+    {
+      "group_id": 94,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.5,
+      "alpha": 0.5,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 94,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.2850749465972118,
+          "stealth_auc_avg": 0.19808630219098522,
+          "transfer_rate": 0.995673,
+          "asr": 0.9311836962590732,
+          "test_param_value": 0.5,
+          "test_param_type": "test_alpha",
+          "alpha": 0.5,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.304696559906006,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.30596725302194494,
+          "S_stealth_tpr": 0.3755581685469262
+        }
+      ]
+    },
+    {
+      "group_id": 95,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.6,
+      "alpha": 0.6,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 95,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.3282354773702115,
+          "stealth_auc_avg": 0.21553794609406374,
+          "transfer_rate": 0.999023,
+          "asr": 0.9437465103294249,
+          "test_param_value": 0.6,
+          "test_param_type": "test_alpha",
+          "alpha": 0.6,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.209000587463379,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3375543367147476,
+          "S_stealth_tpr": 0.42771236173566585
+        }
+      ]
+    },
+    {
+      "group_id": 96,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.7,
+      "alpha": 0.7,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 96,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.281570690157251,
+          "stealth_auc_avg": 0.18360469798474843,
+          "transfer_rate": 1.0,
+          "asr": 0.9586823003908431,
+          "test_param_value": 0.7,
+          "test_param_type": "test_alpha",
+          "alpha": 0.7,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.944013595581055,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3001840485331637,
+          "S_stealth_tpr": 0.37855684227116576
+        }
+      ]
+    },
+    {
+      "group_id": 97,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.8,
+      "alpha": 0.8,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 97,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.2954325558629114,
+          "stealth_auc_avg": 0.20288841618861575,
+          "transfer_rate": 1.0,
+          "asr": 0.9715242881072027,
+          "test_param_value": 0.8,
+          "test_param_type": "test_alpha",
+          "alpha": 0.8,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.060084342956543,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3137438663461365,
+          "S_stealth_tpr": 0.387779178085573
+        }
+      ]
+    },
+    {
+      "group_id": 98,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 0.9,
+      "alpha": 0.9,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 98,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.30682934630056136,
+          "stealth_auc_avg": 0.19751359919684175,
+          "transfer_rate": 1.0,
+          "asr": 0.9697096594081519,
+          "test_param_value": 0.9,
+          "test_param_type": "test_alpha",
+          "alpha": 0.9,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 14.036422729492188,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.16504733065355082,
+          "S_stealth_tpr": 0.2524999283365265
+        }
+      ]
+    },
+    {
+      "group_id": 99,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.01,
+      "train_param_value": 1.0,
+      "alpha": 1.0,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 99,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.30762299828424355,
+          "stealth_auc_avg": 0.19968610133447973,
+          "transfer_rate": 0.999581,
+          "asr": 0.9762702400893356,
+          "test_param_value": 1.0,
+          "test_param_type": "test_alpha",
+          "alpha": 1.0,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.613325595855713,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3183687400520618,
+          "S_stealth_tpr": 0.40471825761187286
+        }
+      ]
+    },
+    {
+      "group_id": 100,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 100,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.34067837914294063,
+          "stealth_auc_avg": 0.20914838354946053,
+          "transfer_rate": 1.0,
+          "asr": 0.9563093243997767,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.566430568695068,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.3266929364858192,
+          "S_stealth_tpr": 0.4319169329606033
+        }
+      ]
+    },
+    {
+      "group_id": 101,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 101,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.26797449661439776,
+          "stealth_auc_avg": 0.1768000400510552,
+          "transfer_rate": 1.0,
+          "asr": 0.9792015633724176,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 6.696604251861572,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.26654750402947547,
+          "S_stealth_tpr": 0.3394870692801495
+        }
+      ]
+    },
+    {
+      "group_id": 102,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.4,
+      "alpha": 0.4,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 102,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.24891366029641193,
+          "stealth_auc_avg": 0.1619239282445758,
+          "transfer_rate": 1.0,
+          "asr": 0.9842266890005583,
+          "test_param_value": 0.4,
+          "test_param_type": "test_alpha",
+          "alpha": 0.4,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.942516803741455,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.2828635106852969,
+          "S_stealth_tpr": 0.35245529632676575
+        }
+      ]
+    },
+    {
+      "group_id": 103,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.5,
+      "alpha": 0.5,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 103,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.24400027420039616,
+          "stealth_auc_avg": 0.16190902499796578,
+          "transfer_rate": 1.0,
+          "asr": 0.986320491345617,
+          "test_param_value": 0.5,
+          "test_param_type": "test_alpha",
+          "alpha": 0.5,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.9337880611419678,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.29907836979979385,
+          "S_stealth_tpr": 0.36475136916173817
+        }
+      ]
+    },
+    {
+      "group_id": 104,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.6,
+      "alpha": 0.6,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 104,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.23424879077813876,
+          "stealth_auc_avg": 0.13972949602561124,
+          "transfer_rate": 1.0,
+          "asr": 0.9884142936906756,
+          "test_param_value": 0.6,
+          "test_param_type": "test_alpha",
+          "alpha": 0.6,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 12.090348243713379,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.15012531834633033,
+          "S_stealth_tpr": 0.22574075414835235
+        }
+      ]
+    },
+    {
+      "group_id": 105,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.7,
+      "alpha": 0.7,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 105,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.209994165961647,
+          "stealth_auc_avg": 0.14579178705362406,
+          "transfer_rate": 1.0,
+          "asr": 0.9899497487437185,
+          "test_param_value": 0.7,
+          "test_param_type": "test_alpha",
+          "alpha": 0.7,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.272832870483398,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.2646442119442448,
+          "S_stealth_tpr": 0.31600611507066323
+        }
+      ]
+    },
+    {
+      "group_id": 106,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.8,
+      "alpha": 0.8,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 106,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.23861999718151072,
+          "stealth_auc_avg": 0.16648721906597208,
+          "transfer_rate": 1.0,
+          "asr": 0.9905080960357342,
+          "test_param_value": 0.8,
+          "test_param_type": "test_alpha",
+          "alpha": 0.8,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.2022342681884766,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.31450896854039295,
+          "S_stealth_tpr": 0.37221519103282386
+        }
+      ]
+    },
+    {
+      "group_id": 107,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 0.9,
+      "alpha": 0.9,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 107,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.23810538456120578,
+          "stealth_auc_avg": 0.15751227336499152,
+          "transfer_rate": 1.0,
+          "asr": 0.990926856504746,
+          "test_param_value": 0.9,
+          "test_param_type": "test_alpha",
+          "alpha": 0.9,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 6.144455432891846,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.25999935974386224,
+          "S_stealth_tpr": 0.3244738487008337
+        }
+      ]
+    },
+    {
+      "group_id": 108,
+      "attack_type": "basic",
+      "trigger_type": "basic",
+      "poison_rate": 0.05,
+      "train_param_value": 1.0,
+      "alpha": 1.0,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 108,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.2445609377200394,
+          "stealth_auc_avg": 0.16478895505097246,
+          "transfer_rate": 1.0,
+          "asr": 0.9912060301507538,
+          "test_param_value": 1.0,
+          "test_param_type": "test_alpha",
+          "alpha": 1.0,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 6.7076029777526855,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.2567617064777808,
+          "S_stealth_tpr": 0.32057929261303436
+        }
+      ]
+    },
+    {
+      "group_id": 109,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.1,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 109,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8860369318181818,
+          "stealth_auc_avg": 0.5736933664256028,
+          "transfer_rate": 0.121161,
+          "asr": 0.17197096594081518,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.1,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 1.8455009460449219,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4589546931404822,
+          "S_stealth_tpr": 0.7088295454545455
+        }
+      ]
+    },
+    {
+      "group_id": 110,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.15,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 110,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9106322829244674,
+          "stealth_auc_avg": 0.5262790739856326,
+          "transfer_rate": 0.075516,
+          "asr": 0.4320212171970966,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.15,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 2.191516160964966,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6186012358392283,
+          "S_stealth_tpr": 0.9260838029902962
+        }
+      ]
+    },
+    {
+      "group_id": 111,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 111,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9289807696205611,
+          "stealth_auc_avg": 0.6127220511260913,
+          "transfer_rate": 0.823283,
+          "asr": 0.8608319374651033,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.2,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 4.2359771728515625,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.654867665461872,
+          "S_stealth_tpr": 0.9078746402574478
+        }
+      ]
+    },
+    {
+      "group_id": 112,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.25,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 112,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9500670890872347,
+          "stealth_auc_avg": 0.5989186621177487,
+          "transfer_rate": 0.780988,
+          "asr": 0.8288665549972083,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.25,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 14.47383975982666,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.47913492969419896,
+          "S_stealth_tpr": 0.7600536712697878
+        }
+      ]
+    },
+    {
+      "group_id": 113,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.3,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 113,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9552664692435577,
+          "stealth_auc_avg": 0.5660861746384063,
+          "transfer_rate": 0.894612,
+          "asr": 0.8397543271915131,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.3,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 4.473357200622559,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6137403818018212,
+          "S_stealth_tpr": 0.9250846174859424
+        }
+      ]
+    },
+    {
+      "group_id": 114,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.35,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 114,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7675755108861726,
+          "stealth_auc_avg": 0.6211571388347221,
+          "transfer_rate": 0.994975,
+          "asr": 0.9135957565605807,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.35,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 5.547180652618408,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6405232340003608,
+          "S_stealth_tpr": 0.7576579316415213
+        }
+      ]
+    },
+    {
+      "group_id": 115,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.02,
+      "train_param_value": 0.2,
+      "alpha": 0.1,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 115,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7585777564530485,
+          "stealth_auc_avg": 0.47916669165772974,
+          "transfer_rate": 0.644333,
+          "asr": 0.6274427694025684,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.1,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 5.63513708114624,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5255159767861978,
+          "S_stealth_tpr": 0.7490448286224528
+        }
+      ]
+    },
+    {
+      "group_id": 116,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.02,
+      "train_param_value": 0.2,
+      "alpha": 0.15,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 116,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.846373956126772,
+          "stealth_auc_avg": 0.4900145392940425,
+          "transfer_rate": 0.994975,
+          "asr": 0.8566443327749861,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.15,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 7.863128662109375,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.4983539625419072,
+          "S_stealth_tpr": 0.7834414960080909
+        }
+      ]
+    },
+    {
+      "group_id": 117,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.02,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 117,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7048171992481203,
+          "stealth_auc_avg": 0.433848641255544,
+          "transfer_rate": 0.996231,
+          "asr": 0.9282523729759911,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.2,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 3.9542274475097656,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5163012673161409,
+          "S_stealth_tpr": 0.733076113710202
+        }
+      ]
+    },
+    {
+      "group_id": 118,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.02,
+      "train_param_value": 0.2,
+      "alpha": 0.25,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 118,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7509800161337635,
+          "stealth_auc_avg": 0.4558793231978817,
+          "transfer_rate": 0.893216,
+          "asr": 0.9517029592406476,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.25,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 8.50072193145752,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.46078922973395703,
+          "S_stealth_tpr": 0.6968697840826625
+        }
+      ]
+    },
+    {
+      "group_id": 119,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.02,
+      "train_param_value": 0.2,
+      "alpha": 0.3,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 119,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7522279064620832,
+          "stealth_auc_avg": 0.5497372012769544,
+          "transfer_rate": 1.0,
+          "asr": 0.9461194863204914,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.3,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 4.94775390625,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5930298831532732,
+          "S_stealth_tpr": 0.7550224473013762
+        }
+      ]
+    },
+    {
+      "group_id": 120,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.02,
+      "train_param_value": 0.2,
+      "alpha": 0.35,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 120,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9092533553472518,
+          "stealth_auc_avg": 0.5624271925309777,
+          "transfer_rate": 1.0,
+          "asr": 0.9828308207705193,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.35,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 4.663516044616699,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.607754230983085,
+          "S_stealth_tpr": 0.8852151612361043
+        }
+      ]
+    },
+    {
+      "group_id": 121,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.1,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 121,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6461652702509983,
+          "stealth_auc_avg": 0.39738223030088204,
+          "transfer_rate": 1.0,
+          "asr": 0.9787828029034059,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.1,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 3.5413804054260254,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.4937693479770434,
+          "S_stealth_tpr": 0.6927957799371365
+        }
+      ]
+    },
+    {
+      "group_id": 122,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.15,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 122,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6317299305849936,
+          "stealth_auc_avg": 0.37180320873614026,
+          "transfer_rate": 1.0,
+          "asr": 0.9878559463986599,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.15,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 3.2693943977355957,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.47768139772129,
+          "S_stealth_tpr": 0.6856227752003727
+        }
+      ]
+    },
+    {
+      "group_id": 123,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 123,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6684756355932203,
+          "stealth_auc_avg": 0.40772478284458336,
+          "transfer_rate": 1.0,
+          "asr": 0.9882747068676717,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.2,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 3.6057987213134766,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5010071332801375,
+          "S_stealth_tpr": 0.709607815479047
+        }
+      ]
+    },
+    {
+      "group_id": 124,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.25,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 124,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6831769939513292,
+          "stealth_auc_avg": 0.3823851138326252,
+          "transfer_rate": 1.0,
+          "asr": 0.992322724734785,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.25,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 3.8022124767303467,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.47757581413115807,
+          "S_stealth_tpr": 0.7182093182261213
+        }
+      ]
+    },
+    {
+      "group_id": 125,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.3,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 125,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6712457279144535,
+          "stealth_auc_avg": 0.3964900847764693,
+          "transfer_rate": 1.0,
+          "asr": 0.9986041317699609,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.3,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 5.982328414916992,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.453789643738276,
+          "S_stealth_tpr": 0.6735941582486633
+        }
+      ]
+    },
+    {
+      "group_id": 126,
+      "attack_type": "belt",
+      "trigger_type": "belt",
+      "poison_rate": 0.1,
+      "train_param_value": 0.2,
+      "alpha": 0.35,
+      "cover_rate": 0.5,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 126,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7261165411223487,
+          "stealth_auc_avg": 0.5651492631752233,
+          "transfer_rate": 1.0,
+          "asr": 0.9937185929648241,
+          "test_param_value": 0.2,
+          "test_param_type": "test_mask_rate",
+          "alpha": 0.35,
+          "cover_rate": 0.5,
+          "nc_max_anomaly_index": 1.4175750017166138,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4521194105401787,
+          "S_stealth_tpr": 0.580893232897879
+        }
+      ]
+    },
+    {
+      "group_id": 127,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 127,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9335178571428572,
+          "stealth_auc_avg": 0.5580644840343345,
+          "transfer_rate": 0.000838,
+          "asr": 0.001954215522054718,
+          "test_param_value": 0.01,
+          "test_param_type": "test_alpha",
+          "alpha": 0.01,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.0522208213806152,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.44645158722746764,
+          "S_stealth_tpr": 0.7468142857142858
+        }
+      ]
+    },
+    {
+      "group_id": 128,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 128,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7157451665390505,
+          "stealth_auc_avg": 0.4647423302678809,
+          "transfer_rate": 0.417225,
+          "asr": 0.0911501954215522,
+          "test_param_value": 0.05,
+          "test_param_type": "test_alpha",
+          "alpha": 0.05,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.3843417167663574,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.37179386421430477,
+          "S_stealth_tpr": 0.5725961332312405
+        }
+      ]
+    },
+    {
+      "group_id": 129,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 129,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7443641656982374,
+          "stealth_auc_avg": 0.48087765487764655,
+          "transfer_rate": 0.99651,
+          "asr": 0.7206867671691792,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.939200758934021,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.3847021239021173,
+          "S_stealth_tpr": 0.5954913325585899
+        }
+      ]
+    },
+    {
+      "group_id": 130,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 130,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5972675127510361,
+          "stealth_auc_avg": 0.3076011776857459,
+          "transfer_rate": 0.998185,
+          "asr": 0.8757677275265215,
+          "test_param_value": 0.15,
+          "test_param_type": "test_alpha",
+          "alpha": 0.15,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.936861276626587,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.24608094214859674,
+          "S_stealth_tpr": 0.47781401020082886
+        }
+      ]
+    },
+    {
+      "group_id": 131,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 131,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.594920198497854,
+          "stealth_auc_avg": 0.34496722014142345,
+          "transfer_rate": 1.0,
+          "asr": 0.9106644332774986,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.3178527355194092,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.2759737761131388,
+          "S_stealth_tpr": 0.47593615879828327
+        }
+      ]
+    },
+    {
+      "group_id": 132,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 132,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9012062916540442,
+          "stealth_auc_avg": 0.4812598022043181,
+          "transfer_rate": 0.999023,
+          "asr": 0.9215522054718035,
+          "test_param_value": 0.25,
+          "test_param_type": "test_alpha",
+          "alpha": 0.25,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.9916269779205322,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5697149414145601,
+          "S_stealth_tpr": 0.9056721329743411
+        }
+      ]
+    },
+    {
+      "group_id": 133,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.005,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 133,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6824458676622039,
+          "stealth_auc_avg": 0.506120081197607,
+          "transfer_rate": 1.0,
+          "asr": 0.9487716359575656,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 0.9631295204162598,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4048960649580856,
+          "S_stealth_tpr": 0.5459566941297632
+        }
+      ]
+    },
+    {
+      "group_id": 134,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 134,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.93796875,
+          "stealth_auc_avg": 0.5926681878429151,
+          "transfer_rate": 0.002373,
+          "asr": 0.0018146286990508096,
+          "test_param_value": 0.01,
+          "test_param_type": "test_alpha",
+          "alpha": 0.01,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 5.148518085479736,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4741345502743321,
+          "S_stealth_tpr": 0.750375
+        }
+      ]
+    },
+    {
+      "group_id": 135,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 135,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7325254987466054,
+          "stealth_auc_avg": 0.43586130716472427,
+          "transfer_rate": 0.997767,
+          "asr": 0.6679229480737019,
+          "test_param_value": 0.05,
+          "test_param_type": "test_alpha",
+          "alpha": 0.05,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.2164530754089355,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.513693142108066,
+          "S_stealth_tpr": 0.7510244953735711
+        }
+      ]
+    },
+    {
+      "group_id": 136,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 136,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6085300729214516,
+          "stealth_auc_avg": 0.30962842073539243,
+          "transfer_rate": 1.0,
+          "asr": 0.911641541038526,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.6967365741729736,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.24770273658831396,
+          "S_stealth_tpr": 0.48682405833716125
+        }
+      ]
+    },
+    {
+      "group_id": 137,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 137,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.817578129567378,
+          "stealth_auc_avg": 0.3699295028564542,
+          "transfer_rate": 0.999721,
+          "asr": 0.9549134561697376,
+          "test_param_value": 0.15,
+          "test_param_type": "test_alpha",
+          "alpha": 0.15,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.5932390689849854,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.48705931642489014,
+          "S_stealth_tpr": 0.8451782177936291
+        }
+      ]
+    },
+    {
+      "group_id": 138,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 138,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6842989112668895,
+          "stealth_auc_avg": 0.3616239608094901,
+          "transfer_rate": 1.0,
+          "asr": 0.9606365159128978,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.7972922325134277,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.4771324085181288,
+          "S_stealth_tpr": 0.7352723688840483
+        }
+      ]
+    },
+    {
+      "group_id": 139,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 139,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5857060675443617,
+          "stealth_auc_avg": 0.5526716873001165,
+          "transfer_rate": 1.0,
+          "asr": 0.9754327191513121,
+          "test_param_value": 0.25,
+          "test_param_type": "test_alpha",
+          "alpha": 0.25,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.5047318935394287,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6346768229699531,
+          "S_stealth_tpr": 0.6611043271653493
+        }
+      ]
+    },
+    {
+      "group_id": 140,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.01,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 140,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.860554778472025,
+          "stealth_auc_avg": 0.5799296596906012,
+          "transfer_rate": 1.0,
+          "asr": 0.9829704075935232,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.4046127796173096,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46394372775248094,
+          "S_stealth_tpr": 0.6884438227776201
+        }
+      ]
+    },
+    {
+      "group_id": 141,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.01,
+      "alpha": 0.01,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 141,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9112314033742331,
+          "stealth_auc_avg": 0.5735999344730177,
+          "transfer_rate": 0.086823,
+          "asr": 0.022752652149637075,
+          "test_param_value": 0.01,
+          "test_param_type": "test_alpha",
+          "alpha": 0.01,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.0556457042694092,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4588799475784142,
+          "S_stealth_tpr": 0.7289851226993865
+        }
+      ]
+    },
+    {
+      "group_id": 142,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.05,
+      "alpha": 0.05,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 142,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5072536515551433,
+          "stealth_auc_avg": 0.26397992272959225,
+          "transfer_rate": 1.0,
+          "asr": 0.9783640424343942,
+          "test_param_value": 0.05,
+          "test_param_type": "test_alpha",
+          "alpha": 0.05,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.376336097717285,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.38970246538130926,
+          "S_stealth_tpr": 0.5843214484417502
+        }
+      ]
+    },
+    {
+      "group_id": 143,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.1,
+      "alpha": 0.1,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 143,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5409097711267605,
+          "stealth_auc_avg": 0.33095389641860273,
+          "transfer_rate": 1.0,
+          "asr": 0.9910664433277498,
+          "test_param_value": 0.1,
+          "test_param_type": "test_alpha",
+          "alpha": 0.1,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 7.358504295349121,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.37922302148009013,
+          "S_stealth_tpr": 0.5471877212466163
+        }
+      ]
+    },
+    {
+      "group_id": 144,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.15,
+      "alpha": 0.15,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 144,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.4689040570175438,
+          "stealth_auc_avg": 0.2402651858091811,
+          "transfer_rate": 1.0,
+          "asr": 0.9945561139028476,
+          "test_param_value": 0.15,
+          "test_param_type": "test_alpha",
+          "alpha": 0.15,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.901731014251709,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.36227897990032476,
+          "S_stealth_tpr": 0.5451900768670149
+        }
+      ]
+    },
+    {
+      "group_id": 145,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.2,
+      "alpha": 0.2,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 145,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.849074856281548,
+          "stealth_auc_avg": 0.5082751202715514,
+          "transfer_rate": 1.0,
+          "asr": 0.9955332216638749,
+          "test_param_value": 0.2,
+          "test_param_type": "test_alpha",
+          "alpha": 0.2,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.3636348247528076,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5853429407651736,
+          "S_stealth_tpr": 0.857982729573171
+        }
+      ]
+    },
+    {
+      "group_id": 146,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.25,
+      "alpha": 0.25,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 146,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.5735530726256983,
+          "stealth_auc_avg": 0.36460997332761114,
+          "transfer_rate": 1.0,
+          "asr": 0.9994416527079844,
+          "test_param_value": 0.25,
+          "test_param_type": "test_alpha",
+          "alpha": 0.25,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.4934656620025635,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.46832231659120427,
+          "S_stealth_tpr": 0.6354767960296741
+        }
+      ]
+    },
+    {
+      "group_id": 147,
+      "attack_type": "blend",
+      "trigger_type": "blend",
+      "poison_rate": 0.05,
+      "train_param_value": 0.3,
+      "alpha": 0.3,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 147,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.6461439546313139,
+          "stealth_auc_avg": 0.42297670881972627,
+          "transfer_rate": 1.0,
+          "asr": 0.9976270240089335,
+          "test_param_value": 0.3,
+          "test_param_type": "test_alpha",
+          "alpha": 0.3,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.4811391830444336,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5152139932609031,
+          "S_stealth_tpr": 0.6937477899101733
+        }
+      ]
+    },
+    {
+      "group_id": 148,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 148,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9066078565830721,
+          "stealth_auc_avg": 0.6065601639391298,
+          "transfer_rate": 0.005723,
+          "asr": 0.044528196538246786,
+          "test_param_value": 4.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.7256168127059937,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4852481311513039,
+          "S_stealth_tpr": 0.7252862852664577
+        }
+      ]
+    },
+    {
+      "group_id": 149,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 6.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 149,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8865405245746691,
+          "stealth_auc_avg": 0.6053901876500042,
+          "transfer_rate": 0.024567,
+          "asr": 0.07384142936906755,
+          "test_param_value": 6.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.5548083782196045,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4843121501200034,
+          "S_stealth_tpr": 0.7092324196597354
+        }
+      ]
+    },
+    {
+      "group_id": 150,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 8.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 150,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9117247732426303,
+          "stealth_auc_avg": 0.5682893884038005,
+          "transfer_rate": 0.25321,
+          "asr": 0.24651032942490228,
+          "test_param_value": 8.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 0.9237549304962158,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4546315107230404,
+          "S_stealth_tpr": 0.7293798185941043
+        }
+      ]
+    },
+    {
+      "group_id": 151,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 10.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 151,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.885522758462946,
+          "stealth_auc_avg": 0.5754861751634004,
+          "transfer_rate": 0.864182,
+          "asr": 0.30513679508654384,
+          "test_param_value": 10.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 6.445813179016113,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5895307295948709,
+          "S_stealth_tpr": 0.8375599962345073
+        }
+      ]
+    },
+    {
+      "group_id": 152,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 152,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9196304747883696,
+          "stealth_auc_avg": 0.5123522724149774,
+          "transfer_rate": 0.83794,
+          "asr": 0.3792573981016192,
+          "test_param_value": 12.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.474256753921509,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6029115253709603,
+          "S_stealth_tpr": 0.928734087269674
+        }
+      ]
+    },
+    {
+      "group_id": 153,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 16.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 153,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8597154284164858,
+          "stealth_auc_avg": 0.5352702808748037,
+          "transfer_rate": 0.996371,
+          "asr": 0.6434952540480179,
+          "test_param_value": 16.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.027247667312622,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.42821622469984294,
+          "S_stealth_tpr": 0.6877723427331888
+        }
+      ]
+    },
+    {
+      "group_id": 154,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 154,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8707747835670279,
+          "stealth_auc_avg": 0.6095914536802012,
+          "transfer_rate": 0.99986,
+          "asr": 0.657035175879397,
+          "test_param_value": 20.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.7921993732452393,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.48767316294416097,
+          "S_stealth_tpr": 0.6966198268536223
+        }
+      ]
+    },
+    {
+      "group_id": 155,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.005,
+      "train_param_value": 24.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 155,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8631548030407741,
+          "stealth_auc_avg": 0.4340505495069862,
+          "transfer_rate": 1.0,
+          "asr": 0.807928531546622,
+          "test_param_value": 24.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.574828624725342,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.347240439605589,
+          "S_stealth_tpr": 0.6905238424326193
+        }
+      ]
+    },
+    {
+      "group_id": 156,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 156,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9239270833333333,
+          "stealth_auc_avg": 0.5699616364061805,
+          "transfer_rate": 0.01019,
+          "asr": 0.052345058626465664,
+          "test_param_value": 4.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.6078890562057495,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4559693091249444,
+          "S_stealth_tpr": 0.7391416666666667
+        }
+      ]
+    },
+    {
+      "group_id": 157,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 6.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 157,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8952821088794926,
+          "stealth_auc_avg": 0.5677764777378476,
+          "transfer_rate": 0.099805,
+          "asr": 0.13204913456169737,
+          "test_param_value": 6.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.7832452058792114,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.45422118219027807,
+          "S_stealth_tpr": 0.7162256871035941
+        }
+      ]
+    },
+    {
+      "group_id": 158,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 8.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 158,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.916416443338438,
+          "stealth_auc_avg": 0.5947938910063721,
+          "transfer_rate": 0.235623,
+          "asr": 0.1823003908431044,
+          "test_param_value": 8.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.2240121364593506,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4758351128050977,
+          "S_stealth_tpr": 0.7331331546707505
+        }
+      ]
+    },
+    {
+      "group_id": 159,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 10.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 159,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8822086755646817,
+          "stealth_auc_avg": 0.5515284599192508,
+          "transfer_rate": 0.779453,
+          "asr": 0.27177554438860974,
+          "test_param_value": 10.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.014503002166748,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.44122276793540066,
+          "S_stealth_tpr": 0.7057669404517455
+        }
+      ]
+    },
+    {
+      "group_id": 160,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 160,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9272794802533532,
+          "stealth_auc_avg": 0.5763746243736806,
+          "transfer_rate": 0.701843,
+          "asr": 0.37465103294249025,
+          "test_param_value": 12.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.188091278076172,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.46109969949894447,
+          "S_stealth_tpr": 0.7418235842026826
+        }
+      ]
+    },
+    {
+      "group_id": 161,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 16.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 161,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.7932920081967213,
+          "stealth_auc_avg": 0.5367736686915757,
+          "transfer_rate": 0.981016,
+          "asr": 0.5449469570072585,
+          "test_param_value": 16.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.1048794984817505,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4294189349532606,
+          "S_stealth_tpr": 0.6346336065573771
+        }
+      ]
+    },
+    {
+      "group_id": 162,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 162,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8561546049249436,
+          "stealth_auc_avg": 0.5083232249192591,
+          "transfer_rate": 1.0,
+          "asr": 0.6788107202680067,
+          "test_param_value": 20.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.615316867828369,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.40665857993540727,
+          "S_stealth_tpr": 0.6849236839399548
+        }
+      ]
+    },
+    {
+      "group_id": 163,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.01,
+      "train_param_value": 24.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 163,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8631690533547466,
+          "stealth_auc_avg": 0.5307828785697489,
+          "transfer_rate": 1.0,
+          "asr": 0.7822445561139029,
+          "test_param_value": 24.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 3.2081234455108643,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.42462630285579916,
+          "S_stealth_tpr": 0.6905352426837973
+        }
+      ]
+    },
+    {
+      "group_id": 164,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 4.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 164,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9393031655844156,
+          "stealth_auc_avg": 0.5753275552946608,
+          "transfer_rate": 0.042714,
+          "asr": 0.10748185371300949,
+          "test_param_value": 4.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 4.201369285583496,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6255087840051768,
+          "S_stealth_tpr": 0.9166892722369807
+        }
+      ]
+    },
+    {
+      "group_id": 165,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 6.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 165,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8989313872255489,
+          "stealth_auc_avg": 0.5790659409504404,
+          "transfer_rate": 0.274567,
+          "asr": 0.14000558347292016,
+          "test_param_value": 6.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.6722391843795776,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4632527527603523,
+          "S_stealth_tpr": 0.7191451097804391
+        }
+      ]
+    },
+    {
+      "group_id": 166,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 8.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 166,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9366450167973124,
+          "stealth_auc_avg": 0.5666887107708704,
+          "transfer_rate": 0.479481,
+          "asr": 0.24930206588498047,
+          "test_param_value": 8.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.5765012502670288,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.4533509686166963,
+          "S_stealth_tpr": 0.7493160134378499
+        }
+      ]
+    },
+    {
+      "group_id": 167,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 10.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 167,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8846576141324118,
+          "stealth_auc_avg": 0.5563660179564727,
+          "transfer_rate": 0.961195,
+          "asr": 0.38372417643774426,
+          "test_param_value": 10.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.2927913665771484,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.6410416407945534,
+          "S_stealth_tpr": 0.9036749177353048
+        }
+      ]
+    },
+    {
+      "group_id": 168,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 12.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 168,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.9211997404391993,
+          "stealth_auc_avg": 0.6030382268394843,
+          "transfer_rate": 0.934673,
+          "asr": 0.46719709659408154,
+          "test_param_value": 12.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.570701837539673,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.48243058147158746,
+          "S_stealth_tpr": 0.7369597923513594
+        }
+      ]
+    },
+    {
+      "group_id": 169,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 16.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 169,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8680927359094791,
+          "stealth_auc_avg": 0.43639995602717263,
+          "transfer_rate": 1.0,
+          "asr": 0.653824678950307,
+          "test_param_value": 16.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.742960214614868,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.3491199648217381,
+          "S_stealth_tpr": 0.6944741887275834
+        }
+      ]
+    },
+    {
+      "group_id": 170,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 20.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 170,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.8355316076196834,
+          "stealth_auc_avg": 0.41826881209524625,
+          "transfer_rate": 0.994835,
+          "asr": 0.7318537130094919,
+          "test_param_value": 20.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 1.4644466638565063,
+          "nc_is_poisoned": false,
+          "S_stealth": 0.33461504967619704,
+          "S_stealth_tpr": 0.6684252860957467
+        }
+      ]
+    },
+    {
+      "group_id": 171,
+      "attack_type": "upgd",
+      "trigger_type": "upgd",
+      "poison_rate": 0.05,
+      "train_param_value": 24.0,
+      "alpha": null,
+      "cover_rate": null,
+      "group_size": 1,
+      "data_points": [
+        {
+          "group_id": 171,
+          "point_id": 1,
+          "stealth_tpr_avg": 0.854116535622593,
+          "stealth_auc_avg": 0.43910216853292594,
+          "transfer_rate": 1.0,
+          "asr": 0.8699050809603573,
+          "test_param_value": 24.0,
+          "test_param_type": "test_eps",
+          "alpha": null,
+          "cover_rate": null,
+          "nc_max_anomaly_index": 2.8625168800354004,
+          "nc_is_poisoned": true,
+          "S_stealth": 0.5380657470176506,
+          "S_stealth_tpr": 0.8700772406893843
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_groups": 171,
+    "total_points": 171
+  }
+}

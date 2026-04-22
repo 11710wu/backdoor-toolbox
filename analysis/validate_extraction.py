@@ -99,7 +99,7 @@ def parse_result_files(
         res['stealth_tpr_avg'] = 1.0 - raw_tpr
         res['stealth_auc_avg'] = 1.0 - raw_auc
 
-    # 2. 迁移性：tiny_imagenet → Tiny ImageNet-C；否则 STL-10
+    # 2. 迁移性：tiny_imagenet / mnistm / cifar10
     if dataset == 'tiny_imagenet':
         candidates = []
         try:
@@ -131,6 +131,40 @@ def parse_result_files(
         if candidates:
             candidates.sort(key=lambda x: x[0])
             res['transfer_rate'] = candidates[0][1]
+    elif dataset == 'mnistm':
+        suffix = test_param_type_suffix.replace('test_', '') if test_param_type_suffix else ''
+        # 主命名：test_mnistm_results_*.txt；兼容旧命名：test_mnist_cross_results_*.txt
+        candidate_files = [
+            os.path.join(dir_path, f'test_mnistm_results_{suffix}={param_str}.txt'),
+            os.path.join(dir_path, f'test_mnist_cross_results_{suffix}={param_str}.txt'),
+        ]
+        if test_param_value == int(test_param_value):
+            candidate_files.extend([
+                os.path.join(dir_path, f'test_mnistm_results_{suffix}={test_param_value}.txt'),
+                os.path.join(dir_path, f'test_mnist_cross_results_{suffix}={test_param_value}.txt'),
+            ])
+        for fp in candidate_files:
+            if os.path.exists(fp):
+                try:
+                    c = open(fp, encoding='utf-8').read()
+                    tr = _parse_transfer_rate_from_text(c)
+                    if tr is not None:
+                        res['transfer_rate'] = tr
+                        break
+                except Exception:
+                    pass
+        if res['transfer_rate'] is None:
+            for base_name in ['test_mnistm_results.txt', 'test_mnist_cross_results.txt']:
+                base_fp = os.path.join(dir_path, base_name)
+                if os.path.exists(base_fp):
+                    try:
+                        c = open(base_fp, encoding='utf-8').read()
+                        tr = _parse_transfer_rate_from_text(c)
+                        if tr is not None:
+                            res['transfer_rate'] = tr
+                            break
+                    except Exception:
+                        pass
     else:
         suffix = test_param_type_suffix.replace('test_', '') if test_param_type_suffix else ''
         stl10 = os.path.join(dir_path, f'test_stl10_results_{suffix}={param_str}.txt')
@@ -195,12 +229,16 @@ def extract_test_param_suffix(test_param_type):
 
 
 def find_result_directory(base_dir, group_info, arch=None, dataset: str = 'cifar10'):
-    """定位原始实验目录。Tiny ImageNet 使用 64×64 触发器文件名（hellokitty_64 / badnet_patch_64）。"""
+    """定位原始实验目录。不同数据集使用对应触发器尺寸命名。"""
     at = group_info['attack_type']
     pr = group_info['poison_rate']
     tv = group_info['train_param_value']
-    hk = 'hellokitty_64.png' if dataset == 'tiny_imagenet' else 'hellokitty_32.png'
-    bn = 'badnet_patch_64.png' if dataset == 'tiny_imagenet' else 'badnet_patch_32.png'
+    if dataset == 'tiny_imagenet':
+        hk, bn = 'hellokitty_64.png', 'badnet_patch_64.png'
+    elif dataset == 'mnistm':
+        hk, bn = 'hellokitty_28.png', 'badnet_patch_28.png'
+    else:
+        hk, bn = 'hellokitty_32.png', 'badnet_patch_32.png'
     candidates = []
     if at == 'adaptive_blend':
         cr = group_info.get('cover_rate', 0.03)
@@ -496,8 +534,8 @@ def main():
     parser.add_argument('--arch', choices=ARCHS + ['all'], default='all',
                         help='要验证的模型架构，all=验证所有 (默认: all)')
     parser.add_argument('--dataset', default='cifar10',
-                        choices=['cifar10', 'tiny_imagenet', 'all'],
-                        help='数据集：cifar10 / tiny_imagenet / all（默认 cifar10）')
+                        choices=['cifar10', 'tiny_imagenet', 'mnistm', 'all'],
+                        help='数据集：cifar10 / tiny_imagenet / mnistm / all（默认 cifar10）')
     parser.add_argument('--mode', choices=['no_nc', 'nc', 'all'], default='all',
                         help='no_nc: 验证 _no_nc 文件；nc: 验证 _nc 文件；all: 两种都验证（默认）')
     parser.add_argument('--seed', type=int, default=None,
@@ -516,7 +554,7 @@ def main():
     modes = ['no_nc', 'nc'] if args.mode == 'all' else [args.mode]
     script_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(script_dir)
-    datasets_loop = ['cifar10', 'tiny_imagenet'] if args.dataset == 'all' else [args.dataset]
+    datasets_loop = ['cifar10', 'tiny_imagenet', 'mnistm'] if args.dataset == 'all' else [args.dataset]
 
     # 汇总统计
     total_ok = total_mismatch = total_nf = total_json_err = total_sampled = total_skipped = 0

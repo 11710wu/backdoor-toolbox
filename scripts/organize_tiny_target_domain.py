@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Organize generated target-domain images into a stable ImageFolder dataset.
+"""Organize generated target-domain images into a Tiny-ImageNet-aligned test set.
 
 The output directory uses **wnid** as subdirectory names so that
 ``torchvision.datasets.ImageFolder`` assigns label indices in exactly the same
@@ -12,7 +12,8 @@ Usage:
         --output-dir /workspace/data/tiny-target-domain
 
 Outputs under ``--output-dir``:
-    images/<wnid>/*.png          ImageFolder structure (wnid dirs, alphabetically sorted = label idx)
+    test/<wnid>/images/*.png     Tiny-ImageNet-like test-only structure
+    images -> test               Backward-compatible symlink for existing scripts
     class_to_idx.json            {wnid: int}  – matches ImageFolder assignment
     idx_to_class.json            {int_str: {wnid, name}}
     class_to_wnid.json           {display_name: wnid}
@@ -67,10 +68,14 @@ def discover_src_images(src_root: Path) -> Dict[str, List[Path]]:
     for d in sorted(src_root.iterdir()):
         if not d.is_dir():
             continue
-        imgs = sorted(
+        all_imgs = sorted(
             p for p in d.iterdir()
             if p.is_file() and p.suffix.lower() in (".png", ".jpg", ".jpeg", ".bmp", ".webp")
         )
+        # Prefer final 64x64 exports when both raw/high-res and 64x64 files coexist.
+        # Current generator writes `image_XXXX.png` (64x64) and `raw_image_XXXX.png` (high-res).
+        image_pref = [p for p in all_imgs if p.name.startswith("image_")]
+        imgs = image_pref if image_pref else all_imgs
         result[d.name] = imgs
     return result
 
@@ -91,8 +96,8 @@ def organize(
     wnid_to_name = {c["wnid"]: c["name"] for c in classes}
     name_to_wnid = {c["name"]: c["wnid"] for c in classes}
 
-    images_out = output_dir / "images"
-    images_out.mkdir(parents=True, exist_ok=True)
+    test_out = output_dir / "test"
+    test_out.mkdir(parents=True, exist_ok=True)
 
     src_dirs = discover_src_images(src_root)
 
@@ -116,7 +121,7 @@ def organize(
 
         wnid = entry["wnid"]
         matched_wnids.add(wnid)
-        dst_dir = images_out / wnid
+        dst_dir = test_out / wnid / "images"
         dst_dir.mkdir(parents=True, exist_ok=True)
 
         count = 0
@@ -164,6 +169,20 @@ def organize(
     all_wnids = {c["wnid"] for c in classes}
     missing_wnids = all_wnids - matched_wnids
 
+    # Backward-compatible alias: images -> test
+    images_alias = output_dir / "images"
+    if images_alias.exists() or images_alias.is_symlink():
+        if images_alias.is_symlink() or images_alias.is_file():
+            images_alias.unlink()
+        else:
+            shutil.rmtree(images_alias)
+    try:
+        images_alias.symlink_to(test_out, target_is_directory=True)
+    except OSError:
+        # Fallback for filesystems where symlink is not available.
+        if not images_alias.exists():
+            shutil.copytree(test_out, images_alias)
+
     # Write mappings
     _write_json(output_dir / "class_to_idx.json", class_to_idx)
     _write_json(output_dir / "idx_to_class.json", {str(k): v for k, v in idx_to_class.items()})
@@ -196,6 +215,8 @@ def organize(
         "class_to_idx_matches_imagefolder_sort": (
             list(class_to_idx.keys()) == sorted(class_to_idx.keys())
         ),
+        "storage_layout": "tiny-imagenet-test-only",
+        "imagefolder_root_recommended": str(test_out),
     }
     _write_json(output_dir / "build_validation_report.json", report)
 

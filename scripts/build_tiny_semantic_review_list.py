@@ -74,9 +74,9 @@ def _default_semantic_entry(rec: Dict) -> Dict:
     return {
         "wnid": rec["wnid"],
         "name": name,
-        "sense": f"photograph of {name} as the Tiny-ImageNet object class",
+        "sense": f"{name} as the intended Tiny-ImageNet object or animal class",
         "include_keywords": include_keywords[:8],
-        "exclude_keywords": ["cartoon", "illustration", "icon", "logo"],
+        "exclude_keywords": ["cartoon", "illustration", "icon", "logo", "3d render", "toy"],
         "scene_hint_override": "",
         "framing_hint": "mid_shot",
         "synonyms": synonyms,

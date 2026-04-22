@@ -18,6 +18,7 @@ import time
 import numpy as np
 import torch
 from torch import nn
+import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
 
@@ -33,7 +34,7 @@ from utils.densenet import DenseNetWrapper
 def test_target_domain_model(
     model, test_loader, poison_transform, poison_type, num_classes,
     target_class, source_dataset="tiny_imagenet", save_example=True,
-    model_dir=None,
+    model_dir=None, wanet_bicubic_scale=1.0,
 ):
     print(f"执行 Tiny Target Domain 迁移测试: 攻击类型={poison_type}, 源数据集={source_dataset}")
 
@@ -73,6 +74,21 @@ def test_target_domain_model(
     with torch.no_grad():
         for batch_idx, (data, target) in enumerate(test_loader):
             data, target = data.cuda(), target.cuda()
+            if poison_type == "WaNet" and wanet_bicubic_scale < 1.0:
+                resized_h = max(1, int(round(input_size * wanet_bicubic_scale)))
+                resized_w = max(1, int(round(input_size * wanet_bicubic_scale)))
+                data = F.interpolate(
+                    data,
+                    size=(resized_h, resized_w),
+                    mode="bicubic",
+                    align_corners=False,
+                )
+                data = F.interpolate(
+                    data,
+                    size=(input_size, input_size),
+                    mode="bicubic",
+                    align_corners=False,
+                )
             data_poisoned, _ = poison_transform.transform(data, target)
 
             if save_example and batch_idx == 0 and model_dir:
@@ -94,15 +110,21 @@ def _save_example(original, poisoned, attack_type, model_dir, source_dataset):
     save_dir = os.path.join(model_dir, "tiny_target_domain_examples")
     os.makedirs(save_dir, exist_ok=True)
 
-    if source_dataset in ("cifar10", "cifar100", "gtsrb"):
-        mean = torch.tensor([0.4914, 0.4822, 0.4465]).view(3, 1, 1).cuda()
-        std = torch.tensor([0.247, 0.243, 0.261]).view(3, 1, 1).cuda()
+    # UPGD/BELT examples are already in raw [0,1] space.
+    # Applying an extra denormalization here causes shifted colors.
+    if attack_type in ("upgd", "belt"):
+        orig_d = torch.clamp(original, 0, 1)
+        pois_d = torch.clamp(poisoned, 0, 1)
     else:
-        mean = torch.tensor([0.4802, 0.4481, 0.3975]).view(3, 1, 1).cuda()
-        std = torch.tensor([0.2302, 0.2265, 0.2262]).view(3, 1, 1).cuda()
+        if source_dataset in ("cifar10", "cifar100", "gtsrb"):
+            mean = torch.tensor([0.4914, 0.4822, 0.4465]).view(3, 1, 1).cuda()
+            std = torch.tensor([0.247, 0.243, 0.261]).view(3, 1, 1).cuda()
+        else:
+            mean = torch.tensor([0.4802, 0.4481, 0.3975]).view(3, 1, 1).cuda()
+            std = torch.tensor([0.2302, 0.2265, 0.2262]).view(3, 1, 1).cuda()
 
-    orig_d = torch.clamp(original * std + mean, 0, 1)
-    pois_d = torch.clamp(poisoned * std + mean, 0, 1)
+        orig_d = torch.clamp(original * std + mean, 0, 1)
+        pois_d = torch.clamp(poisoned * std + mean, 0, 1)
     diff = torch.abs(pois_d - orig_d)
     diff = diff / (diff.max() + 1e-8)
 
@@ -206,7 +228,7 @@ def main():
 
     # Basic params (same as test_tiny_imagenet.py)
     parser.add_argument("-source_dataset", type=str, default="tiny_imagenet",
-                        choices=["cifar10", "cifar100", "gtsrb", "imagenette", "tiny_imagenet"])
+                        choices=["tiny_imagenet"])
     parser.add_argument("-dataset", type=str, default="tiny_imagenet",
                         choices=default_args.parser_choices["dataset"])
     parser.add_argument("-poison_type", type=str,
@@ -262,9 +284,17 @@ def main():
     parser.add_argument("-mask_rate", type=float, default=0.2)
 
     args = parser.parse_args()
+    wanet_bicubic_scale = 0.34
     os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
 
     source_dataset = args.source_dataset
+
+    # This script is intentionally Tiny-ImageNet specific: class space, label
+    # checks, trigger defaults and normalization are all tied to Tiny-ImageNet.
+    if args.dataset != "tiny_imagenet":
+        raise ValueError(
+            f"test_tiny_target_domain.py requires -dataset tiny_imagenet, got: {args.dataset}"
+        )
 
     # ---- Trigger default ----
     if args.trigger is None and args.trigger_path is None:
@@ -273,17 +303,8 @@ def main():
         args.trigger = os.path.basename(args.trigger_path)
 
     # ---- Num classes / batch size ----
-    if source_dataset == "tiny_imagenet":
-        num_classes = 200
-        batch_size = 64
-    elif source_dataset in ("cifar10",):
-        num_classes = 10
-        batch_size = 128
-    elif source_dataset == "gtsrb":
-        num_classes = 43
-        batch_size = 128
-    else:
-        raise NotImplementedError(f"不支持的源数据集: {source_dataset}")
+    num_classes = 200
+    batch_size = 64
 
     # ---- Save original params & get model path (same logic as test_tiny_imagenet.py) ----
     original_dataset = args.dataset
@@ -362,26 +383,13 @@ def main():
     if not os.path.isdir(images_dir):
         raise FileNotFoundError(f"目标域 images 目录不存在: {images_dir}")
 
-    if source_dataset == "tiny_imagenet":
-        if args.poison_type in ("upgd", "belt"):
-            target_transform = transforms.Compose([transforms.ToTensor()])
-        else:
-            target_transform = transforms.Compose([
-                transforms.ToTensor(),
-                transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262]),
-            ])
+    if args.poison_type in ("upgd", "belt"):
+        target_transform = transforms.Compose([transforms.ToTensor()])
     else:
-        if args.poison_type in ("upgd", "belt"):
-            target_transform = transforms.Compose([
-                transforms.Resize((32, 32)),
-                transforms.ToTensor(),
-            ])
-        else:
-            target_transform = transforms.Compose([
-                transforms.Resize((32, 32)),
-                transforms.ToTensor(),
-                transforms.Normalize([0.4914, 0.4822, 0.4465], [0.247, 0.243, 0.261]),
-            ])
+        target_transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262]),
+        ])
 
     test_set = datasets.ImageFolder(images_dir, transform=target_transform)
     print(f"目标域数据集加载完成: {len(test_set)} 张图像, {len(test_set.classes)} 个类别")
@@ -414,6 +422,7 @@ def main():
         target_class=target_class,
         source_dataset=source_dataset,
         model_dir=model_dir,
+        wanet_bicubic_scale=wanet_bicubic_scale,
     )
 
     # ---- Save results ----
@@ -459,6 +468,7 @@ def main():
                 f.write(f"测试时WaNet s参数 (test_s): {args.test_s}\n")
             else:
                 f.write(f"WaNet s参数: {args.s}\n")
+            f.write(f"WaNet bicubic预处理缩放系数: {wanet_bicubic_scale}\n")
         elif args.poison_type == "SIG":
             if args.test_delta is not None:
                 f.write(f"训练时SIG delta参数: {getattr(args, 'original_delta', None)}\n")

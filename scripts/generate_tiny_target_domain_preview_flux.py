@@ -21,22 +21,33 @@ from typing import Dict, List, Optional
 from PIL import Image, ImageOps, ImageDraw
 
 
-STYLE_ANCHOR = "photorealistic DSLR, natural light, realistic texture, sharp focus"
+STYLE_ANCHOR = "natural texture, sharp focus"
+
+COMPOSITION_ANCHOR = "single subject, large in frame, clear details, clean background"
+
+LIGHTING_ANCHOR = "even light, natural color"
 
 NEGATIVE_PROMPT = (
-    "illustration, cartoon, anime, painting, sketch, comic, digital art, "
-    "3d render, cgi, unreal engine, game asset, plastic texture, waxy skin, "
-    "blurry, low resolution, low quality, over-smoothed, watermark, text, logo"
+    "illustration, cartoon, logo, collage, multiple subjects, tiny subject, "
+    "crop, blur, low-res"
 )
 
-PROMPT_TEMPLATE = "Photo of {class_name}, {scene_hint}, " + STYLE_ANCHOR + "."
+PROMPT_TEMPLATE = (
+    "Photorealistic photo of {class_name}, {scene_hint}, "
+    + COMPOSITION_ANCHOR
+    + ", "
+    + LIGHTING_ANCHOR
+    + ", "
+    + STYLE_ANCHOR
+    + "."
+)
 
 
 SCENE_HINTS = [
-    "centered subject, clean composition",
-    "outdoor context with natural perspective",
-    "lifelike details with believable background",
-    "documentary framing with realistic context",
+    "centered with clean background",
+    "natural setting with low clutter",
+    "class details clearly visible",
+    "eye-level documentary framing",
 ]
 
 
@@ -76,8 +87,89 @@ def choose_scene_hint(seed: int, class_index: int) -> str:
     return SCENE_HINTS[rng.randrange(len(SCENE_HINTS))]
 
 
+def _clean_piece(text: str) -> str:
+    text = re.sub(r"\s+", " ", text.strip())
+    return text.strip(" ,.")
+
+
+def _unique_pieces(parts: List[str]) -> List[str]:
+    seen = set()
+    out: List[str] = []
+    for raw in parts:
+        piece = _clean_piece(raw)
+        if not piece:
+            continue
+        key = piece.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(piece)
+    return out
+
+
+def _word_count(text: str) -> int:
+    return len(re.findall(r"\S+", text))
+
+
+def _join_with_word_budget(parts: List[str], max_words: int) -> str:
+    kept: List[str] = []
+    total = 0
+    for piece in _unique_pieces(parts):
+        count = _word_count(piece)
+        if kept and total + count > max_words:
+            continue
+        kept.append(piece)
+        total += count
+    return ", ".join(kept) + "."
+
+
+def _split_csv_terms(parts: List[str]) -> List[str]:
+    terms: List[str] = []
+    for part in parts:
+        for term in str(part).split(","):
+            cleaned = _clean_piece(term)
+            if cleaned:
+                terms.append(cleaned)
+    return terms
+
+
+def _join_terms_with_word_budget(parts: List[str], max_words: int) -> str:
+    kept: List[str] = []
+    seen = set()
+    total = 0
+    for term in _split_csv_terms(parts):
+        key = term.lower()
+        if key in seen:
+            continue
+        count = _word_count(term)
+        if kept and total + count > max_words:
+            continue
+        seen.add(key)
+        kept.append(term)
+        total += count
+    return ", ".join(kept)
+
+
+def _compress_default_sense(class_name: str, sense: str) -> str:
+    default_pattern = f"{class_name} as the intended tiny-imagenet object or animal class"
+    if sense.strip().lower() == default_pattern.lower():
+        return ""
+    return sense.strip()
+
+
+def render_framing_hint(framing_hint: str) -> str:
+    hint = framing_hint.strip().lower()
+    mapping = {
+        "close_up": "close-up",
+        "mid_shot": "mid shot",
+        "full_object": "full subject in frame",
+    }
+    return mapping.get(hint, hint)
+
+
 def build_prompt(class_name: str, scene_hint: str) -> str:
-    return PROMPT_TEMPLATE.format(class_name=class_name, scene_hint=scene_hint)
+    prompt = PROMPT_TEMPLATE.format(class_name=class_name, scene_hint=scene_hint)
+    return _join_with_word_budget([prompt], max_words=28)
 
 
 def load_semantic_spec(semantic_spec_path: Optional[Path]) -> Dict[str, Dict]:
@@ -97,38 +189,36 @@ def build_disambiguated_prompt(
     rec: ClassRecord,
     scene_hint: str,
     semantic_row: Optional[Dict],
-    max_include_keywords: int = 3,
+    max_include_keywords: int = 2,
 ) -> str:
     if not semantic_row:
         return build_prompt(rec.name, scene_hint)
 
-    sense = str(semantic_row.get("sense", "")).strip()
+    sense = _compress_default_sense(rec.name, str(semantic_row.get("sense", "")).strip())
     include_keywords = [str(x).strip() for x in semantic_row.get("include_keywords", []) if str(x).strip()]
     scene_override = str(semantic_row.get("scene_hint_override", "")).strip()
     framing_hint = str(semantic_row.get("framing_hint", "")).strip()
 
-    pieces = [f"Photo of {rec.name}"]
+    pieces = [f"photorealistic photo of {rec.name}"]
     if sense:
-        pieces.append(f"specifically {sense}")
+        pieces.append(f"show {sense}")
     if include_keywords:
-        pieces.append("include " + ", ".join(include_keywords[:max_include_keywords]))
-    if scene_override:
-        pieces.append(scene_override)
-    else:
-        pieces.append(scene_hint)
+        pieces.append("cues: " + ", ".join(include_keywords[:max_include_keywords]))
+    pieces.append(scene_override or scene_hint)
     if framing_hint:
-        pieces.append(f"framing {framing_hint}")
-    pieces.append(STYLE_ANCHOR)
-    return ", ".join(pieces) + "."
+        pieces.append(render_framing_hint(framing_hint))
+    pieces.extend([COMPOSITION_ANCHOR, LIGHTING_ANCHOR, STYLE_ANCHOR])
+    return _join_with_word_budget(pieces, max_words=34)
 
 
-def build_disambiguated_negative_prompt(semantic_row: Optional[Dict], max_exclude_keywords: int = 3) -> str:
-    parts = [NEGATIVE_PROMPT]
+def build_disambiguated_negative_prompt(semantic_row: Optional[Dict], max_exclude_keywords: int = 2) -> str:
+    parts: List[str] = []
     if semantic_row:
         exclude_keywords = [str(x).strip() for x in semantic_row.get("exclude_keywords", []) if str(x).strip()]
         if exclude_keywords:
-            parts.append("avoid " + ", ".join(exclude_keywords[:max_exclude_keywords]))
-    return ", ".join(parts)
+            parts.append(", ".join(exclude_keywords[:max_exclude_keywords]))
+    parts.append(NEGATIVE_PROMPT)
+    return _join_terms_with_word_budget(parts, max_words=20)
 
 
 def center_crop_resize_64(image: Image.Image) -> Image.Image:
@@ -281,8 +371,8 @@ def main() -> None:
         action="store_true",
         help="严格消歧义：强制将 include/exclude 关键词拼入 prompt 和 negative_prompt",
     )
-    parser.add_argument("--max-include-keywords", type=int, default=3, help="每类最多拼接多少个 include 关键词")
-    parser.add_argument("--max-exclude-keywords", type=int, default=3, help="每类最多拼接多少个 exclude 关键词")
+    parser.add_argument("--max-include-keywords", type=int, default=2, help="每类最多拼接多少个 include 关键词")
+    parser.add_argument("--max-exclude-keywords", type=int, default=2, help="每类最多拼接多少个 exclude 关键词")
     args = parser.parse_args()
 
     # 与「import os; os.environ['HF_ENDPOINT']=...」等价，须在首次加载模型前执行

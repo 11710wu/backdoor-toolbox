@@ -205,26 +205,28 @@ def save_poisoned_example_to_dir(original_img, poisoned_img, attack_type, method
     save_dir = os.path.join(model_dir, "tiny_imagenet_examples")
     os.makedirs(save_dir, exist_ok=True)
     
-    # 根据源数据集选择归一化参数
-    # 注意: Tiny ImageNet 使用 ImageNet 归一化（语义上更接近 ImageNet）
-    if source_dataset in ['cifar10', 'cifar100', 'gtsrb']:
-        mean = torch.tensor([0.4914, 0.4822, 0.4465]).view(3, 1, 1).cuda()
-        std = torch.tensor([0.247, 0.243, 0.261]).view(3, 1, 1).cuda()
-    elif source_dataset in ['imagenette', 'imagenet', 'tiny_imagenet']:
-        # Tiny ImageNet 使用 ImageNet 归一化（是 ImageNet 的子集）
-        mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1).cuda()
-        std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1).cuda()
+    # UPGD/BELT examples are already in raw [0,1] space.
+    # Applying an extra denormalization here causes shifted colors.
+    if attack_type in ('upgd', 'belt'):
+        original_denorm = torch.clamp(original_img, 0, 1)
+        poisoned_denorm = torch.clamp(poisoned_img, 0, 1)
     else:
-        # 默认使用 ImageNet 的归一化参数
-        mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1).cuda()
-        std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1).cuda()
-    
-    original_denorm = original_img * std + mean
-    poisoned_denorm = poisoned_img * std + mean
-    
-    # 限制像素值在[0, 1]范围内
-    original_denorm = torch.clamp(original_denorm, 0, 1)
-    poisoned_denorm = torch.clamp(poisoned_denorm, 0, 1)
+        # 根据源数据集选择归一化参数
+        # 注意: Tiny ImageNet 使用 ImageNet 归一化（语义上更接近 ImageNet）
+        if source_dataset in ['cifar10', 'cifar100', 'gtsrb']:
+            mean = torch.tensor([0.4914, 0.4822, 0.4465]).view(3, 1, 1).cuda()
+            std = torch.tensor([0.247, 0.243, 0.261]).view(3, 1, 1).cuda()
+        elif source_dataset in ['imagenette', 'imagenet', 'tiny_imagenet']:
+            # Tiny ImageNet 使用 ImageNet 归一化（是 ImageNet 的子集）
+            mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1).cuda()
+            std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1).cuda()
+        else:
+            # 默认使用 ImageNet 的归一化参数
+            mean = torch.tensor([0.485, 0.456, 0.406]).view(3, 1, 1).cuda()
+            std = torch.tensor([0.229, 0.224, 0.225]).view(3, 1, 1).cuda()
+
+        original_denorm = torch.clamp(original_img * std + mean, 0, 1)
+        poisoned_denorm = torch.clamp(poisoned_img * std + mean, 0, 1)
     
     # 计算差异图
     diff = torch.abs(poisoned_denorm - original_denorm)

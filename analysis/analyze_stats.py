@@ -48,10 +48,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 ARCHS = ['resnet18', 'mobilenet', 'vgg']
-DATASETS = ['cifar10', 'tiny_imagenet']
+DATASETS = ['cifar10', 'tiny_imagenet', 'mnistm']
 DATASET_DISPLAY = {
     'cifar10': 'CIFAR-10',
     'tiny_imagenet': 'Tiny ImageNet',
+    'mnistm': 'MNIST-M',
 }
 STEALTH_COLS = ['stealth_tpr_avg', 'stealth_auc_avg']
 METRIC_COLS = STEALTH_COLS + ['transfer_rate']
@@ -1069,8 +1070,8 @@ def resolve_output_dir_for_dataset(script_dir: str, output_dir_arg: str, dataset
 def main() -> None:
     parser = argparse.ArgumentParser(description='隐蔽性与迁移性分析（按模型分开）')
     parser.add_argument('--dataset', type=str, default='cifar10',
-                        choices=['cifar10', 'tiny_imagenet', 'all'],
-                        help='分析的数据集：cifar10 / tiny_imagenet / all（默认 cifar10）')
+                        choices=['cifar10', 'tiny_imagenet', 'mnistm', 'all'],
+                        help='分析的数据集：cifar10 / tiny_imagenet / mnistm / all（默认 cifar10）')
     parser.add_argument('--data-dir', type=str, default=None,
                         help='数据目录，包含 data_{dataset}_{arch}.csv')
     parser.add_argument('--data-suffix', type=str, default='_no_nc',

@@ -1,0 +1,140 @@
+#!/bin/bash
+
+# 设置错误日志文件
+LOG_DIR="logs"
+mkdir -p "$LOG_DIR"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+ERROR_LOG="$LOG_DIR/run_defenses_mobilenet_resnet_explicit_rate_0.005.log"
+
+# 执行命令并记录失败的命令
+set +e
+
+run_command() {
+    local original_cmd="$1"
+    local description="$2"
+    local run_in_background=false
+    local cmd="$original_cmd"
+    local TMP_OUT
+    TMP_OUT=$(mktemp 2>/dev/null || echo "/tmp/run_cmd_$$_${RANDOM}.out")
+
+    if [[ "$cmd" == *" &" ]]; then
+        run_in_background=true
+        cmd="${cmd% &}"
+    fi
+
+    if [ "$run_in_background" = true ]; then
+        eval "$cmd" > "$TMP_OUT" 2>&1 &
+        local pid=$!
+        wait $pid
+        local exit_code=$?
+    else
+        eval "$cmd" 2>&1 | tee "$TMP_OUT"
+        local exit_code=${PIPESTATUS[0]}
+    fi
+
+    if [ "$exit_code" -ne 0 ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 命令执行失败 (退出码: $exit_code)" >> "$ERROR_LOG"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 命令: $original_cmd" >> "$ERROR_LOG"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] 描述: $description" >> "$ERROR_LOG"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] --- 命令输出 (stdout+stderr) ---" >> "$ERROR_LOG"
+        cat "$TMP_OUT" >> "$ERROR_LOG" 2>/dev/null
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ---" >> "$ERROR_LOG"
+    fi
+    rm -f "$TMP_OUT"
+    return "$exit_code"
+}
+
+echo "=========================================="
+echo "MNISTM UPGD Attack Experiment Script - Model: resnet18 - Poison Rate: 0.005"
+echo "=========================================="
+
+echo '----- 1. Creation (resnet18) -----'
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python create_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -upgd_model_path=poisoned_train_set/mnistm/none_0.000_poison_seed=2333_arch=ResNet18_mnistm/ResNet18_mnistm.pt -model=resnet18" "Create: mnistm upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- 2. Training (resnet18) -----'
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python train_on_poisoned_set.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Train: mnistm upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- 3. Local Testing (resnet18) -----'
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python test_model.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Test: mnistm upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- 4. Cross Testing (resnet18) -----'
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=4 (resnet18)"
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=6 (resnet18)"
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=8 (resnet18)"
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=10 (resnet18)"
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=12 (resnet18)"
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=16 (resnet18)"
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=20 (resnet18)"
+run_command "python test_mnist.py -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Cross Test: test_mnist.py upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- 5. Defenses (resnet18) -----'
+echo '----- Defense: SentiNet (resnet18) -----'
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python other_defense.py -defense=SentiNet -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: SentiNet mnistm upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- Defense: STRIP (resnet18) -----'
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python other_defense.py -defense=STRIP -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: STRIP mnistm upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- Defense: ScaleUp (resnet18) -----'
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python other_defense.py -defense=ScaleUp -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: ScaleUp mnistm upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- Defense: IBD_PSC (resnet18) -----'
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python other_defense.py -defense=IBD_PSC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: IBD_PSC mnistm upgd rate=0.005 eps=24 (resnet18)"
+
+echo '----- Defense: NC (resnet18) -----'
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=4 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=4 (resnet18)"
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=6 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=6 (resnet18)"
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=8 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=8 (resnet18)"
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=10 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=10 (resnet18)"
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=12 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=12 (resnet18)"
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=16 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=16 (resnet18)"
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=20 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=20 (resnet18)"
+run_command "python other_defense.py -defense=NC -dataset=mnistm -poison_type=upgd -poison_rate=0.005 -eps=24 -upgd_steps=100 -upgd_steps_multiplier=5 -model=resnet18" "Defense: NC mnistm upgd rate=0.005 eps=24 (resnet18)"
