@@ -41,8 +41,6 @@ if _script_dir not in sys.path:
 from extract_all_results import (
     _parse_transfer_rate_from_text,
     _parse_auxiliary_result_filename,
-    _parse_corruption_severity_from_filename,
-    _tiny_imagenet_c_corruption_sort_key,
 )
 
 DEFENSE_METHODS = ["STRIP", "SCaLe-Up", "SentiNet", "IBD_PSC"]
@@ -99,12 +97,12 @@ def parse_result_files(
         res['stealth_tpr_avg'] = 1.0 - raw_tpr
         res['stealth_auc_avg'] = 1.0 - raw_auc
 
-    # 2. 迁移性：tiny_imagenet / mnistm / cifar10
+    # 2. 迁移性：tiny_imagenet(target-domain) / mnistm / cifar10
     if dataset == 'tiny_imagenet':
-        candidates = []
+        tr = None
         try:
             for fn in os.listdir(dir_path):
-                if not fn.startswith('test_tiny_imagenet_results') or not fn.endswith('.txt'):
+                if not fn.startswith('test_tiny_target_domain_results') or not fn.endswith('.txt'):
                     continue
                 fp = os.path.join(dir_path, fn)
                 pinfo = _parse_auxiliary_result_filename(fn)
@@ -116,7 +114,6 @@ def parse_result_files(
                     continue
                 if pval is None or abs(float(pval) - float(test_param_value)) > 1e-9:
                     continue
-                corr, sev = _parse_corruption_severity_from_filename(fn)
                 try:
                     c = open(fp, encoding='utf-8').read()
                     tr = _parse_transfer_rate_from_text(c)
@@ -124,13 +121,10 @@ def parse_result_files(
                     continue
                 if tr is None:
                     continue
-                sk = _tiny_imagenet_c_corruption_sort_key(corr, sev)
-                candidates.append((sk, tr))
         except OSError:
             pass
-        if candidates:
-            candidates.sort(key=lambda x: x[0])
-            res['transfer_rate'] = candidates[0][1]
+        if tr is not None:
+            res['transfer_rate'] = tr
     elif dataset == 'mnistm':
         suffix = test_param_type_suffix.replace('test_', '') if test_param_type_suffix else ''
         # 主命名：test_mnistm_results_*.txt；兼容旧命名：test_mnist_cross_results_*.txt

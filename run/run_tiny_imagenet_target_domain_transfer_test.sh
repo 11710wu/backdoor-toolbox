@@ -8,7 +8,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/tiny-target-domain-qwen-200class-organized-v2}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
 
 cd "$PROJECT_ROOT" || exit 1
 
@@ -550,4 +550,3 @@ run_command "python test_tiny_target_domain.py -source_dataset=tiny_imagenet -da
 echo '=========================================='
 echo 'All 465 transfer tests completed.'
 echo '=========================================='
-

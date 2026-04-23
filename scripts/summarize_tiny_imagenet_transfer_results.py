@@ -23,6 +23,8 @@ from pathlib import Path
 from statistics import mean
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+
 
 KNOWN_ATTACKS = [
     "adaptive_blend",
@@ -387,8 +389,8 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=str,
-        default="/workspace/backdoor-toolbox-new1/poisoned_train_set/tiny_imagenet/tiny_imagenet_original_vs_transfer_summary.md",
-        help="Output Markdown path.",
+        default=str(SCRIPT_DIR / "tiny_imagenet_original_vs_transfer_summary.md"),
+        help="Output Markdown path. Defaults to the scripts/ directory.",
     )
     args = parser.parse_args()
 
@@ -400,6 +402,7 @@ def main() -> None:
     markdown = build_markdown(records, missing, root)
 
     output_path = Path(args.output).resolve()
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(markdown, encoding="utf-8")
     print(f"[OK] records={len(records)} missing={len(missing)}")
     print(f"[OK] wrote markdown to {output_path}")

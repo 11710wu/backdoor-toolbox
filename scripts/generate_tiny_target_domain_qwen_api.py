@@ -69,9 +69,7 @@ NEGATIVE_PROMPT = (
 )
 
 REFERENCE_PHOTO_STYLE_PROMPT_SUFFIX = (
-    "class-defining subject or place still recognizable within an ordinary real-world scene, everyday non-studio composition, "
-    "moderate natural scene complexity, not overly centered or isolated, realistic imperfect framing is allowed, sharp enough focus for recognition, "
-    "natural color, visually consistent reference-photo style"
+    "class-defining subject or place remains recognizable, realistic everyday photo, natural color, non-studio composition"
 )
 
 SCENE_REFERENCE_PROMPT_ADDON = (
@@ -295,6 +293,30 @@ SCENE_CATALOG_DISTRACTOR_VARIANTS = [
     "the most salient visual patch need not be the semantic class cue as long as the whole scene remains recognizable",
 ]
 
+OBJECT_CATALOG_SCENARIO_PROFILES = [
+    "closer canonical real-world view, object relatively large in frame, frontal or near-frontal eye-level angle, off-center, everyday setting, one nearby object, surface edge, or foreground element occupies noticeable area and competes strongly for attention while key class-defining parts remain readable",
+    "high-angle wider context view, clearly elevated or downward-looking viewpoint, object medium size in frame, surrounding room, workspace, shop, street, or storage context visible, several nearby objects or surfaces take substantial space and the object need not be the most salient region",
+    "strong lateral side-view, clear side-profile or oblique side angle, object close to one frame edge, non-critical parts may approach the border, a nearby object, shelf edge, wall edge, or table edge occupies noticeable space and competes strongly for attention",
+    "low-angle cluttered real-world view, clearly lower or upward-looking viewpoint, stronger depth perspective, multiple nearby objects, furniture, tools, packaging, or structural elements take substantial space, the object remains readable but competes with several strong visual elements",
+    "imperfect off-axis snapshot, strong passing or turning viewpoint, partial foreground blockage, edge cutoff, uneven exposure, or focus falloff allowed, a foreground element or nearby object may take large visible area and rival the labeled object for attention while overall identity remains clear",
+]
+
+ANIMAL_CATALOG_SCENARIO_PROFILES = [
+    "closer canonical animal view, animal relatively large in frame, frontal or near-frontal eye-level viewpoint, off-center, habitat visible, key species traits readable, foreground texture, vegetation, or another habitat element occupies noticeable area and competes strongly for attention",
+    "high-angle wider habitat view, clearly elevated or downward-looking observational viewpoint, animal medium size in frame, broader environment visible, surrounding habitat elements take substantial space and the animal is not necessarily the strongest visual patch",
+    "strong side-profile sighting, clear lateral side view rather than a frontal portrait, animal close to one frame edge, non-critical body parts may approach the border, side vegetation, rocks, water edges, or nearby habitat structure occupies noticeable space and competes strongly for attention",
+    "low-angle busy habitat view, clearly lower or upward-looking ground-near viewpoint, stronger foreground-background layering, grass, branches, stones, water, or habitat clutter takes substantial space, the animal remains readable but competes with a visually busy environment",
+    "imperfect off-axis animal snapshot, strong passing, turning, or oblique sighting viewpoint, partial screening, foreground obstruction, focus softness, or uneven exposure allowed, nearby habitat elements may take large visible area and rival the animal for attention while species identity remains clear",
+]
+
+SCENE_CATALOG_SCENARIO_PROFILES = [
+    "closer canonical scene view, ordinary eye-level real-location viewpoint, main place or structure cue clearly readable, off-center, foreground and side elements occupy noticeable space and compete strongly for attention",
+    "high-angle wider establishing view, clearly elevated or overlook-like viewpoint from farther away, the key place cue occupies only part of the layout, broader surroundings participate in recognition, secondary scene elements take substantial space and the main cue need not dominate the frame",
+    "strong lateral or roadside scene view, diagonal side-view rather than a straight-on composition, main semantic region close to one side of the frame, side walls, rails, rocks, vegetation, or boundary structures occupy noticeable space and compete strongly for attention",
+    "low-angle busy real-world scene, clearly lower or upward-emphasizing viewpoint, stronger depth perspective, layered foreground and background, rails, rocks, vegetation, signs, walls, or vehicles take substantial space while place identity stays clear, the most salient patch need not be the class cue",
+    "imperfect off-axis scene snapshot, strong passing viewpoint, uneven exposure, haze, reflections, weathering, foreground edge clutter, or partial occluders allowed, non-central elements may take large visible area and rival the main place cue while the scene remains semantically clear",
+]
+
 CATALOG_NEGATIVE_PROMPT = (
     "illustration, cartoon, anime, painting, sketch, 3d render, cgi, blurry, low quality, noisy, "
     "jpeg artifacts, watermark, text, logo, multiple main subjects, duplicate subject, tiny distant subject, "
@@ -337,6 +359,7 @@ MINIMAL_CATALOG_CUES: Dict[str, str] = {
     "n03089624": "candy shop storefront or display without people",
     "n04067472": "spool",
     "n03160309": "large concrete dam structure",
+    "n03544143": "glass sand timer with sand in two bulbs",
     "n02231487": "stick insect",
     "n07583066": "bowl of guacamole dip",
     "n09332890": "empty inland freshwater lakeshore with calm still water, no people, no ocean, no beach, no surf",
@@ -366,6 +389,7 @@ EXTRA_CATALOG_GUIDANCE_BY_WNID: Dict[str, str] = {
     "n03085013": "keyboard alone dominates the image, keyboard fills most of the frame, full keyboard clearly visible, not cropped, on a simple desk surface, no person, no face, no hands, no headset, no monitor, no laptop, no other main objects",
     "n03179701": "desk itself is the main subject, any person must be secondary and not dominant",
     "n03201208": "table furniture itself is the main subject, no dominant meal",
+    "n03544143": "timekeeping sand timer object clearly recognizable, not a person or body figure",
     "n03804744": "no hand holding it, no person",
     "n03854065": "musical instrument clearly recognizable, not anatomy",
     "n03980874": "poncho itself is the main subject, full poncho silhouette visible, not cropped, clearly a rain poncho, not a regular shirt or coat",
@@ -385,6 +409,7 @@ EXTRA_CATALOG_NEGATIVE_BY_WNID: Dict[str, str] = {
     "n03085013": "cropped keyboard, partial keyboard, laptop only, person, face, portrait, headset, headphones, hands on keyboard, person using keyboard, portrait with keyboard, monitor as main subject, desk scene with person, keyboard as a secondary object, office scene as the main subject, computer setup as the main subject, mouse as the main subject",
     "n03179701": "person as the sole subject, office worker portrait, dominant foreground person",
     "n03201208": "meal scene, dinner plate as main subject, people dining",
+    "n03544143": "person, human body, human figure, waist, torso, hourglass figure, body shape, silhouette, dress, gown, mannequin",
     "n03804744": "hand holding nail, person holding object",
     "n03854065": "human organ, anatomy, surgery, biology diagram",
     "n03980874": "blanket, shawl, regular shirt, coat, jacket, cropped garment, mannequin, hollow garment, floating garment, faceless void, fashion editorial, costume cape, glossy plastic costume",
@@ -705,8 +730,17 @@ def choose_catalog_cue(
     if semantic_row and max_include_keywords > 0:
         include_keywords = [str(x).strip() for x in semantic_row.get("include_keywords", []) if str(x).strip()]
         rec_name_norm = _normalize_catalog_cue(rec.name)
+        rec_name_tokens = set(rec_name_norm.split())
         for keyword in include_keywords[:max_include_keywords]:
-            if _normalize_catalog_cue(keyword) == rec_name_norm:
+            keyword_norm = _normalize_catalog_cue(keyword)
+            keyword_tokens = set(keyword_norm.split())
+            if keyword_norm == rec_name_norm:
+                continue
+            # Skip weak cues that are already just a subset of the class name,
+            # e.g. "egyptian" for "Egyptian cat".
+            if keyword_norm in rec_name_norm:
+                continue
+            if keyword_tokens and keyword_tokens.issubset(rec_name_tokens):
                 continue
             return keyword, "semantic_include_keywords"
 
@@ -730,45 +764,17 @@ def choose_catalog_sample_variant(rec, sample_idx: int, total_samples: int) -> O
         return None
 
     if rec.wnid in ANIMAL_VARIANT_WNIDS:
-        view_variants = ANIMAL_CATALOG_VIEW_VARIANTS
-        context_variants = ANIMAL_CATALOG_CONTEXT_VARIANTS
-        capture_variants = ANIMAL_CATALOG_CAPTURE_VARIANTS
-        state_variants = ANIMAL_CATALOG_STATE_VARIANTS
-        distractor_variants = ANIMAL_CATALOG_DISTRACTOR_VARIANTS
+        scenario_profiles = ANIMAL_CATALOG_SCENARIO_PROFILES
     elif rec.wnid in SCENE_LIKE_WNIDS:
-        view_variants = SCENE_CATALOG_VIEW_VARIANTS
-        context_variants = SCENE_CATALOG_CONTEXT_VARIANTS
-        capture_variants = SCENE_CATALOG_CAPTURE_VARIANTS
-        state_variants = SCENE_CATALOG_STATE_VARIANTS
-        distractor_variants = SCENE_CATALOG_DISTRACTOR_VARIANTS
+        scenario_profiles = SCENE_CATALOG_SCENARIO_PROFILES
     else:
-        view_variants = OBJECT_CATALOG_VIEW_VARIANTS
-        context_variants = OBJECT_CATALOG_CONTEXT_VARIANTS
-        capture_variants = OBJECT_CATALOG_CAPTURE_VARIANTS
-        state_variants = OBJECT_CATALOG_STATE_VARIANTS
-        distractor_variants = OBJECT_CATALOG_DISTRACTOR_VARIANTS
+        scenario_profiles = OBJECT_CATALOG_SCENARIO_PROFILES
 
-    if (
-        not view_variants
-        or not context_variants
-        or not capture_variants
-        or not state_variants
-        or not distractor_variants
-    ):
+    if not scenario_profiles:
         return None
 
-    def _pick(options: List[str], a: int, b: int, salt: int) -> str:
-        offset = (rec.index * a + sample_idx * b + salt * 17) % len(options)
-        return options[offset]
-
-    parts = [
-        _pick(view_variants, a=37, b=13, salt=1),
-        _pick(context_variants, a=53, b=17, salt=2),
-        _pick(capture_variants, a=71, b=19, salt=3),
-        _pick(state_variants, a=89, b=23, salt=4),
-        _pick(distractor_variants, a=107, b=29, salt=5),
-    ]
-    return ", ".join(_unique_pieces(parts))
+    slot = (sample_idx - 1) % len(scenario_profiles)
+    return scenario_profiles[slot]
 
 
 def build_catalog_negative_prompt(rec, semantic_row: Optional[Dict]) -> str:

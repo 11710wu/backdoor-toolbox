@@ -18,7 +18,6 @@ import time
 import numpy as np
 import torch
 from torch import nn
-import torch.nn.functional as F
 from torchvision import datasets, transforms
 from torchvision.utils import save_image
 
@@ -34,7 +33,7 @@ from utils.densenet import DenseNetWrapper
 def test_target_domain_model(
     model, test_loader, poison_transform, poison_type, num_classes,
     target_class, source_dataset="tiny_imagenet", save_example=True,
-    model_dir=None, wanet_bicubic_scale=1.0,
+    model_dir=None,
 ):
     print(f"执行 Tiny Target Domain 迁移测试: 攻击类型={poison_type}, 源数据集={source_dataset}")
 
@@ -74,21 +73,6 @@ def test_target_domain_model(
     with torch.no_grad():
         for batch_idx, (data, target) in enumerate(test_loader):
             data, target = data.cuda(), target.cuda()
-            if poison_type == "WaNet" and wanet_bicubic_scale < 1.0:
-                resized_h = max(1, int(round(input_size * wanet_bicubic_scale)))
-                resized_w = max(1, int(round(input_size * wanet_bicubic_scale)))
-                data = F.interpolate(
-                    data,
-                    size=(resized_h, resized_w),
-                    mode="bicubic",
-                    align_corners=False,
-                )
-                data = F.interpolate(
-                    data,
-                    size=(input_size, input_size),
-                    mode="bicubic",
-                    align_corners=False,
-                )
             data_poisoned, _ = poison_transform.transform(data, target)
 
             if save_example and batch_idx == 0 and model_dir:
@@ -284,7 +268,6 @@ def main():
     parser.add_argument("-mask_rate", type=float, default=0.2)
 
     args = parser.parse_args()
-    wanet_bicubic_scale = 0.34
     os.environ["CUDA_VISIBLE_DEVICES"] = args.devices
 
     source_dataset = args.source_dataset
@@ -422,7 +405,6 @@ def main():
         target_class=target_class,
         source_dataset=source_dataset,
         model_dir=model_dir,
-        wanet_bicubic_scale=wanet_bicubic_scale,
     )
 
     # ---- Save results ----
@@ -468,7 +450,6 @@ def main():
                 f.write(f"测试时WaNet s参数 (test_s): {args.test_s}\n")
             else:
                 f.write(f"WaNet s参数: {args.s}\n")
-            f.write(f"WaNet bicubic预处理缩放系数: {wanet_bicubic_scale}\n")
         elif args.poison_type == "SIG":
             if args.test_delta is not None:
                 f.write(f"训练时SIG delta参数: {getattr(args, 'original_delta', None)}\n")

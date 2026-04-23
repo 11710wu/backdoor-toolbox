@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 分析隐蔽性（TPR平均、AUC平均）与迁移性，按三种模型（resnet18, mobilenet, vgg）分别分析。
-支持 CIFAR-10（data_cifar10_*）与 Tiny ImageNet（data_tiny_imagenet_*），见 --dataset。
+支持 CIFAR-10（data_cifar10_*）与 Tiny ImageNet Target-Domain（data_tiny_imagenet_*），见 --dataset。
 输出按数据集分目录：{--output-dir}/cifar10/、{--output-dir}/tiny_imagenet/（含 per-arch 图与 combined 散点/箱线等）。
 
 # 1. no_nc 数据：所有图
@@ -22,10 +22,10 @@ python analysis/analyze_stats.py --data-dir analysis --data-suffix _nc --output-
 # 只分析某个 arch
 python analysis/analyze_stats.py --data-dir analysis --arch mobilenet --all-plots
 
-# Tiny ImageNet（结果在 analysis_outputs_no_nc/tiny_imagenet/）
+# Tiny ImageNet Target-Domain（结果在 analysis_outputs_no_nc/tiny_imagenet/）
 python analysis/analyze_stats.py --dataset tiny_imagenet --data-dir analysis --data-suffix _no_nc --all-plots --output-dir analysis_outputs_no_nc
 
-# 同时跑 CIFAR-10 与 Tiny ImageNet（输出到 analysis_outputs_no_nc/cifar10 与 .../tiny_imagenet）
+# 同时跑 CIFAR-10 与 Tiny ImageNet Target-Domain（输出到 analysis_outputs_no_nc/cifar10 与 .../tiny_imagenet）
 python analysis/analyze_stats.py --dataset all --data-suffix _no_nc --all-plots --output-dir analysis_outputs_no_nc
 
 # 指定部分图类型
@@ -51,7 +51,7 @@ ARCHS = ['resnet18', 'mobilenet', 'vgg']
 DATASETS = ['cifar10', 'tiny_imagenet', 'mnistm']
 DATASET_DISPLAY = {
     'cifar10': 'CIFAR-10',
-    'tiny_imagenet': 'Tiny ImageNet',
+    'tiny_imagenet': 'Tiny ImageNet -> Target Domain',
     'mnistm': 'MNIST-M',
 }
 STEALTH_COLS = ['stealth_tpr_avg', 'stealth_auc_avg']

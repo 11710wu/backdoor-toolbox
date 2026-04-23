@@ -13,15 +13,13 @@
 输出：data_{dataset}_{arch}_{suffix}.csv/json
   no_nc -> _no_nc,  nc -> _nc
 
-数据集分支（与历史行为一致）：
+数据集分支：
   - cifar10：迁移率仅来自 test_stl10_results*.txt（STL-10）；不读取 test_tiny_imagenet_*。
-  - tiny_imagenet：优先 test_tiny_target_domain_results*.txt；若无则回退 test_tiny_imagenet_results*.txt。
+  - tiny_imagenet：迁移率仅来自 test_tiny_target_domain_results*.txt（target-domain）。
   - mnistm：迁移率来自 test_mnistm_results*.txt（主）或 test_mnist_cross_results*.txt（兼容旧命名）。
 
 防御结果 *defense_results*.json 与上述迁移结果文件，均通过同一套文件名规则解析 test 维度
 （兼容原 results_* 命名，并支持 test_* 后缀）。
-
-tiny_imagenet Tiny-C 多文件时：优先 gaussian_noise+severity=4，否则按 severity 与 4 的距离。
 
 分组键（cifar10 与 tiny 相同）：attack_type + poison_rate + train_param_value + alpha + cover_rate，
 避免 belt 等「仅 alpha/cover 不同」的目录被合并；CSV 含 alpha 列。
@@ -41,11 +39,6 @@ DEFENSE_PREFIX = {"STRIP": "strip", "SCaLe-Up": "scaleup", "SentiNet": "sentinet
 # 数据集与模型（arch）映射：文件夹中的 arch 名 -> 输出文件名
 DATASETS = ["cifar10", "tiny_imagenet", "mnistm"]
 ARCH_TO_OUTPUT = {"ResNet18": "resnet18", "mobilenetv2": "mobilenet", "vgg19_bn": "vgg"}
-
-# Tiny ImageNet-C 跨域结果：同一 test 参数可能有多组 corruption×severity，优先与 test_tiny_imagenet.py 默认一致
-TINY_IMAGENET_C_PREFERRED_CORRUPTION = "gaussian_noise"
-TINY_IMAGENET_C_PREFERRED_SEVERITY = 4
-
 
 def get_training_param_type(attack_type: str) -> Optional[str]:
     attack_lower = (attack_type or '').lower()
@@ -167,25 +160,6 @@ def _parse_transfer_rate_from_text(c: str) -> Optional[float]:
     return None
 
 
-def _tiny_imagenet_c_corruption_sort_key(corruption: Optional[str], severity: Optional[int]) -> tuple:
-    """元组序越小越优先（同一 test_param 多文件时选一条；不依赖 hash 随机化）。"""
-    if corruption == TINY_IMAGENET_C_PREFERRED_CORRUPTION and severity == TINY_IMAGENET_C_PREFERRED_SEVERITY:
-        return (0, 0, corruption or "", severity or 0)
-    if corruption == TINY_IMAGENET_C_PREFERRED_CORRUPTION and severity is not None:
-        return (1, abs(severity - TINY_IMAGENET_C_PREFERRED_SEVERITY), corruption, severity)
-    if corruption is not None and severity is not None:
-        # 非默认损坏类型时，优先选 severity 更接近默认强度 4 的结果
-        return (2, abs(severity - TINY_IMAGENET_C_PREFERRED_SEVERITY), corruption, severity)
-    return (3, 0, "", 0)
-
-
-def _parse_corruption_severity_from_filename(name: str) -> tuple:
-    m = re.search(r'corruption=([a-z_]+)_severity=([1-5])', name)
-    if m:
-        return m.group(1), int(m.group(2))
-    return None, None
-
-
 def extract_folder_results(
     folder: Path, params: Dict[str, Any], include_nc: bool = True, dataset: str = "cifar10"
 ) -> List[Dict[str, Any]]:
@@ -218,18 +192,12 @@ def extract_folder_results(
                 test_params[pval]['defense_aucs'][method] = rec['auc']
 
     # 2. 迁移性：
-    #    - cifar10：仅 STL-10（原逻辑）
-    #    - tiny_imagenet：优先 Tiny Target Domain；若无结果则回退 Tiny ImageNet-C（兼容历史）
+    #    - cifar10：仅 STL-10
+    #    - tiny_imagenet：仅 Tiny Target Domain
     #    - mnistm：MNIST 迁移结果（test_mnistm_results；兼容旧 test_mnist_cross_results）
     if dataset == "tiny_imagenet":
-        # source_priority: 0=target_domain(优先), 1=tiny_imagenet_c(回退)
-        tiny_candidates: Dict[float, List[tuple]] = {}
-
         tiny_target_files = list(folder.glob("test_tiny_target_domain_results*.txt"))
-        tiny_c_files = list(folder.glob("test_tiny_imagenet_results*.txt")) if not tiny_target_files else []
-        tiny_files = tiny_target_files or tiny_c_files
-
-        for f in tiny_files:
+        for f in tiny_target_files:
             param_info = _parse_auxiliary_result_filename(f.name)
             if param_info:
                 _, pval = param_info
@@ -245,25 +213,8 @@ def extract_folder_results(
                 continue
             if tr is None:
                 continue
-
-            if f.name.startswith("test_tiny_target_domain_results"):
-                # 新目标域结果：同参数多文件时用稳定字典序兜底
-                source_priority = 0
-                sk = (source_priority, 0, f.name)
-            else:
-                # 历史 Tiny-C 回退：保留原 corruption/severity 选择逻辑
-                source_priority = 1
-                corr, sev = _parse_corruption_severity_from_filename(f.name)
-                c_sk = _tiny_imagenet_c_corruption_sort_key(corr, sev)
-                sk = (source_priority, *c_sk, f.name)
-
-            tiny_candidates.setdefault(pval, []).append((sk, tr))
-
-        for pval, lst in tiny_candidates.items():
-            if pval not in test_params:
-                continue
-            lst.sort(key=lambda x: x[0])
-            test_params[pval]['transfer_rate'] = lst[0][1]
+            if pval in test_params:
+                test_params[pval]['transfer_rate'] = tr
     elif dataset == "mnistm":
         # mnistm：优先新命名 test_mnistm_results*.txt，同时兼容旧命名 test_mnist_cross_results*.txt
         mnist_files = list(folder.glob("test_mnistm_results*.txt"))
@@ -362,7 +313,10 @@ def extract_folder_results(
         raw_auc_avg = np.mean([aucs[m] for m in methods_with_auc]) if methods_with_auc else 0.0
         stealth_tpr_avg = 1.0 - raw_tpr_avg
         stealth_auc_avg = 1.0 - raw_auc_avg
-        transfer = float(d.get('transfer_rate', 0.0))
+        transfer = d.get('transfer_rate')
+        if transfer is None:
+            continue
+        transfer = float(transfer)
         asr = d.get('asr')
         row = {
             **params,
