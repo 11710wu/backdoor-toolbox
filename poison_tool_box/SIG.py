@@ -28,18 +28,11 @@ class poison_generator():
 
     def generate_poisoned_training_set(self):
 
-        # random sampling
-        all_target_indices = []
-        for i in range(self.num_img):
-            _, gt = self.dataset[i]
-            if gt == self.target_class:
-                all_target_indices.append(i)
-        random.shuffle(all_target_indices)
-
-        num_target = len(all_target_indices)
-        num_poison = min(int(self.num_img * self.poison_rate), num_target)
-
-        poison_indices = all_target_indices[:num_poison]
+        # BadNet-style all-to-one: sample from the whole dataset
+        id_set = list(range(0, self.num_img))
+        random.shuffle(id_set)
+        num_poison = int(self.num_img * self.poison_rate)
+        poison_indices = id_set[:num_poison]
         poison_indices.sort() # increasing order
 
         img_set = []
@@ -51,6 +44,7 @@ class poison_generator():
             if pt < num_poison and poison_indices[pt] == i:
                 img = img + self.pattern
                 img = torch.clamp(img,0.0,1.0)
+                gt = self.target_class
                 pt+=1
 
             # img_file_name = '%d.png' % i

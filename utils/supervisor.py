@@ -110,13 +110,19 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
         # 故此处与 get_poison_set_dir 保持一致，不拼接 _trigger= 字段
         dir_core = '%s_%s_%s_alpha=%s_cover=%s_mask=%s' % (
             args.dataset, args.poison_type, ratio, belt_alpha, cover_rate, mask_rate)
+    elif args.poison_type == 'SIG':
+        delta_param = int(getattr(args, 'delta', 30))
+        f_param = int(getattr(args, 'f', 6))
+        dir_core = '%s_%s_%s_delta=%s_f=%s_mode=all2one' % (
+            args.dataset, args.poison_type, ratio, delta_param, f_param
+        )
     elif args.poison_type == 'upgd':
         # ---------------------------------------------------------------------
         # Parameter backdoor (UPGD)
         # ---------------------------------------------------------------------
         # UPGD 不依赖固定的图案触发器文件（trigger_name='none'），而是：
         # 1) 用一个干净基模型生成 universal targeted perturbation（delta）
-        # 2) 把 delta 加到训练集中的部分样本（本实现：仅目标类别子集的一部分，标签不变）
+        # 2) 把 delta 加到训练集中的一部分样本（all-to-one，标签改为目标类）
         # 3) 测试/防御阶段再把 delta 作为“触发器”加到输入上
         #
         # 目录命名需要包含 UPGD 的关键生成参数，否则不同 UPGD 设置会覆盖同一个目录。
@@ -125,7 +131,7 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
         upgd_constraint = getattr(args, 'constraint', 'Linf')
         upgd_steps = getattr(args, 'upgd_steps', 100)
         upgd_steps_multiplier = getattr(args, 'upgd_steps_multiplier', 5)
-        dir_core = '%s_%s_%s_eps=%s_constraint=%s_steps=%s' % (
+        dir_core = '%s_%s_%s_eps=%s_constraint=%s_steps=%s_mode=all2one' % (
             args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps)
         )
         dir_core = f'{dir_core}_mult={upgd_steps_multiplier}'
@@ -193,8 +199,8 @@ def get_poison_set_dir(args):
         # ========== [SIG目录路径修改] 开始 ==========
         # 对于SIG攻击，需要在目录路径中包含delta和f参数
         # 原因：不同的delta和f会生成不同的频域扰动，对应不同的中毒数据集
-        # 例如：poisoned_train_set/cifar10/SIG_0.020_delta=20_f=6
-        #      poisoned_train_set/cifar10/SIG_0.020_delta=30_f=6
+        # 例如：poisoned_train_set/cifar10/SIG_0.020_delta=20_f=6_mode=all2one
+        #      poisoned_train_set/cifar10/SIG_0.020_delta=30_f=6_mode=all2one
         # 这样可以确保：
         # 1. create_poisoned_set.py 根据delta和f创建不同的数据集目录
         # 2. train_on_poisoned_set.py 根据delta和f加载对应的数据集目录
@@ -204,7 +210,7 @@ def get_poison_set_dir(args):
         # 获取f参数（频率参数，默认为6）
         f_param = int(getattr(args, 'f', 6))
         # 构建包含delta和f的目录路径
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_delta=%s_f=%s' % (args.dataset, args.poison_type, ratio, delta_param, f_param)
+        poison_set_dir = 'poisoned_train_set/%s/%s_%s_delta=%s_f=%s_mode=all2one' % (args.dataset, args.poison_type, ratio, delta_param, f_param)
         # ========== [SIG目录路径修改] 结束 ==========
     elif args.poison_type == 'upgd':
         # Parameter backdoor (UPGD): include eps/constraint/steps(/mult) to avoid collisions
@@ -212,7 +218,7 @@ def get_poison_set_dir(args):
         upgd_constraint = getattr(args, 'constraint', 'Linf')
         upgd_steps = getattr(args, 'upgd_steps', 100)
         upgd_steps_multiplier = getattr(args, 'upgd_steps_multiplier', 5)
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_eps=%s_constraint=%s_steps=%s' % (
+        poison_set_dir = 'poisoned_train_set/%s/%s_%s_eps=%s_constraint=%s_steps=%s_mode=all2one' % (
             args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps)
         )
         poison_set_dir = f'{poison_set_dir}_mult={upgd_steps_multiplier}'

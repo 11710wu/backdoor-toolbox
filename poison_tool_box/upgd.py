@@ -202,22 +202,16 @@ def poison_images_with_delta_raw(
     seed: int,
 ) -> Tuple[torch.Tensor, list, torch.Tensor]:
     """
-    生成投毒训练集（对应源代码 poison_loader.py::CIFAR10_POI）
-    
-    与源代码的关键差异：
-    - 源代码: poison_rate 相对于目标类样本数（如 0.1 = 投毒目标类的 10%）
-    - 本代码: poison_rate 相对于全局数据集（如 0.01 = 投毒全数据集的 1%）
-    
-    数据流：
-    - 输入 dataset: raw [0,1] 图像（只有 ToTensor，无 Normalize）
-    - 输出 img_set: raw [0,1] 图像（投毒样本 = 原图 + delta_raw）
-    - 标签不修改（保持原始标签，这是 parameter backdoor 的特点）
+    生成投毒训练集（BadNet-style all-to-one）
+    - poison_rate 相对于全局数据集大小
+    - 从全体样本中抽样投毒，而非只从目标类中抽样
+    - 投毒样本标签改为 target_class
     
     Args:
         dataset: 训练集，数据范围 [0,1]
         delta_raw: 通用扰动，范围 [0,1] 空间中的扰动值
         poison_rate: 投毒率（相对于全局数据集大小）
-        target_class: 目标类别（只投毒该类别的样本）
+        target_class: 目标类别（被投毒样本统一改为该类）
         seed: 随机种子（确保可复现）
     
     Returns:
@@ -231,40 +225,17 @@ def poison_images_with_delta_raw(
     num_img = len(dataset)
     
     # =========================================================================
-    # 步骤1: 找出目标类的所有样本索引
+    # 步骤1: 从全体样本中随机选择要投毒的样本（BadNet-style）
     # =========================================================================
-    # UPGD 只投毒目标类的样本（不改变标签），这样训练后模型会学到：
-    # "带有 delta 扰动的图像 -> 目标类"
-    target_cls_ids = []
-    print(f"[UPGD] 扫描目标类 {target_class} 的样本索引...")
-    for i in tqdm(range(num_img), desc='[UPGD] 扫描目标类', ncols=100):
-        _, y = dataset[i]
-        if int(y) == target_class:
-            target_cls_ids.append(i)
-    
-    print(f"[UPGD] 目标类 {target_class} 共有 {len(target_cls_ids)} 个样本")
-    
-    # =========================================================================
-    # 步骤2: 从目标类中随机选择要投毒的样本
-    # =========================================================================
-    # 修改：poison_rate 相对于全体数据集数量（与 BadNet 等其他攻击一致）
-    # 例如 CIFAR-10: 全体 50000 个样本，poison_rate=0.01 → 投毒 500 个样本
-    # 注意：这些样本依然全部从【目标类】中选取
     num_poison = int(poison_rate * num_img)
-    
-    # 安全检查：如果计算出的投毒数量超过了目标类样本总数
-    if num_poison > len(target_cls_ids):
-        print(f"[UPGD Warning] 计算出的投毒样本数 ({num_poison}) 超过了目标类样本总数 ({len(target_cls_ids)})")
-        print(f"[UPGD Warning] 将强制投毒目标类的所有样本")
-        num_poison = len(target_cls_ids)
-        
-    poison_indices = sorted(random.sample(target_cls_ids, num_poison)) if num_poison > 0 else []
+    all_ids = list(range(num_img))
+    poison_indices = sorted(random.sample(all_ids, num_poison)) if num_poison > 0 else []
     poison_index_set = set(poison_indices)  # 用 set 加速查找
-    
-    print(f"[UPGD] 投毒样本数: {num_poison} (占全数据集 {100*num_poison/num_img:.3f}%, 占目标类 {100*num_poison/len(target_cls_ids):.1f}%)")
+
+    print(f"[UPGD] 投毒样本数: {num_poison} (占全数据集 {100*num_poison/num_img:.3f}%)")
 
     # =========================================================================
-    # 步骤3: 遍历所有样本，对选中的样本加上扰动
+    # 步骤2: 遍历所有样本，对选中的样本加上扰动并改标签
     # =========================================================================
     img_set = []
     label_set = []
@@ -278,9 +249,10 @@ def poison_images_with_delta_raw(
             # 对投毒样本：原图 + delta，然后 clamp 到 [0,1]
             # 这确保像素值不会超出有效范围
             x = torch.clamp(x + delta_raw, 0.0, 1.0)
+            y = int(target_class)
         
         img_set.append(x.unsqueeze(0))  # 添加 batch 维度
-        label_set.append(int(y))  # 标签不修改！
+        label_set.append(int(y))
 
         # 定期更新进度条后缀信息（性能优化：每 256 个样本更新一次，减少 I/O 开销）
         # 显示：已投毒样本数（固定值）和已处理样本数（递增）

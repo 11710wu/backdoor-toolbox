@@ -684,7 +684,8 @@ elif args.poison_type == 'upgd':
     """
     Parameter Backdoor (UPGD):
     - 先用干净基模型生成 universal targeted perturbation（delta_raw，raw-space [0,1]）
-    - 只对目标类别样本中抽取 poison_rate 比例加上 delta_raw（标签不变）
+    - 从全体样本中按 poison_rate 抽样加上 delta_raw（BadNet-style）
+    - 被投毒样本标签统一改为 target_class（all-to-one）
     - 保存 imgs/labels/poison_indices，同时保存 upgd_{target_class}.pth 与 upgd_meta.json
     """
     # -------------------------------------------------------------------------
@@ -794,9 +795,9 @@ elif args.poison_type == 'upgd':
         std=std,
     )
 
-    # 3) 生成投毒训练集：
-    #    - 只投毒“目标类别样本子集”的一部分
-    #    - 标签不修改（parameter-backdoor 风格）
+    # 3) 生成投毒训练集（BadNet-style all-to-one）：
+    #    - 从全体样本中按 poison_rate 抽样
+    #    - 被投毒样本标签改为 target_class
     img_set, poison_indices, label_set = upgd_mod.poison_images_with_delta_raw(
         dataset=train_set,
         delta_raw=delta_raw,

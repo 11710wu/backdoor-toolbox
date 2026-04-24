@@ -1,4 +1,5 @@
 #!/bin/bash
+# Mode: all-to-one poisoning for SIG/UPGD (labels of poisoned samples are reassigned to target_class)
 
 # 设置错误日志文件
 LOG_DIR="logs"
