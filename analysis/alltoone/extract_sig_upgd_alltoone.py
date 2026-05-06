@@ -18,7 +18,18 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from analysis.extract_all_results import ARCH_TO_OUTPUT, extract_folder_results, parse_folder_name
 
-DATASETS = ["cifar10", "tiny_imagenet", "mnistm"]
+# (directory_name, normalized_dataset_name)
+DATASET_CANDIDATES = [
+    ("cifar10", "cifar10"),
+    ("mnistm", "mnistm"),
+    ("tiny_imagenet", "tiny_imagenet"),
+    ("tiny-imagenet", "tiny_imagenet"),
+]
+DEFAULT_TARGET_CLASS = {
+    "cifar10": 0,
+    "tiny_imagenet": 0,
+    "mnistm": 2,
+}
 ARCH_NORMALIZE = {
     "ResNet18": "resnet18",
     "resnet18": "resnet18",
@@ -74,9 +85,16 @@ def _extract_extra_attack_params(folder_name: str) -> Dict[str, Optional[float]]
 
     return {
         "f": _grab(r"(?:^|_)f=([0-9.]+)"),
-        "upgd_steps": _grab(r"upgd_steps=([0-9.]+)"),
-        "upgd_steps_multiplier": _grab(r"upgd_steps_multiplier=([0-9.]+)"),
+        "upgd_steps": _grab(r"(?:upgd_steps|steps)=([0-9.]+)"),
+        "upgd_steps_multiplier": _grab(r"(?:upgd_steps_multiplier|mult)=([0-9.]+)"),
     }
+
+
+def _extract_mode(folder_name: str) -> str:
+    name = folder_name.lower()
+    if "mode=all2one" in name or "all2one" in name:
+        return "all-to-one"
+    return "unknown"
 
 
 def _build_rows_for_folder(folder: Path, dataset: str, source_set: str) -> List[Dict[str, Any]]:
@@ -84,7 +102,10 @@ def _build_rows_for_folder(folder: Path, dataset: str, source_set: str) -> List[
     attack_type = str(params.get("attack_type", "")).lower()
     if attack_type not in ATTACK_ALLOWLIST:
         return []
+    mode = _extract_mode(folder.name)
     params["target_label"] = _extract_target_label(folder.name)
+    if params["target_label"] is None and mode == "all-to-one":
+        params["target_label"] = DEFAULT_TARGET_CLASS.get(dataset)
     params["poison_seed"] = _extract_seed(folder.name)
     params.update(_extract_extra_attack_params(folder.name))
     params["model_norm"] = _normalize_arch(params)
@@ -97,7 +118,7 @@ def _build_rows_for_folder(folder: Path, dataset: str, source_set: str) -> List[
             continue
         row["source_set"] = source_set
         row["attack_family"] = row_attack
-        row["mode"] = "all-to-one"
+        row["mode"] = mode
         row["mode_inferred"] = row.get("target_label") is None
         row["dataset"] = dataset
         row["model_norm"] = row.get("model_norm")
@@ -108,13 +129,13 @@ def _build_rows_for_folder(folder: Path, dataset: str, source_set: str) -> List[
 
 def collect_rows(root: Path, source_set: str) -> List[Dict[str, Any]]:
     all_rows: List[Dict[str, Any]] = []
-    for dataset in DATASETS:
-        dataset_dir = root / dataset
+    for dataset_dir_name, dataset_norm in DATASET_CANDIDATES:
+        dataset_dir = root / dataset_dir_name
         if not dataset_dir.exists() or not dataset_dir.is_dir():
             continue
         for folder in dataset_dir.iterdir():
             if folder.is_dir() and not folder.name.startswith("none_"):
-                all_rows.extend(_build_rows_for_folder(folder, dataset, source_set))
+                all_rows.extend(_build_rows_for_folder(folder, dataset_norm, source_set))
     return all_rows
 
 
@@ -138,7 +159,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="提取 SIG/UPGD all-to-one 对比原始数据")
     parser.add_argument("--new-root", type=Path, default=Path("poisoned_train_set"))
     parser.add_argument("--baseline-root", type=Path, default=Path("poisoned_train_set1"))
-    parser.add_argument("--output-csv", type=Path, default=Path("analysis/data_sig_upgd_alltoone_raw.csv"))
+    parser.add_argument("--output-csv", type=Path, default=Path("analysis/alltoone/data_sig_upgd_alltoone_raw.csv"))
     return parser.parse_args()
 
 

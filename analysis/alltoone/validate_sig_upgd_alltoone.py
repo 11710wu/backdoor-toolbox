@@ -48,8 +48,6 @@ def _pair_key(row: Dict[str, Any]) -> Tuple[str, ...]:
         _normalize_model(row.get("model_norm")),
         attack,
         _to_float(row.get("poison_rate")),
-        str(row.get("target_label", "")).strip(),
-        str(row.get("mode", "")).strip().lower(),
         *attack_specific,
     )
 
@@ -62,15 +60,18 @@ def _read_rows(path: Path) -> List[Dict[str, Any]]:
 
 def _missing_fields(row: Dict[str, Any]) -> List[str]:
     attack = str(row.get("attack_family", "")).lower()
+    source_set = str(row.get("source_set", "")).strip().lower()
     missing: List[str] = []
-    base_fields = ["dataset", "model_norm", "poison_rate", "mode", "attack_family"]
+    base_fields = ["dataset", "model_norm", "poison_rate", "attack_family"]
     for field in base_fields:
         if row.get(field, "") in ("", None):
             missing.append(field)
-    if str(row.get("mode", "")).strip().lower() != "all-to-one":
-        missing.append("mode_not_all_to_one")
-    if row.get("target_label", "") in ("", None):
-        missing.append("target_label")
+    # 仅对 new(all-to-one) 强制要求 mode/target_label，baseline(clean-label)不强制
+    if source_set == "new":
+        if str(row.get("mode", "")).strip().lower() != "all-to-one":
+            missing.append("mode_not_all_to_one")
+        if row.get("target_label", "") in ("", None):
+            missing.append("target_label")
     if attack == "sig":
         for field in ["delta", "f"]:
             if row.get(field, "") in ("", None):
@@ -145,12 +146,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input-csv",
         type=Path,
-        default=Path("analysis/data_sig_upgd_alltoone_raw.csv"),
+        default=Path("analysis/alltoone/data_sig_upgd_alltoone_raw.csv"),
     )
     parser.add_argument(
         "--output-json",
         type=Path,
-        default=Path("analysis/validation_sig_upgd_alltoone.json"),
+        default=Path("analysis/alltoone/validation_sig_upgd_alltoone.json"),
     )
     return parser.parse_args()
 

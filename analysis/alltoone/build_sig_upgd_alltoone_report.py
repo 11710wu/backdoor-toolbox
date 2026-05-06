@@ -109,11 +109,11 @@ def build_report(
 
     lines.append("")
     lines.append("## 5. 输出文件索引")
-    lines.append("- `analysis/data_sig_upgd_alltoone_raw.csv`")
-    lines.append("- `analysis/validation_sig_upgd_alltoone.json`")
-    lines.append("- `analysis/report_tables/sig_upgd_alltoone_pairwise_comparison.csv`")
-    lines.append("- `analysis/report_tables/sig_upgd_alltoone_group_summary.csv`")
-    lines.append("- `analysis/report_tables/sig_upgd_alltoone_unmatched_cases.csv`")
+    lines.append("- `analysis/alltoone/data_sig_upgd_alltoone_raw.csv`")
+    lines.append("- `analysis/alltoone/validation_sig_upgd_alltoone.json`")
+    lines.append("- `analysis/alltoone/report_tables/sig_upgd_alltoone_pairwise_comparison.csv`")
+    lines.append("- `analysis/alltoone/report_tables/sig_upgd_alltoone_group_summary.csv`")
+    lines.append("- `analysis/alltoone/report_tables/sig_upgd_alltoone_unmatched_cases.csv`")
     return "\n".join(lines) + "\n"
 
 
@@ -122,27 +122,27 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--validation-json",
         type=Path,
-        default=Path("analysis/validation_sig_upgd_alltoone.json"),
+        default=Path("analysis/alltoone/validation_sig_upgd_alltoone.json"),
     )
     parser.add_argument(
         "--pairwise-csv",
         type=Path,
-        default=Path("analysis/report_tables/sig_upgd_alltoone_pairwise_comparison.csv"),
+        default=Path("analysis/alltoone/report_tables/sig_upgd_alltoone_pairwise_comparison.csv"),
     )
     parser.add_argument(
         "--group-csv",
         type=Path,
-        default=Path("analysis/report_tables/sig_upgd_alltoone_group_summary.csv"),
+        default=Path("analysis/alltoone/report_tables/sig_upgd_alltoone_group_summary.csv"),
     )
     parser.add_argument(
         "--unmatched-csv",
         type=Path,
-        default=Path("analysis/report_tables/sig_upgd_alltoone_unmatched_cases.csv"),
+        default=Path("analysis/alltoone/report_tables/sig_upgd_alltoone_unmatched_cases.csv"),
     )
     parser.add_argument(
         "--output-md",
         type=Path,
-        default=Path("analysis/sig_upgd_alltoone_comparison_report.md"),
+        default=Path("analysis/alltoone/sig_upgd_alltoone_comparison_report.md"),
     )
     return parser.parse_args()
 

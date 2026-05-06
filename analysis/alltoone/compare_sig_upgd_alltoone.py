@@ -52,8 +52,6 @@ def _pair_key(row: Dict[str, Any]) -> Tuple[str, ...]:
         _norm_model(row.get("model_norm")),
         attack,
         str(row.get("poison_rate", "")),
-        str(row.get("target_label", "")),
-        str(row.get("mode", "")).lower(),
         str(row.get("f", "")) if attack == "sig" else "",
         str(row.get("delta", "")) if attack == "sig" else "",
         str(row.get("eps", "")) if attack == "upgd" else "",
@@ -189,11 +187,11 @@ def build_group_summary(pairwise_rows: List[Dict[str, Any]]) -> List[Dict[str, A
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="SIG/UPGD all-to-one 对比统计")
-    parser.add_argument("--input-csv", type=Path, default=Path("analysis/data_sig_upgd_alltoone_raw.csv"))
+    parser.add_argument("--input-csv", type=Path, default=Path("analysis/alltoone/data_sig_upgd_alltoone_raw.csv"))
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("analysis/report_tables"),
+        default=Path("analysis/alltoone/report_tables"),
         help="输出目录（pairwise/group/unmatched）",
     )
     parser.add_argument("--prefix", default="sig_upgd_alltoone")
