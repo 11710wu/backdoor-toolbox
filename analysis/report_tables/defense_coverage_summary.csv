@@ -1,5 +1,5 @@
 dataset,dataset_display,n_configs,expected_records,actual_records,coverage_rate
 cifar10,CIFAR-10 -> STL-10,513,2052,2052,1.0
-tiny_imagenet,Tiny-ImageNet -> Target Domain,465,1860,1859,0.9994623655913979
+tiny_imagenet,Tiny-ImageNet -> Target Domain,465,1860,1860,1.0
 mnistm,MNIST-M -> MNIST,513,2052,2052,1.0
-overall,overall,1491,5964,5963,0.999832327297116
+overall,overall,1491,5964,5964,1.0

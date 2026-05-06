@@ -577,7 +577,7 @@ def plot_cross_dataset_attack_heatmaps(cross_attack: pd.DataFrame, path: Path) -
     fig.suptitle("Cross-dataset Comparison by Attack Type", y=1.02)
     cbar = fig.colorbar(im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.02)
     cbar.set_label("Value")
-    plt.tight_layout()
+    fig.subplots_adjust(left=0.08, right=0.92, bottom=0.18, top=0.84, wspace=0.28)
     fig.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 

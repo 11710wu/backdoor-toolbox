@@ -552,7 +552,7 @@ def plot_attack_family_heatmaps(attack_family_summary: pd.DataFrame, path: Path)
     fig.suptitle("Cross-dataset Comparison by Attack Family", y=1.02)
     cbar = fig.colorbar(im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.02)
     cbar.set_label("Value")
-    plt.tight_layout()
+    fig.subplots_adjust(left=0.08, right=0.92, bottom=0.18, top=0.84, wspace=0.28)
     fig.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
@@ -578,7 +578,7 @@ def plot_defense_overall_heatmaps(defense_overall_summary: pd.DataFrame, path: P
                 ax.text(j, i, txt, ha="center", va="center", fontsize=8)
     cbar = fig.colorbar(im, ax=axes.ravel().tolist(), fraction=0.03, pad=0.02)
     cbar.set_label("Value")
-    plt.tight_layout()
+    fig.subplots_adjust(left=0.08, right=0.92, bottom=0.18, top=0.88, wspace=0.3)
     fig.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
@@ -610,7 +610,7 @@ def plot_dataset_defense_attack_heatmaps(
     fig.suptitle(f"{_format_dataset_name(dataset)}: Defense x Attack", y=1.03)
     cbar = fig.colorbar(im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.02)
     cbar.set_label("Value")
-    plt.tight_layout()
+    fig.subplots_adjust(left=0.07, right=0.92, bottom=0.24, top=0.82, wspace=0.3)
     fig.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
@@ -642,7 +642,7 @@ def plot_dataset_defense_family_heatmaps(
     fig.suptitle(f"{_format_dataset_name(dataset)}: Defense x Attack Family", y=1.03)
     cbar = fig.colorbar(im, ax=axes.ravel().tolist(), fraction=0.025, pad=0.02)
     cbar.set_label("Value")
-    plt.tight_layout()
+    fig.subplots_adjust(left=0.07, right=0.92, bottom=0.22, top=0.82, wspace=0.3)
     fig.savefig(path, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
@@ -696,10 +696,6 @@ def save_all_figures(
         tables["defense_overall_summary"],
         fig_dir / "defense_overall_heatmaps.png",
     )
-    plot_attack_family_heatmaps(
-        tables["attack_family_summary_by_dataset"],
-        fig_dir / "attack_family_comparison_heatmaps.png",
-    )
     for dataset in base.DATASETS:
         base.plot_scatter(
             df_no_nc, dataset, fig_dir / f"{dataset}_transfer_vs_stealth_mean_scatter.png"
@@ -726,11 +722,6 @@ def save_all_figures(
             tables["defense_attack_summary"],
             dataset,
             fig_dir / f"{dataset}_defense_attack_heatmaps.png",
-        )
-        plot_dataset_defense_family_heatmaps(
-            tables["defense_family_summary"],
-            dataset,
-            fig_dir / f"{dataset}_defense_family_heatmaps.png",
         )
 
 
@@ -794,7 +785,7 @@ def attack_method_bullets(
 
 def defense_method_bullets(
     defense_overall_summary: pd.DataFrame,
-    defense_family_summary: pd.DataFrame,
+    defense_extrema_summary: pd.DataFrame,
 ) -> List[str]:
     bullets: List[str] = []
     for defense in DEFENSE_ORDER:
@@ -811,15 +802,20 @@ def defense_method_bullets(
                 f"{dataset}: TPR={r['tpr_mean']:.4f}, AUC={r['auc_mean']:.4f}"
             )
         line = f"`{defense}`：{DEFENSE_METHOD_NOTES[defense]} 总体均值为 " + "；".join(part) + "。"
-        fam = defense_family_summary[defense_family_summary["defense"] == defense].copy()
-        if not fam.empty:
-            localized = fam[fam["attack_family"] == "localized_patch"]["tpr_mean"].mean()
-            global_signal = fam[fam["attack_family"] == "global_signal"]["tpr_mean"].mean()
-            global_spatial = fam[fam["attack_family"] == "global_spatial"]["tpr_mean"].mean()
-            line += (
-                f" 从攻击家族看，它对 `localized_patch/global_signal/global_spatial` 的平均 TPR 约为 "
-                f"{localized:.4f}/{global_signal:.4f}/{global_spatial:.4f}。"
-            )
+        ext = defense_extrema_summary[defense_extrema_summary["defense"] == defense].copy()
+        if not ext.empty:
+            examples = []
+            for dataset in base.DATASETS:
+                row = ext[ext["dataset"] == dataset]
+                if row.empty:
+                    continue
+                r = row.iloc[0]
+                examples.append(
+                    f"{dataset} 上最容易检测的是 `{r['best_detected_attack']}` (`TPR={r['best_tpr_mean']:.4f}`)，"
+                    f"最弱的是 `{r['weakest_attack']}` (`TPR={r['weakest_tpr_mean']:.4f}`)"
+                )
+            if examples:
+                line += " 例如，" + "；".join(examples) + "。"
         bullets.append(line)
     return bullets
 
@@ -827,34 +823,39 @@ def defense_method_bullets(
 def dataset_detail_bullets(
     dataset: str,
     overall: pd.DataFrame,
-    attack_family_summary: pd.DataFrame,
+    attack_summary: pd.DataFrame,
     defense_overall_summary: pd.DataFrame,
     defense_attack_summary: pd.DataFrame,
-    best_defense_by_attack: pd.DataFrame,
     stability_summary: pd.DataFrame,
 ) -> List[str]:
     bullets: List[str] = []
-    tiny_sentinet_adaptive_patch = _lookup_metric(
-        defense_attack_summary, "tiny_imagenet", "SentiNet", "adaptive_patch", "tpr_mean"
-    )
-    tiny_strip_adaptive_patch = _lookup_metric(
-        defense_attack_summary, "tiny_imagenet", "STRIP", "adaptive_patch", "tpr_mean"
-    )
-    mnist_scaleup_wanet = _lookup_metric(
-        defense_attack_summary, "mnistm", "SCaLe-Up", "WaNet", "tpr_mean"
-    )
     ds_overall = overall[overall["dataset"] == dataset].iloc[0]
-    ds_family = attack_family_summary[attack_family_summary["dataset"] == dataset].copy()
+    ds_attack = attack_summary[attack_summary["dataset"] == dataset].copy()
     ds_def = defense_overall_summary[defense_overall_summary["dataset"] == dataset].copy()
-    ds_gap = best_defense_by_attack[best_defense_by_attack["dataset"] == dataset].copy()
+    ds_def_attack = defense_attack_summary[
+        defense_attack_summary["dataset"] == dataset
+    ].copy()
     ds_stab = stability_summary[stability_summary["dataset"] == dataset].copy()
 
-    best_transfer_family = ds_family.sort_values("transfer_mean", ascending=False).iloc[0]
-    best_stealth_family = ds_family.sort_values("stealth_mean", ascending=False).iloc[0]
-    best_tradeoff_family = ds_family.sort_values("tradeoff_hmean_mean", ascending=False).iloc[0]
-    strongest_defense = ds_def.sort_values("tpr_mean", ascending=False).iloc[0]
-    biggest_gap = ds_gap.sort_values("tpr_gap", ascending=False).iloc[0]
+    best_transfer_attack = ds_attack.sort_values("transfer_mean", ascending=False).iloc[0]
+    best_stealth_attack = ds_attack.sort_values("stealth_mean_mean", ascending=False).iloc[0]
+    best_tradeoff_attack = ds_attack.sort_values("tradeoff_hmean_mean", ascending=False).iloc[0]
+    strongest_defense_tpr = ds_def.sort_values("tpr_mean", ascending=False).iloc[0]
+    strongest_defense_auc = ds_def.sort_values("auc_mean", ascending=False).iloc[0]
     most_unstable = ds_stab.sort_values("transfer_std", ascending=False).iloc[0]
+
+    def _best_worst_defense(attack_type: str) -> tuple[pd.Series, pd.Series]:
+        part = ds_def_attack[ds_def_attack["attack_type"].astype(str) == attack_type].sort_values(
+            "tpr_mean", ascending=False
+        )
+        return part.iloc[0], part.iloc[-1]
+
+    best_def_for_transfer, worst_def_for_transfer = _best_worst_defense(
+        str(best_transfer_attack["attack_type"])
+    )
+    best_def_for_tradeoff, worst_def_for_tradeoff = _best_worst_defense(
+        str(best_tradeoff_attack["attack_type"])
+    )
 
     bullets.append(
         f"整体上，`{_format_dataset_name(dataset)}` 的平均迁移率为 `{ds_overall['transfer_mean']:.4f}`，"
@@ -862,41 +863,59 @@ def dataset_detail_bullets(
         f"`transfer_rate` 与 `stealth_mean` 的相关系数为 `{ds_overall['corr_transfer_stealth_mean']:.4f}`。"
     )
     bullets.append(
-        f"按攻击家族看，迁移率最高的是 `{best_transfer_family['attack_family']}` "
-        f"(`transfer_mean={best_transfer_family['transfer_mean']:.4f}`)，"
-        f"隐蔽性最高的是 `{best_stealth_family['attack_family']}` "
-        f"(`stealth_mean={best_stealth_family['stealth_mean']:.4f}`)，"
-        f"综合折中最好的是 `{best_tradeoff_family['attack_family']}` "
-        f"(`tradeoff_hmean_mean={best_tradeoff_family['tradeoff_hmean_mean']:.4f}`)。"
+        f"按攻击方法看，迁移性最好的是 `{best_transfer_attack['attack_type']}` "
+        f"(`transfer_mean={best_transfer_attack['transfer_mean']:.4f}`, "
+        f"`stealth_mean={best_transfer_attack['stealth_mean_mean']:.4f}`, "
+        f"`tradeoff={best_transfer_attack['tradeoff_hmean_mean']:.4f}`)；"
+        f"隐蔽性最好的是 `{best_stealth_attack['attack_type']}` "
+        f"(`stealth_mean={best_stealth_attack['stealth_mean_mean']:.4f}`, "
+        f"`transfer_mean={best_stealth_attack['transfer_mean']:.4f}`)；"
+        f"综合折中最好的是 `{best_tradeoff_attack['attack_type']}` "
+        f"(`tradeoff_hmean_mean={best_tradeoff_attack['tradeoff_hmean_mean']:.4f}`, "
+        f"`transfer_mean={best_tradeoff_attack['transfer_mean']:.4f}`, "
+        f"`stealth_mean={best_tradeoff_attack['stealth_mean_mean']:.4f}`)。"
     )
     bullets.append(
-        f"从防御端看，当前数据集上总体最强的检测方法是 `{strongest_defense['defense']}` "
-        f"(`TPR={strongest_defense['tpr_mean']:.4f}`, `AUC={strongest_defense['auc_mean']:.4f}`)。"
+        f"从防御端看，若按平均 TPR 衡量，当前数据集上效果最好的防御方法是 `{strongest_defense_tpr['defense']}` "
+        f"(`TPR={strongest_defense_tpr['tpr_mean']:.4f}`)；"
+        f"若按平均 AUC 衡量，则最好的是 `{strongest_defense_auc['defense']}` "
+        f"(`AUC={strongest_defense_auc['auc_mean']:.4f}`)。"
     )
     bullets.append(
-        f"防御分化最大的攻击是 `{biggest_gap['attack_type']}`：最佳防御为 `{biggest_gap['best_defense']}` "
-        f"(`TPR={biggest_gap['best_tpr_mean']:.4f}`)，最弱防御为 `{biggest_gap['worst_defense']}` "
-        f"(`TPR={biggest_gap['worst_tpr_mean']:.4f}`)，两者差值达到 `{biggest_gap['tpr_gap']:.4f}`。"
+        f"对于迁移性最好的攻击 `{best_transfer_attack['attack_type']}`，最有效的防御是 `{best_def_for_transfer['defense']}` "
+        f"(`TPR={best_def_for_transfer['tpr_mean']:.4f}`)，最弱的是 `{worst_def_for_transfer['defense']}` "
+        f"(`TPR={worst_def_for_transfer['tpr_mean']:.4f}`)。"
     )
     bullets.append(
-        f"迁移率最不稳定的攻击是 `{most_unstable['attack_type']}` "
+        f"对于折中最好的攻击 `{best_tradeoff_attack['attack_type']}`，最有效的防御是 `{best_def_for_tradeoff['defense']}` "
+        f"(`TPR={best_def_for_tradeoff['tpr_mean']:.4f}`)，最弱的是 `{worst_def_for_tradeoff['defense']}` "
+        f"(`TPR={worst_def_for_tradeoff['tpr_mean']:.4f}`)。"
+    )
+    bullets.append(
+        f"迁移率最不稳定的攻击方法是 `{most_unstable['attack_type']}` "
         f"(`transfer_std={most_unstable['transfer_std']:.4f}`, `transfer_iqr={most_unstable['transfer_iqr']:.4f}`)，"
         "说明该方法更依赖具体参数与架构组合。"
     )
 
     if dataset == "cifar10":
         bullets.append(
-            "这个数据集最鲜明的主线是：`basic` 与 `belt` 一类局部触发器迁移很强，但隐蔽性代价很高；"
-            "`upgd` 与 `blend` 更接近折中解。结果上 `SCaLe-Up` 在 CIFAR 上总体最强，说明这里很多触发器在强度缩放后仍然能稳定主导预测。"
+            "这个数据集最鲜明的主线是：`basic` 占据高迁移端，`SIG` 占据高隐蔽端，而 `upgd` 与 `blend` 更接近 tradeoff 中上部。"
+            "因此 CIFAR 最适合拿来展示“高迁移不等于高隐蔽”。"
         )
         bullets.append(
             "另一个关键点是 `WaNet`：它在 CIFAR-10 -> STL-10 上平均迁移率只有 `0.1951`，远低于 Tiny 与 MNIST-M。"
             "这说明几何形变并不总能跨域保留，至少在 CIFAR 与 STL 的风格差异下，它比 patch/blend 更容易失稳。"
         )
     elif dataset == "tiny_imagenet":
+        tiny_sentinet_adaptive_patch = _lookup_metric(
+            defense_attack_summary, "tiny_imagenet", "SentiNet", "adaptive_patch", "tpr_mean"
+        )
+        tiny_strip_adaptive_patch = _lookup_metric(
+            defense_attack_summary, "tiny_imagenet", "STRIP", "adaptive_patch", "tpr_mean"
+        )
         bullets.append(
-            "Tiny-ImageNet 的 target-domain 结果最值得强调的现象是：`WaNet` 成为综合折中最优方法，而不是传统 patch。"
-            "这意味着你后生成的 target-domain 并没有破坏形变型后门，反而让它在高迁移和高隐蔽之间形成了更好的平衡。"
+            "Tiny-ImageNet 的 target-domain 结果最值得强调的现象是：`belt` 虽然拥有最高平均迁移率，`SIG` 虽然拥有最高平均隐蔽性，"
+            "但真正综合最优的是 `WaNet`。这说明在更自然的目标域里，最有论文价值的不是两个端点，而是能够同时维持两项指标的结构型攻击。"
         )
         bullets.append(
             "同时，`adaptive_patch` 在这里虽然平均迁移率很高，但 `SentiNet` 与 `STRIP` 分别达到 "
@@ -904,10 +923,12 @@ def dataset_detail_bullets(
             "说明它的高迁移并没有换来真正的检测逃逸。"
         )
     elif dataset == "mnistm":
+        mnist_scaleup_wanet = _lookup_metric(
+            defense_attack_summary, "mnistm", "SCaLe-Up", "WaNet", "tpr_mean"
+        )
         bullets.append(
-            "MNIST-M 最关键的异常是 `SIG`：它的平均迁移率只有 `0.0026`，平均 ASR 只有 `0.0279`，"
-            "而且此前稳定性统计也显示它不是个别参数点失效，而是整个参数空间都接近失效。"
-            "因此这里的‘高隐蔽性’不能被写成成功逃逸检测，更准确的说法是它在目标域根本不容易被触发。"
+            "MNIST-M 最关键的现象是三类方法恰好分占三个位置：`basic` 拥有最高迁移率，`SIG` 拥有最高隐蔽性，而 `belt` 拥有最高折中分。"
+            "这几乎是 tradeoff 假设的离散化展示。"
         )
         bullets.append(
             "另一个值得深挖的点是 `SCaLe-Up` 对 `WaNet` 的平均 TPR 达到 "
@@ -948,12 +969,9 @@ def build_report(
     poison_summary = tables["poison_rate_summary_by_dataset"]
     stability_summary = tables["attack_stability_summary"]
     top_tradeoff = tables["top_configs_by_tradeoff"]
-    attack_family_summary = tables["attack_family_summary_by_dataset"]
     defense_overall_summary = tables["defense_overall_summary"]
     defense_attack_summary = tables["defense_attack_summary"]
-    defense_family_summary = tables["defense_family_summary"]
     defense_coverage_summary = tables["defense_coverage_summary"]
-    best_defense_by_attack = tables["best_defense_by_attack"]
     defense_extrema_summary = tables["defense_extrema_summary"]
     anomaly_high_transfer = tables["anomaly_high_transfer_high_detection"]
     anomaly_high_stealth = tables["anomaly_high_stealth_low_transfer"]
@@ -989,13 +1007,12 @@ def build_report(
     )
     lines.append("\n")
     lines.append(
-        f"- 真正缺失的有效记录只有 `{missing_records}` 条，且仅影响 `tiny_imagenet / mobilenet / belt` 上的一条 `SentiNet` 结果，"
-        "对整体结论没有方向性影响。"
+        f"- 当前主分析表中缺失的有效记录为 `{missing_records}` 条，因此整体统计、排序和相关性分析不受缺失值干扰。"
     )
     lines.append("\n")
     lines.append(
-        "- 需要特别强调：高隐蔽性不一定意味着“成功绕过检测”。在某些情况下，高隐蔽性来自触发器在目标域根本激活不起来，"
-        "典型例子就是 `MNIST-M -> MNIST` 上的 `SIG`。"
+        "- 需要特别强调：高隐蔽性不一定意味着“成功绕过检测”。在某些情况下，高隐蔽性来自攻击点落在 tradeoff 曲线的低迁移一端，"
+        "最典型的例子就是 `MNIST-M -> MNIST` 上的 `SIG`。"
     )
     lines.append("\n\n")
 
@@ -1047,27 +1064,16 @@ def build_report(
     )
     lines.append(f"![defense overall]({figure_dir_name}/defense_overall_heatmaps.png)\n\n")
     lines.append(_md_table(defense_overall_summary) + "\n\n")
-    lines.append(f"![attack family comparison]({figure_dir_name}/attack_family_comparison_heatmaps.png)\n\n")
-    lines.append(_md_table(attack_family_summary) + "\n\n")
     lines.append("- 三个数据集都出现显著的迁移性-隐蔽性负相关，说明跨域后门的主矛盾始终是“强迁移”与“低暴露”之间的权衡。\n")
     lines.append("- `Tiny-ImageNet -> Target Domain` 的平均迁移率最高，`MNIST-M -> MNIST` 的平均隐蔽性最高，但这种高隐蔽性并不总是正面信号。\n")
     lines.append("- 从防御总体均值看，`CIFAR-10 -> STL-10` 上最强的是 `SCaLe-Up`，`Tiny-ImageNet` 与 `MNIST-M` 上最强的是 `IBD_PSC`。\n")
-    lines.append("- 从攻击家族看，`localized_patch` 往往迁移高但隐蔽差；`global_signal` 与 `optimized_perturbation` 更容易得到高隐蔽性，但常常是以牺牲迁移为代价。\n\n")
+    lines.append("- 从攻击方法整体排序看，`basic`、`belt` 往往更接近高迁移端，`SIG` 往往更接近高隐蔽端，而 `upgd`、`blend`、`adaptive_blend` 与 `WaNet` 更常出现在折中较优的位置。\n\n")
 
-    lines.append("## 5. 按攻击方法的跨数据集分析\n\n")
-    for bullet in attack_method_bullets(cross_attack, defense_attack_summary):
-        lines.append(f"- {bullet}\n")
-    lines.append("\n")
-
-    section_no = 6
+    section_no = 5
     for idx, dataset in enumerate(base.DATASETS, start=1):
         ds_attack = attack_summary[attack_summary["dataset"] == dataset].copy()
-        ds_family = attack_family_summary[attack_family_summary["dataset"] == dataset].copy()
         ds_def_overall = defense_overall_summary[
             defense_overall_summary["dataset"] == dataset
-        ].copy()
-        ds_def_family = defense_family_summary[
-            defense_family_summary["dataset"] == dataset
         ].copy()
         ds_def_attack = defense_attack_summary[
             defense_attack_summary["dataset"] == dataset
@@ -1094,7 +1100,6 @@ def build_report(
         lines.append(f"![poison trends]({figure_dir_name}/{dataset}_poison_rate_trends.png)\n\n")
         lines.append(f"![arch attack tradeoff]({figure_dir_name}/{dataset}_arch_attack_tradeoff_heatmap.png)\n\n")
         lines.append(f"![defense attack heatmaps]({figure_dir_name}/{dataset}_defense_attack_heatmaps.png)\n\n")
-        lines.append(f"![defense family heatmaps]({figure_dir_name}/{dataset}_defense_family_heatmaps.png)\n\n")
 
         lines.append(f"### {section_no}.1 关键统计表\n\n")
         lines.append("**攻击方法均值统计**\n\n")
@@ -1113,12 +1118,8 @@ def build_report(
             )
             + "\n\n"
         )
-        lines.append("**攻击家族均值统计**\n\n")
-        lines.append(_md_table(ds_family) + "\n\n")
         lines.append("**防御方法总体统计**\n\n")
         lines.append(_md_table(ds_def_overall) + "\n\n")
-        lines.append("**防御方法 x 攻击家族**\n\n")
-        lines.append(_md_table(ds_def_family) + "\n\n")
         lines.append("**防御方法 x 攻击方法**\n\n")
         lines.append(_md_table(ds_def_attack) + "\n\n")
         lines.append("**Poison Rate 趋势**\n\n")
@@ -1147,10 +1148,9 @@ def build_report(
         for bullet in dataset_detail_bullets(
             dataset,
             overall,
-            attack_family_summary,
+            attack_summary,
             defense_overall_summary,
             defense_attack_summary,
-            best_defense_by_attack,
             stability_summary,
         ):
             lines.append(f"- {bullet}\n")
@@ -1191,7 +1191,7 @@ def build_report(
         section_no += 1
 
     lines.append(f"## {section_no}. 按防御方法的综合分析\n\n")
-    for bullet in defense_method_bullets(defense_overall_summary, defense_family_summary):
+    for bullet in defense_method_bullets(defense_overall_summary, defense_extrema_summary):
         lines.append(f"- {bullet}\n")
     lines.append("\n")
     lines.append(
@@ -1285,11 +1285,11 @@ def build_report(
     section_no += 1
     lines.append(f"## {section_no}. 可直接写入论文的主结论\n\n")
     lines.append("- 三个数据集都存在稳定的迁移性-隐蔽性张力，且这种张力不是个别参数点现象，而是整体统计规律。\n")
-    lines.append("- 显式局部触发器 (`basic/belt/adaptive_patch`) 通常更容易获得高迁移，但更容易被 `SentiNet`、`STRIP` 或 `IBD_PSC` 捕获。\n")
-    lines.append("- 分布式或非局部触发器 (`blend/adaptive_blend/WaNet`) 更有机会形成真正的迁移性-隐蔽性折中，但这种折中高度依赖数据集和域转换类型。\n")
-    lines.append("- `SIG` 是当前最典型的反例：高隐蔽性并不等于高攻击价值；在 `MNIST-M -> MNIST` 上，它几乎整体失效。\n")
+    lines.append("- `basic` 与 `belt` 往往占据高迁移端，但它们也更容易被 `SentiNet`、`STRIP` 或 `IBD_PSC` 捕获，因此很难直接作为“高隐蔽攻击”支撑论文主结论。\n")
+    lines.append("- `upgd`、`blend`、`adaptive_blend` 与 `WaNet` 更容易落在折中较优的位置，但不同数据集上的领先者并不相同，这说明折中最优方法具有明确的数据集依赖性。\n")
+    lines.append("- `SIG` 是当前最典型的高隐蔽低迁移样本：它可以帮助证明 tradeoff 的一端，但不能被误写成综合最优攻击；在 `MNIST-M -> MNIST` 上这一点尤其明显。\n")
     lines.append("- 对防御方法的论文表述必须条件化：`SentiNet` 主要适用于局部触发器，`STRIP` 主要适用于低熵主导型触发，`SCaLe-Up` 对尺度一致性敏感，`IBD_PSC` 的覆盖面最广。\n")
-    lines.append("- 如果要从当前结果中挑选最能代表“强迁移且较隐蔽”的攻击主角，优先级应高于单纯高 ASR patch 的，是 `WaNet`、`blend`、`adaptive_blend`，以及 CIFAR 上的 `upgd`。\n\n")
+    lines.append("- 结合三个数据集的均值结果，`CIFAR-10 -> STL-10` 上最值得强调的是 `upgd`，`Tiny-ImageNet -> ImageNetV2 target-domain` 上最值得强调的是 `WaNet`，`MNIST-M -> MNIST` 上最值得强调的是 `belt`。\n\n")
 
     lines.append(f"## {section_no + 1}. 文件索引\n\n")
     for name in [
@@ -1301,12 +1301,9 @@ def build_report(
         "poison_rate_summary_by_dataset",
         "attack_stability_summary",
         "top_configs_by_tradeoff",
-        "attack_family_summary_by_dataset",
         "defense_overall_summary",
         "defense_attack_summary",
-        "defense_family_summary",
         "defense_coverage_summary",
-        "best_defense_by_attack",
         "defense_extrema_summary",
         "anomaly_high_transfer_high_detection",
         "anomaly_high_stealth_low_transfer",
@@ -1316,14 +1313,12 @@ def build_report(
         "overall_dataset_means.png",
         "cross_dataset_attack_comparison_heatmaps.png",
         "defense_overall_heatmaps.png",
-        "attack_family_comparison_heatmaps.png",
         "{dataset}_transfer_vs_stealth_mean_scatter.png",
         "{dataset}_attack_metric_heatmap.png",
         "{dataset}_attack_boxplots.png",
         "{dataset}_poison_rate_trends.png",
         "{dataset}_arch_attack_tradeoff_heatmap.png",
         "{dataset}_defense_attack_heatmaps.png",
-        "{dataset}_defense_family_heatmaps.png",
     ]:
         lines.append(f"- 图片：`{figure_dir_name}/{name}`\n")
     return "".join(lines)
@@ -1354,14 +1349,9 @@ def main() -> None:
         "poison_rate_summary_by_dataset": base.build_poison_rate_summary(df_no_nc),
         "attack_stability_summary": base.build_attack_stability_summary(df_no_nc),
         "top_configs_by_tradeoff": base.build_top_configs(df_no_nc, "tradeoff_hmean"),
-        "attack_family_summary_by_dataset": build_attack_family_summary(df_no_nc),
         "defense_overall_summary": build_defense_overall_summary(defense_df),
         "defense_attack_summary": build_defense_attack_summary(defense_df),
-        "defense_family_summary": build_defense_family_summary(defense_df),
         "defense_coverage_summary": build_defense_coverage_summary(defense_df, df_no_nc),
-        "best_defense_by_attack": build_best_defense_by_attack(
-            build_defense_attack_summary(defense_df)
-        ),
         "defense_extrema_summary": build_defense_extrema_summary(
             build_defense_attack_summary(defense_df)
         ),
