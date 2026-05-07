@@ -124,6 +124,43 @@ def _build_rows_for_folder(folder: Path, dataset: str, source_set: str) -> List[
         row["model_norm"] = row.get("model_norm")
         row["folder_name"] = folder.name
         out_rows.append(row)
+
+    # 某些目录只缺迁移结果文件时，extract_folder_results 可能返回空。
+    # 为保证参数提取与配对覆盖完整，这里补一条“参数行”（指标留空）。
+    if not out_rows:
+        out_rows.append(
+            {
+                "source_set": source_set,
+                "dataset": dataset,
+                "folder_name": folder.name,
+                "attack_type": attack_type,
+                "attack_family": attack_type,
+                "mode": mode,
+                "mode_inferred": params.get("target_label") is None,
+                "model_norm": params.get("model_norm"),
+                "poison_rate": params.get("poison_rate"),
+                "train_param_value": "",
+                "test_param_type": "",
+                "test_param_value": "",
+                "target_label": params.get("target_label"),
+                "poison_seed": params.get("poison_seed"),
+                "delta": params.get("delta"),
+                "eps": params.get("eps"),
+                "f": params.get("f"),
+                "upgd_steps": params.get("upgd_steps"),
+                "upgd_steps_multiplier": params.get("upgd_steps_multiplier"),
+                "alpha": params.get("alpha"),
+                "cover_rate": params.get("cover_rate"),
+                "stealth_tpr_avg": "",
+                "stealth_auc_avg": "",
+                "transfer_rate": "",
+                "asr": "",
+                "nc_max_anomaly_index": "",
+                "nc_is_poisoned": "",
+                "S_stealth": "",
+                "S_stealth_tpr": "",
+            }
+        )
     return out_rows
 
 

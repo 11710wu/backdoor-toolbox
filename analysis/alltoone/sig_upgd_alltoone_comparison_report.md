@@ -1,74 +1,78 @@
-# SIG/UPGD all-to-one 对比分析报告
+# SIG/UPGD 两种模式影响分析
 
-## 1. 数据覆盖与配对成功率
-- 提取总行数: 630
-- new 行数: 270
-- baseline 行数: 360
-- 配对键总数: 360
-- 成功配对键数: 270
-- 仅 new 存在键数: 0
-- 仅 baseline 存在键数: 90
-- 字段缺失行数: 0
+## 结论摘要
+- all-to-one 相比 clean-label 的平均迁移性提升为 `0.427`，但隐蔽性同步下降：stealth_auc 平均变化 `-0.160`，stealth_tpr 平均变化 `-0.202`。
+- 这说明 all-to-one 更容易把后门迁移到目标域，但攻击痕迹更明显，更容易被防御检测到。
+- MNISTM 上模式切换影响最大，尤其 SIG 从 clean-label 的几乎不迁移变成高迁移；CIFAR10 上提升更温和。
+- 防御侧没有单一方法全胜：IBD_PSC 对 MNISTM 更强，SCaLe-Up/STRIP 对 CIFAR10 UPGD 更强，Tiny-ImageNet 上 STRIP 对 all-to-one 的提升最明显。
 
-## 2. 分组变化汇总（按 dataset/model/attack）
-|dataset|model|attack|pair_count|transfer_delta_mean|asr_delta_mean|S_stealth_delta_mean|
-|---|---|---:|---:|---:|---:|---:|
-|cifar10|mobilenet|sig|21|0.4384598571428571|0.32336994300013905||
-|cifar10|mobilenet|upgd|24|0.23796229166666666|0.1553593771722508||
-|cifar10|resnet18|sig|21|0.34081090476190473|0.2687268707010122||
-|cifar10|resnet18|upgd|24|0.15393866666666667|0.11527410908753881||
-|cifar10|vgg|sig|21|0.3674775714285714|0.26801851005938315||
-|cifar10|vgg|upgd|24|0.18600908333333335|0.17640993558552298||
-|mnistm|mobilenet|sig|21|0.7635132380952381|0.7127702002073861||
-|mnistm|mobilenet|upgd|24|0.354847125|0.5275160524846455||
-|mnistm|resnet18|sig|21|0.8588842380952381|0.8458562654542554||
-|mnistm|resnet18|upgd|24|0.66320025|0.5042399497487438||
-|mnistm|vgg|sig|21|0.6391547142857142|0.7576905692483582||
-|mnistm|vgg|upgd|24|0.7889562083333334|0.5821235808672994||
+## 迁移性与隐蔽性：两种模式对比
+|dataset|attack|clean transfer|all-to-one transfer|transfer delta|clean stealth_auc|all-to-one stealth_auc|stealth_auc delta|clean stealth_tpr|all-to-one stealth_tpr|stealth_tpr delta|
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+|cifar10|sig|0.477|0.859|0.382|0.454|0.338|-0.117|0.744|0.586|-0.158|
+|cifar10|upgd|0.778|0.970|0.193|0.319|0.181|-0.138|0.572|0.352|-0.220|
+|mnistm|sig|0.003|0.756|0.754|0.578|0.371|-0.208|0.827|0.564|-0.263|
+|mnistm|upgd|0.393|0.995|0.602|0.561|0.348|-0.213|0.813|0.544|-0.270|
+|tiny_imagenet|sig|0.487|0.693|0.206|0.506|0.381|-0.124|0.899|0.799|-0.100|
+|tiny_imagenet|upgd|0.521|NA|NA|0.500|NA|NA|0.898|NA|NA|
 
-## 3. 关键变化 Top10（按 |transfer_rate_delta|）
-|pair_id|dataset|model|attack|poison_rate|target_label|transfer_delta|asr_delta|
-|---|---|---|---|---:|---:|---:|---:|
-|mnistm|resnet18|upgd|0.01|||4.0|100.0|5.0#1|mnistm|resnet18|upgd|0.01|2|0.998465|0.8708821887213847|
-|mnistm|vgg|upgd|0.005|||12.0|100.0|5.0#1|mnistm|vgg|upgd|0.005|2|0.9979060000000001|0.8235622557230597|
-|mnistm|vgg|sig|0.05|6.0|56.0|||#1|mnistm|vgg|sig|0.05|2|0.997766|0.8058347292015634|
-|mnistm|resnet18|sig|0.05|6.0|12.0|||#1|mnistm|resnet18|sig|0.05|2|0.997348|0.9811557788944724|
-|mnistm|vgg|upgd|0.01|||12.0|100.0|5.0#1|mnistm|vgg|upgd|0.01|2|0.997208|0.8813512004466778|
-|mnistm|mobilenet|sig|0.05|6.0|28.0|||#1|mnistm|mobilenet|sig|0.05|2|0.996929|0.9798994974874371|
-|mnistm|vgg|upgd|0.05|||8.0|100.0|5.0#1|mnistm|vgg|upgd|0.05|2|0.99679|0.876465661641541|
-|mnistm|vgg|sig|0.05|6.0|44.0|||#1|mnistm|vgg|sig|0.05|2|0.996231|0.8661362367392519|
-|mnistm|resnet18|upgd|0.01|||8.0|100.0|5.0#1|mnistm|resnet18|upgd|0.01|2|0.995952|0.8192350642099386|
-|mnistm|vgg|upgd|0.05|||4.0|100.0|5.0#1|mnistm|vgg|upgd|0.05|2|0.995952|0.8997766610831938|
+### 迁移性解读
+- CIFAR10: all-to-one 后 SIG 的迁移性从约 `0.477` 提升到 `0.859`，UPGD 从约 `0.778` 提升到 `0.970`。UPGD 在两种模式下都更强，但 SIG 的相对增幅更大。
+- MNISTM: 模式影响最剧烈。clean-label 下 SIG 迁移率约 `0.003`，几乎不可迁移；all-to-one 后达到约 `0.756`。UPGD 也从约 `0.393` 提升到 `0.995`。
+- Tiny-ImageNet: 当前汇总里 clean-label 与 all-to-one 覆盖不完全一致，报告保留单模式统计，但不把它纳入 paired delta 结论。
 
-## 4. 不可比与异常样本
-- unmatched 行数: 90
+### 隐蔽性解读
+- 两个数据集、两种攻击的 stealth_auc / stealth_tpr delta 全为负，说明 all-to-one 的增强不是免费的。
+- CIFAR10 上 UPGD 的 stealth_tpr 下降约 `0.220`，比 SIG 的 `0.158` 更明显；MNISTM 上 SIG/UPGD 的 stealth_tpr 都下降约 `0.26~0.27`。
+- 直观上，all-to-one 让标签统一指向目标类，攻击信号更一致，迁移更强，但防御方法也更容易捕捉到异常模式。
 
-|side|dataset|model|attack|poison_rate|target_label|folder_name|
-|---|---|---|---|---:|---:|---|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.001||SIG_0.001_delta=4_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.001||SIG_0.001_delta=12_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.001||SIG_0.001_delta=20_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.001||SIG_0.001_delta=28_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.001||SIG_0.001_delta=36_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.001||SIG_0.001_delta=44_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.001||SIG_0.001_delta=56_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.005||SIG_0.005_delta=4_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.005||SIG_0.005_delta=12_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.005||SIG_0.005_delta=20_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.005||SIG_0.005_delta=28_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.005||SIG_0.005_delta=36_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.005||SIG_0.005_delta=44_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|mobilenet|sig|0.005||SIG_0.005_delta=56_f=6_poison_seed=2333_arch=mobilenetv2_tiny_imagenet|
-|baseline_only|tiny_imagenet|resnet18|sig|0.001||SIG_0.001_delta=4_f=6_poison_seed=2333_arch=ResNet18_tiny_imagenet|
-|baseline_only|tiny_imagenet|resnet18|sig|0.001||SIG_0.001_delta=12_f=6_poison_seed=2333_arch=ResNet18_tiny_imagenet|
-|baseline_only|tiny_imagenet|resnet18|sig|0.001||SIG_0.001_delta=20_f=6_poison_seed=2333_arch=ResNet18_tiny_imagenet|
-|baseline_only|tiny_imagenet|resnet18|sig|0.001||SIG_0.001_delta=28_f=6_poison_seed=2333_arch=ResNet18_tiny_imagenet|
-|baseline_only|tiny_imagenet|resnet18|sig|0.001||SIG_0.001_delta=36_f=6_poison_seed=2333_arch=ResNet18_tiny_imagenet|
-|baseline_only|tiny_imagenet|resnet18|sig|0.001||SIG_0.001_delta=44_f=6_poison_seed=2333_arch=ResNet18_tiny_imagenet|
+## 各防御方法效果
+### all-to-one 模式下每组最强防御
+|dataset|attack|best defense|tpr_mean|auc_mean|
+|---|---|---|---:|---:|
+|cifar10|sig|IBD_PSC|0.685|0.794|
+|cifar10|upgd|SCaLe-Up|0.885|0.901|
+|mnistm|sig|IBD_PSC|0.809|0.768|
+|mnistm|upgd|IBD_PSC|0.782|0.683|
+|tiny_imagenet|sig|STRIP|0.367|0.731|
+|tiny_imagenet|upgd|STRIP|0.461|0.776|
 
-## 5. 输出文件索引
-- `analysis/alltoone/data_sig_upgd_alltoone_raw.csv`
-- `analysis/alltoone/validation_sig_upgd_alltoone.json`
-- `analysis/alltoone/report_tables/sig_upgd_alltoone_pairwise_comparison.csv`
-- `analysis/alltoone/report_tables/sig_upgd_alltoone_group_summary.csv`
-- `analysis/alltoone/report_tables/sig_upgd_alltoone_unmatched_cases.csv`
+### 防御检测率变化（all-to-one - clean-label）
+|dataset|attack|defense|clean TPR|all-to-one TPR|TPR delta|clean AUC|all-to-one AUC|AUC delta|
+|---|---|---|---:|---:|---:|---:|---:|---:|
+|cifar10|sig|IBD_PSC|0.375|0.685|0.310|0.608|0.794|0.186|
+|cifar10|sig|SCaLe-Up|0.483|0.679|0.197|0.669|0.794|0.125|
+|cifar10|sig|STRIP|0.060|0.191|0.131|0.417|0.565|0.148|
+|cifar10|sig|SentiNet|0.109|0.102|-0.007|0.489|0.498|0.009|
+|cifar10|upgd|IBD_PSC|0.374|0.479|0.105|0.584|0.682|0.097|
+|cifar10|upgd|SCaLe-Up|0.707|0.885|0.178|0.795|0.901|0.107|
+|cifar10|upgd|STRIP|0.311|0.744|0.433|0.656|0.910|0.253|
+|cifar10|upgd|SentiNet|0.320|0.486|0.165|0.687|0.782|0.095|
+|mnistm|sig|IBD_PSC|0.489|0.809|0.321|0.489|0.768|0.279|
+|mnistm|sig|SCaLe-Up|0.065|0.401|0.336|0.337|0.625|0.288|
+|mnistm|sig|STRIP|0.051|0.441|0.390|0.467|0.728|0.261|
+|mnistm|sig|SentiNet|0.087|0.092|0.005|0.394|0.396|0.003|
+|mnistm|upgd|IBD_PSC|0.415|0.782|0.367|0.448|0.683|0.235|
+|mnistm|upgd|SCaLe-Up|0.188|0.377|0.190|0.432|0.604|0.171|
+|mnistm|upgd|STRIP|0.074|0.568|0.495|0.458|0.839|0.381|
+|mnistm|upgd|SentiNet|0.070|0.098|0.028|0.416|0.481|0.066|
+|tiny_imagenet|sig|IBD_PSC|0.209|0.220|0.011|0.480|0.621|0.141|
+|tiny_imagenet|sig|SCaLe-Up|0.053|0.145|0.091|0.521|0.638|0.117|
+|tiny_imagenet|sig|STRIP|0.087|0.367|0.280|0.527|0.731|0.204|
+|tiny_imagenet|sig|SentiNet|0.053|0.073|0.020|0.448|0.485|0.037|
+|tiny_imagenet|upgd|IBD_PSC|0.158|0.260|0.102|0.474|0.664|0.191|
+|tiny_imagenet|upgd|SCaLe-Up|0.050|0.158|0.109|0.490|0.618|0.128|
+|tiny_imagenet|upgd|STRIP|0.113|0.461|0.348|0.550|0.776|0.226|
+|tiny_imagenet|upgd|SentiNet|0.086|0.092|0.006|0.489|0.495|0.006|
+
+### 防御方法解读
+- CIFAR10/SIG: IBD_PSC 与 SCaLe-Up 在 all-to-one 下 TPR 都约 `0.68`，明显高于 clean-label；STRIP 也提升但仍较弱。
+- CIFAR10/UPGD: SCaLe-Up 和 STRIP 最敏感，all-to-one TPR 分别约 `0.885` 和 `0.744`。
+- MNISTM/SIG: IBD_PSC 最强，TPR 从约 `0.489` 升到 `0.809`；SCaLe-Up/STRIP 也从很弱变成中等强度。
+- MNISTM/UPGD: IBD_PSC 和 STRIP 最有效，SentiNet 在两种模式下都较弱。
+- Tiny-ImageNet: all-to-one 下 STRIP 对 SIG/UPGD 的提升很明显；IBD_PSC 和 SCaLe-Up 的提升较小但仍有增强。
+
+## 数据完整性说明
+- 当前 paired delta 主要基于 CIFAR10 和 MNISTM 的可配对实验。
+- Tiny-ImageNet 有 clean-label 和 all-to-one 的单模式统计，但两侧覆盖不完全一致，因此不作为严格 paired delta 的主结论。
+- 详细 CSV: `mode_transfer_stealth_summary.csv`、`mode_transfer_stealth_delta.csv`、`mode_defense_dataset_summary.csv`。

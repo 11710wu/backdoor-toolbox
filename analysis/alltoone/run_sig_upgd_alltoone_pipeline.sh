@@ -24,11 +24,14 @@ python analysis/alltoone/compare_sig_upgd_alltoone.py \
   --output-dir analysis/alltoone/report_tables \
   --prefix sig_upgd_alltoone
 
+python analysis/alltoone/analyze_mode_effects.py \
+  --project-root . \
+  --output-dir analysis/alltoone
+
 python analysis/alltoone/build_sig_upgd_alltoone_report.py \
-  --validation-json analysis/alltoone/validation_sig_upgd_alltoone.json \
-  --pairwise-csv analysis/alltoone/report_tables/sig_upgd_alltoone_pairwise_comparison.csv \
-  --group-csv analysis/alltoone/report_tables/sig_upgd_alltoone_group_summary.csv \
-  --unmatched-csv analysis/alltoone/report_tables/sig_upgd_alltoone_unmatched_cases.csv \
+  --mode-summary-csv analysis/alltoone/mode_transfer_stealth_summary.csv \
+  --mode-delta-csv analysis/alltoone/mode_transfer_stealth_delta.csv \
+  --defense-summary-csv analysis/alltoone/mode_defense_dataset_summary.csv \
   --output-md analysis/alltoone/sig_upgd_alltoone_comparison_report.md
 
 echo "SIG/UPGD all-to-one 对比分析流程已完成。"
