@@ -8,7 +8,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
 
 cd "$PROJECT_ROOT" || exit 1
 
