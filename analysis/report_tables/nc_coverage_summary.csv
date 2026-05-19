@@ -1,4 +1,0 @@
-dataset,dataset_display,n_points,nc_metadata_points,nc_metadata_rate
-cifar10,CIFAR-10 -> STL-10,513,513,1.0
-tiny_imagenet,Tiny-ImageNet -> Target Domain,465,8,0.017204301075268817
-mnistm,MNIST-M -> MNIST,513,513,1.0

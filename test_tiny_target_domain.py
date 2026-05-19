@@ -249,8 +249,8 @@ def main():
 
     # Target domain dataset
     parser.add_argument("-target_domain_dir", type=str,
-                        default="./data/tiny-target-domain",
-                        help="整理后的目标域数据集根目录（含 images/ 和 class_to_idx.json）")
+                        default="./data/imagenetv2-matched-frequency-tiny-organized",
+                        help="目标域数据集根目录（优先读取 test/，其次兼容 images/）")
 
     # System
     parser.add_argument("-devices", type=str, default="0")
@@ -362,9 +362,16 @@ def main():
 
     # ---- Load target domain dataset ----
     target_domain_dir = os.path.abspath(args.target_domain_dir)
+    test_dir = os.path.join(target_domain_dir, "test")
     images_dir = os.path.join(target_domain_dir, "images")
-    if not os.path.isdir(images_dir):
-        raise FileNotFoundError(f"目标域 images 目录不存在: {images_dir}")
+    if os.path.isdir(test_dir):
+        image_root = test_dir
+    elif os.path.isdir(images_dir):
+        image_root = images_dir
+    else:
+        raise FileNotFoundError(
+            f"目标域目录下未找到可读图片目录（需要 test/ 或 images/）: {target_domain_dir}"
+        )
 
     if args.poison_type in ("upgd", "belt"):
         target_transform = transforms.Compose([transforms.ToTensor()])
@@ -374,8 +381,9 @@ def main():
             transforms.Normalize([0.4802, 0.4481, 0.3975], [0.2302, 0.2265, 0.2262]),
         ])
 
-    test_set = datasets.ImageFolder(images_dir, transform=target_transform)
+    test_set = datasets.ImageFolder(image_root, transform=target_transform)
     print(f"目标域数据集加载完成: {len(test_set)} 张图像, {len(test_set.classes)} 个类别")
+    print(f"目标域读取目录: {image_root}")
 
     # ---- Startup assertions ----
     assert len(test_set.classes) == num_classes, (
