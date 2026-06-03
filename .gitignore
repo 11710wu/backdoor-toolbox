@@ -22,6 +22,8 @@ models/*
 
 poisoned_train_set/*
 !poisoned_train_set/.dummy
+poisoned_train_set1/*
+!poisoned_train_set1/.dummy
 poisoned_train_set2/*
 !poisoned_train_set2/.dummy
 poisoned_train_set3/*
