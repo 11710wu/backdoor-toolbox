@@ -1,39 +1,38 @@
 #!/usr/bin/env bash
 
-# Tiny-ImageNet ResNet34 subset experiment
+# Tiny-ImageNet ResNet34 subset experiment — poison_rate=0.001 only
 #
-# Complete but non-exhaustive pipeline across eight attack methods:
-#   badnet, blend, SIG, WaNet, adaptive_patch, adaptive_blend, belt, upgd
-#
-# Each attack uses 2 poison rates and three representative trigger strengths.
-# Defenses are limited to SentiNet, STRIP, ScaleUp and IBD_PSC.
+# Split from run_tiny_imagenet_resnet34_subset_complete.sh
+#   8 attacks × 3 trigger strengths × 1 poison rate (0.001) = 24 configs
 #
 # Usage:
-#   bash run/run_tiny_imagenet_resnet34_subset_complete.sh
+#   bash run/run_tiny_imagenet_resnet34_subset_rate0001_complete.sh
 #
 # Useful overrides:
-#   PYTHON_BIN=/root/anaconda3/envs/backtool/bin/python bash run/run_tiny_imagenet_resnet34_subset_complete.sh
-#   DEVICES=1 bash run/run_tiny_imagenet_resnet34_subset_complete.sh
-#   DRY_RUN=1 bash run/run_tiny_imagenet_resnet34_subset_complete.sh
-#   STOP_ON_FAIL=1 bash run/run_tiny_imagenet_resnet34_subset_complete.sh
+#   PYTHON_BIN=/root/anaconda3/envs/backtool/bin/python bash run/run_tiny_imagenet_resnet34_subset_rate0001_complete.sh
+#   DEVICES=2 DRY_RUN=1 bash run/run_tiny_imagenet_resnet34_subset_rate0001_complete.sh
+#   SKIP_UPGD_PREP=1 bash run/run_tiny_imagenet_resnet34_subset_rate0001_complete.sh
 
 set +e
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
-TITLE="Tiny-ImageNet ResNet34 subset experiment"
+TITLE="Tiny-ImageNet ResNet34 subset (poison_rate=0.001)"
 DATASET="tiny_imagenet"
 MODEL="resnet34"
 TRANSFER_SCRIPT="test_tiny_target_domain.py"
-DEVICES="${DEVICES:-0}"
+QWEN_TRANSFER_SCRIPT="test_tiny_target_domain_qwen.py"
+QWEN_TARGET_DOMAIN_DIR="${QWEN_TARGET_DOMAIN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
+DEVICES="${DEVICES:-2}"
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
+SKIP_UPGD_PREP="${SKIP_UPGD_PREP:-0}"
 
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
 TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
-ERROR_LOG="$LOG_DIR/run_tiny_imagenet_resnet34_subset_${TIMESTAMP}.log"
+ERROR_LOG="$LOG_DIR/run_tiny_imagenet_resnet34_subset_rate0001_${TIMESTAMP}.log"
 
-POISON_RATES=("0.005" "0.001")
+POISON_RATES=("0.001")
 
 ATTACKS=(
   "badnet"
@@ -195,6 +194,14 @@ transfer_command() {
   fi
 }
 
+qwen_transfer_command() {
+  local attack="$1"
+  local rate="$2"
+  local args="$3"
+
+  echo "${PYTHON_BIN} ${QWEN_TRANSFER_SCRIPT} $(base_args) -source_dataset=${DATASET} -poison_type=${attack} -poison_rate=${rate} ${args} -target_domain_dir=${QWEN_TARGET_DOMAIN_DIR}"
+}
+
 echo "============================================================"
 echo "${TITLE}"
 echo "============================================================"
@@ -206,19 +213,24 @@ echo "poison rates : ${POISON_RATES[*]}"
 echo "attacks      : ${ATTACKS[*]}"
 echo "defenses     : ${DEFENSES[*]}"
 echo "transfer     : ${TRANSFER_SCRIPT}"
+echo "qwen transfer: ${QWEN_TRANSFER_SCRIPT}"
+echo "qwen domain  : ${QWEN_TARGET_DOMAIN_DIR}"
 echo "dry run      : ${DRY_RUN}"
 echo "stop on fail : ${STOP_ON_FAIL}"
+echo "skip upgd prep: ${SKIP_UPGD_PREP}"
 echo "error log    : ${ERROR_LOG}"
 echo "============================================================"
 
-echo
-echo "----- 0. UPGD clean base model preparation -----"
-run_command \
-  "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-  "Create clean set for UPGD base model"
-run_command \
-  "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-  "Train clean base model for UPGD"
+if [ "$SKIP_UPGD_PREP" != "1" ]; then
+  echo
+  echo "----- 0. UPGD clean base model preparation -----"
+  run_command \
+    "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
+    "Create clean set for UPGD base model"
+  run_command \
+    "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
+    "Train clean base model for UPGD"
+fi
 
 echo
 echo "----- 1. Create poisoned datasets -----"
@@ -280,6 +292,20 @@ for attack in "${ATTACKS[@]}"; do
 done
 
 echo
+echo "----- 4b. Qwen target-domain transfer testing -----"
+for attack in "${ATTACKS[@]}"; do
+  for rate in "${POISON_RATES[@]}"; do
+    for strength in $(strength_values "$attack"); do
+      args="$(attack_args "$attack" "$rate" "$strength")"
+      label="$(strength_label "$attack" "$strength")"
+      run_command \
+        "$(qwen_transfer_command "$attack" "$rate" "$args")" \
+        "Qwen transfer test: ${attack}, poison_rate=${rate}, ${label}"
+    done
+  done
+done
+
+echo
 echo "----- 5. Stealth/detection defenses -----"
 for defense in "${DEFENSES[@]}"; do
   echo
@@ -299,5 +325,5 @@ done
 
 echo
 echo "============================================================"
-echo "Subset pipeline finished. Check ${ERROR_LOG} for failures."
+echo "Subset pipeline (rate=0.001) finished. Check ${ERROR_LOG} for failures."
 echo "============================================================"
