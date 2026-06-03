@@ -56,6 +56,13 @@ parser.add_argument('-upgd_steps_multiplier', type=int, required=False, default=
 # BELT specific parameters (for directory lookup)
 parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
                     help='BELT cover samples 的 mask 比例（默认 0.2）')
+parser.add_argument('-input_noise_type', type=str, required=False, default='none',
+                    choices=['none', 'gaussian', 'uniform', 'salt_pepper', 'speckle'],
+                    help='用于定位带输入噪声的CIFAR-10模型目录')
+parser.add_argument('-input_noise_level', type=float, required=False, default=0.0,
+                    help='用于定位带输入噪声的CIFAR-10模型目录')
+parser.add_argument('-input_noise_seed', type=int, required=False, default=2333,
+                    help='输入噪声随机种子；防御阶段仅用于路径一致性')
 args = parser.parse_args()
 # ===== 修改开始（新增辅助函数与结果标注） =====
 

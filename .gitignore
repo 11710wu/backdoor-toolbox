@@ -202,4 +202,5 @@ clean_train_set/
 clean_models/
 
 __pycache__/
+data
 data/

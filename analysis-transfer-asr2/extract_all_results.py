@@ -26,7 +26,7 @@
 防御结果 *defense_results*.json 与上述迁移结果文件，均通过同一套文件名规则解析 test 维度
 （兼容原 results_* 命名，并支持 test_* 后缀）。
 
-分组键（cifar10 与 tiny 相同）：attack_type + poison_rate + train_param_value + alpha + cover_rate，
+分组键（cifar10 与 tiny 相同）：attack_type + poison_rate + train_param_value + alpha + cover_rate + input_noise_type + input_noise_level，
 避免 belt 等「仅 alpha/cover 不同」的目录被合并；CSV 含 alpha 列。
 """
 
@@ -92,6 +92,12 @@ def parse_folder_name(folder_name: str) -> Dict[str, Any]:
                    ('s', r's=([\d.]+)'), ('eps', r'eps=([\d.]+)'), ('mask_rate', r'mask=([\d.]+)')]:
         if m := re.search(pat, folder_name):
             params[k] = float(m.group(1))
+    if m := re.search(r'noise=([A-Za-z_]+)_level=([\d.]+)', folder_name):
+        params['input_noise_type'] = m.group(1)
+        params['input_noise_level'] = float(m.group(2))
+    else:
+        params['input_noise_type'] = 'none'
+        params['input_noise_level'] = 0.0
     # 解析 arch：arch=ResNet18_cifar10 或 arch=mobilenetv2_cifar10
     if m := re.search(r'arch=([\w]+)_(cifar10|tiny_imagenet|mnistm)', folder_name):
         params['arch_raw'] = m.group(1)
@@ -290,6 +296,9 @@ def extract_folder_results(
                 asr = d.get('asr')
                 if asr is not None:
                     test_params[pval]['asr'] = float(asr)
+                clean_acc = d.get('clean_acc')
+                if clean_acc is not None:
+                    test_params[pval]['clean_acc'] = float(clean_acc)
             except Exception:
                 pass
 
@@ -347,6 +356,7 @@ def extract_folder_results(
             'transfer_asr': transfer_asr,
             'transfer_rate': transfer_rate,
             'asr': asr,
+            'clean_acc': d.get('clean_acc'),
         }
         if include_nc:
             row['nc_max_anomaly_index'] = d.get('nc_max_anomaly_index')
@@ -394,26 +404,29 @@ def _experiment_group_key(r: Dict[str, Any]) -> tuple:
         _n(r.get('train_param_value')),
         _n(r.get('alpha')),
         _n(r.get('cover_rate')),
+        r.get('input_noise_type', 'none'),
+        _n(r.get('input_noise_level', 0.0)),
     )
 
 
 def _experiment_group_sort_key(key: tuple) -> tuple:
     """稳定排序且避免 None 与 float 比较报错。"""
-    at, pr, tv, al, cr = key
+    at, pr, tv, al, cr, nt, nl = key
 
     def _s(x):
         if x is None:
             return (-1, 0.0)
         return (0, float(x))
 
-    return (at or '', _s(pr), _s(tv), _s(al), _s(cr))
+    return (at or '', _s(pr), _s(tv), _s(al), _s(cr), nt or '', _s(nl))
 
 
 def convert_to_data_groups(all_results: List[Dict[str, Any]], include_nc: bool = True) -> List[Dict[str, Any]]:
     """cifar10 与 tiny_imagenet 共用分组键（含 alpha、cover_rate），与按数据集分支的迁移率提取独立。"""
     base_keys = [
         'stealth_tpr_avg', 'stealth_auc_avg', 'transfer_asr', 'transfer_rate', 'asr',
-        'test_param_value', 'test_param_type', 'alpha', 'cover_rate',
+        'clean_acc', 'test_param_value', 'test_param_type', 'alpha', 'cover_rate',
+        'input_noise_type', 'input_noise_level',
     ]
     nc_keys = ['nc_max_anomaly_index', 'nc_is_poisoned', 'S_stealth', 'S_stealth_tpr'] if include_nc else []
     point_keys = base_keys + nc_keys
@@ -434,6 +447,8 @@ def convert_to_data_groups(all_results: List[Dict[str, Any]], include_nc: bool =
             'train_param_value': key[2],
             'alpha': entries[0].get('alpha'),
             'cover_rate': entries[0].get('cover_rate'),
+            'input_noise_type': entries[0].get('input_noise_type', 'none'),
+            'input_noise_level': entries[0].get('input_noise_level', 0.0),
             'group_size': len(entries),
             'data_points': pts,
         })
@@ -442,7 +457,8 @@ def convert_to_data_groups(all_results: List[Dict[str, Any]], include_nc: bool =
 
 def export_csv(groups: List[Dict], path: Path, dataset: str = "", arch: str = "", include_nc: bool = True):
     base_fn = ["dataset", "arch", "group_id", "point_id", "attack_type", "trigger_type", "poison_rate", "train_param_value", "alpha",
-               "test_param_type", "test_param_value", "stealth_tpr_avg", "stealth_auc_avg", "transfer_asr", "transfer_rate", "asr", "cover_rate"]
+               "input_noise_type", "input_noise_level", "test_param_type", "test_param_value", "stealth_tpr_avg", "stealth_auc_avg",
+               "transfer_asr", "transfer_rate", "asr", "clean_acc", "cover_rate"]
     nc_fn = ["nc_max_anomaly_index", "nc_is_poisoned", "S_stealth", "S_stealth_tpr"] if include_nc else []
     fn = base_fn + nc_fn
 
@@ -457,13 +473,15 @@ def export_csv(groups: List[Dict], path: Path, dataset: str = "", arch: str = ""
         for g in groups:
             base = {"dataset": dataset, "arch": arch, "group_id": g["group_id"], "attack_type": g["attack_type"],
                     "trigger_type": g.get("trigger_type"), "poison_rate": g.get("poison_rate"),
-                    "train_param_value": g.get("train_param_value"), "alpha": g.get("alpha")}
+                    "train_param_value": g.get("train_param_value"), "alpha": g.get("alpha"),
+                    "input_noise_type": g.get("input_noise_type", "none"),
+                    "input_noise_level": g.get("input_noise_level", 0.0)}
             for p in g["data_points"]:
                 row = {**base, "point_id": p["point_id"], "test_param_type": p.get("test_param_type"),
                        "test_param_value": p.get("test_param_value"), "stealth_tpr_avg": p.get("stealth_tpr_avg"),
                        "stealth_auc_avg": p.get("stealth_auc_avg"),
                        "transfer_asr": p.get("transfer_asr"), "transfer_rate": p.get("transfer_rate"),
-                       "asr": p.get("asr"), "cover_rate": p.get("cover_rate")}
+                       "asr": p.get("asr"), "clean_acc": p.get("clean_acc"), "cover_rate": p.get("cover_rate")}
                 if include_nc:
                     row["nc_max_anomaly_index"] = p.get("nc_max_anomaly_index")
                     row["nc_is_poisoned"] = p.get("nc_is_poisoned")

@@ -77,6 +77,13 @@ parser.add_argument('-model', type=str, required=False, default=None,
                     choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 # ========== [BELT 参数] 结束 ==========
+parser.add_argument('-input_noise_type', type=str, required=False, default='none',
+                    choices=['none', 'gaussian', 'uniform', 'salt_pepper', 'speckle'],
+                    help='用于定位带输入噪声的CIFAR-10投毒集目录')
+parser.add_argument('-input_noise_level', type=float, required=False, default=0.0,
+                    help='用于定位带输入噪声的CIFAR-10投毒集目录')
+parser.add_argument('-input_noise_seed', type=int, required=False, default=2333,
+                    help='输入噪声随机种子；训练阶段仅用于参数记录和路径一致性')
 
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = "%s" % args.devices

@@ -348,6 +348,13 @@ def main():
     parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
                         help='BELT cover samples 的 mask 比例（默认 0.2）')
     # ========== [BELT 参数] 结束 ==========
+    parser.add_argument('-input_noise_type', type=str, required=False, default='none',
+                        choices=['none', 'gaussian', 'uniform', 'salt_pepper', 'speckle'],
+                        help='用于定位带输入噪声的CIFAR-10模型目录')
+    parser.add_argument('-input_noise_level', type=float, required=False, default=0.0,
+                        help='用于定位带输入噪声的CIFAR-10模型目录')
+    parser.add_argument('-input_noise_seed', type=int, required=False, default=2333,
+                        help='输入噪声随机种子；迁移测试阶段仅用于路径一致性')
     # 解析命令行参数
     args = parser.parse_args()
     
@@ -634,4 +641,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

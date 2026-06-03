@@ -63,6 +63,13 @@ parser.add_argument('-model', type=str, required=False, default=None,
                     choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 # ========== [BELT 参数] 结束 ==========
+parser.add_argument('-input_noise_type', type=str, required=False, default='none',
+                    choices=['none', 'gaussian', 'uniform', 'salt_pepper', 'speckle'],
+                    help='在添加触发器前施加到CIFAR-10训练图像的输入噪声类型')
+parser.add_argument('-input_noise_level', type=float, required=False, default=0.0,
+                    help='输入噪声强度；不同噪声类型含义不同')
+parser.add_argument('-input_noise_seed', type=int, required=False, default=2333,
+                    help='输入噪声随机种子；每个样本使用 seed + index 生成确定性噪声')
 
 # 设备选择，与 train_on_poisoned_set.py / test_model.py 保持一致
 parser.add_argument('-devices', type=str, default='0',
@@ -73,6 +80,39 @@ args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = "%s" % args.devices
 
 tools.setup_seed(2333)
+
+
+class InputNoiseDataset(torch.utils.data.Dataset):
+    def __init__(self, dataset, noise_type, noise_level, noise_seed):
+        self.dataset = dataset
+        self.noise_type = noise_type
+        self.noise_level = float(noise_level)
+        self.noise_seed = int(noise_seed)
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def __getitem__(self, index):
+        img, target = self.dataset[index]
+        generator = torch.Generator()
+        generator.manual_seed(self.noise_seed + int(index))
+
+        if self.noise_type == 'gaussian':
+            noise = torch.randn(img.shape, dtype=img.dtype, device=img.device, generator=generator) * self.noise_level
+            img = img + noise
+        elif self.noise_type == 'uniform':
+            noise = (torch.rand(img.shape, dtype=img.dtype, device=img.device, generator=generator) * 2.0 - 1.0) * self.noise_level
+            img = img + noise
+        elif self.noise_type == 'salt_pepper':
+            mask = torch.rand((1, img.shape[-2], img.shape[-1]), dtype=img.dtype, device=img.device, generator=generator) < self.noise_level
+            salt = torch.rand((1, img.shape[-2], img.shape[-1]), dtype=img.dtype, device=img.device, generator=generator) < 0.5
+            replacement = salt.to(dtype=img.dtype).expand_as(img)
+            img = torch.where(mask.expand_as(img), replacement, img)
+        elif self.noise_type == 'speckle':
+            noise = torch.randn(img.shape, dtype=img.dtype, device=img.device, generator=generator) * self.noise_level
+            img = img + img * noise
+
+        return torch.clamp(img, 0.0, 1.0), target
 
 # =============================================================================
 # 随机种子 / 可复现性（工程说明）
@@ -94,8 +134,7 @@ data_dir = config.data_dir  # directory to save standard clean set
 if args.trigger is None:
     args.trigger = config.trigger_default[args.dataset][args.poison_type]
 
-if not os.path.exists(os.path.join('poisoned_train_set', args.dataset)):
-    os.mkdir(os.path.join('poisoned_train_set', args.dataset))
+os.makedirs(os.path.join('poisoned_train_set', args.dataset), exist_ok=True)
 
 if args.poison_type == 'dynamic':
 
@@ -299,6 +338,13 @@ else:
 
     else:
         raise  NotImplementedError('Undefined Dataset')
+
+noise_type, noise_level, noise_seed = supervisor.get_input_noise_config(args)
+if noise_type != 'none':
+    if args.poison_type == 'dynamic':
+        raise NotImplementedError("input noise is applied in pixel space and is not supported for dynamic poison_type")
+    train_set = InputNoiseDataset(train_set, noise_type, noise_level, noise_seed)
+    print(f"[Input Noise] type={noise_type}, level={noise_level:.3f}, seed={noise_seed}")
 
 trigger_transform = transforms.Compose([
     transforms.ToTensor()

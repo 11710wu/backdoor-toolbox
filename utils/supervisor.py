@@ -76,6 +76,40 @@ def get_model_dir(args, cleanse=False, defense=False):
         return f"{get_poison_set_dir(args)}/{get_model_name(args, cleanse=cleanse, defense=defense)}"
 
 
+INPUT_NOISE_TYPES = {'none', 'gaussian', 'uniform', 'salt_pepper', 'speckle'}
+
+
+def get_input_noise_config(args):
+    noise_type = getattr(args, 'input_noise_type', 'none') or 'none'
+    noise_level = getattr(args, 'input_noise_level', 0.0)
+    noise_seed = getattr(args, 'input_noise_seed', config.poison_seed)
+
+    try:
+        noise_level = float(noise_level)
+    except (TypeError, ValueError):
+        raise ValueError(f"Invalid input_noise_level: {noise_level}")
+
+    if noise_type not in INPUT_NOISE_TYPES:
+        raise ValueError(f"Unsupported input_noise_type: {noise_type}")
+    if noise_level < 0:
+        raise ValueError(f"input_noise_level must be >= 0, got {noise_level}")
+
+    if noise_type == 'none' or noise_level == 0.0:
+        return 'none', 0.0, int(noise_seed)
+
+    if getattr(args, 'dataset', None) != 'cifar10':
+        raise ValueError("input noise is only supported for dataset='cifar10' in this experiment")
+
+    return noise_type, noise_level, int(noise_seed)
+
+
+def get_input_noise_suffix(args):
+    noise_type, noise_level, _ = get_input_noise_config(args)
+    if noise_type == 'none' or noise_level == 0.0:
+        return ''
+    return f'_noise={noise_type}_level={noise_level:.3f}'
+
+
 def get_dir_core(args, include_model_name=False, include_poison_seed=False):
     ratio = '%.3f' % args.poison_rate
     # ratio = '%.1f' % (args.poison_rate * 100) + '%'
@@ -137,6 +171,8 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
         dir_core = f'{dir_core}_mult={upgd_steps_multiplier}'
     else:
         dir_core = '%s_%s_%s' % (args.dataset, args.poison_type, ratio)
+
+    dir_core = f'{dir_core}{get_input_noise_suffix(args)}'
 
     if include_model_name:
         dir_core = f'{dir_core}_{get_model_name(args)}'
@@ -230,6 +266,8 @@ def get_poison_set_dir(args):
             args.dataset, args.poison_type, ratio, belt_alpha, cover_rate, mask_rate)
     else:
         poison_set_dir = 'poisoned_train_set/%s/%s_%s' % (args.dataset, args.poison_type, ratio)
+
+    poison_set_dir = f'{poison_set_dir}{get_input_noise_suffix(args)}'
 
     if config.record_poison_seed: poison_set_dir = f'{poison_set_dir}_poison_seed={config.poison_seed}'  # debug
     if config.record_model_arch:
