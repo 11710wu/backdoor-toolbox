@@ -74,7 +74,7 @@ parser.add_argument('-belt_model', type=str, required=False, default='aug',
                     choices=['aug', 'do', 'all'],
                     help='BELT 训练模式：aug=BELT增强模型（默认）, do=对比模型, all=全部')
 parser.add_argument('-model', type=str, required=False, default=None,
-                    choices=['resnet18', 'vgg19_bn', 'mobilenetv2'],
+                    choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 # ========== [BELT 参数] 结束 ==========
 

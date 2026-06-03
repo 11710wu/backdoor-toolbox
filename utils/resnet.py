@@ -266,6 +266,17 @@ def ResNet18_tiny_imagenet(num_classes=200):
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
 
 
+def ResNet34_tiny_imagenet(num_classes=200):
+    """
+    ResNet-34 for Tiny ImageNet (64x64 input, 200 classes).
+
+    Note: The base ResNet uses adaptive average pooling, so the same CIFAR-style
+    stem works for 64x64 Tiny ImageNet inputs.
+    """
+    print(f"[MODEL] Creating ResNet34_TinyImageNet with {num_classes} classes")
+    return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes)
+
+
 def test():
     net = ResNet18()
     y = net(torch.randn(1, 3, 32, 32))

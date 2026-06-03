@@ -143,6 +143,9 @@ class SentiNet(BackdoorDefense):
             # 使用 'last' 让 find_mobilenet_layer 自动找到最后一个有意义的层
             # 或者可以指定具体的层，如 'features_16' 或 'features_17'
             layer_name = 'last'  # 自动选择最后一个有意义的层
+        elif 'smallcnn' in model_arch_name or 'small_cnn' in model_arch_name:
+            model_type = 'small_cnn'
+            layer_name = 'last'
         else:
             # ========== [修改] 未知模型架构的默认处理 ==========
             # 对于未知的模型架构，默认使用 ResNet 参数（向后兼容）

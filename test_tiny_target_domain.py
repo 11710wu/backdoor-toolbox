@@ -236,7 +236,7 @@ def main():
 
     # Model
     parser.add_argument("-model", type=str, default=None,
-                        choices=["resnet18", "vgg19_bn", "mobilenetv2"])
+                        choices=["resnet18", "resnet34", "vgg19_bn", "mobilenetv2", "small_cnn"])
     parser.add_argument("-model_path", default=None)
     parser.add_argument("-cleanser", type=str, default=None,
                         choices=default_args.parser_choices["cleanser"])

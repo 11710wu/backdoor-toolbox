@@ -27,11 +27,20 @@ poisoned_train_set2/*
 poisoned_train_set3/*
 !poisoned_train_set3/.dummy
 
-analysis-testASR/
-analysis-ratio2/
-analysis-ratio/
-analysis-qwen-target-domain/
-analysis-cover-ablation/
+# Keep analysis code trackable, but ignore generated result artifacts.
+analysis-*/**/*.csv
+analysis-*/**/*.json
+analysis-*/**/*.png
+analysis-*/**/*.md
+analysis-*/**/*.pdf
+analysis-*/**/*.svg
+analysis-*/**/*.html
+analysis-*/**/*.xlsx
+analysis-*/**/*.pkl
+analysis-*/**/*.npy
+analysis-*/**/*.npz
+analysis-*/**/__pycache__/
+!analysis-*/**/README.md
 
 clean_set/cifar10/*
 !clean_set/cifar10/.dummy

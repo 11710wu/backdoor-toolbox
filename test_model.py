@@ -37,7 +37,7 @@ parser.add_argument('-test_delta', type=float, required=False, default=None,
 # ========== [修改结束] ==========
 parser.add_argument('-trigger', type=str, required=False, default=None)
 parser.add_argument('-model', type=str, required=False, default=None,
-                    choices=['resnet18', 'vgg19_bn', 'mobilenetv2'],
+                    choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 parser.add_argument('-model_path', required=False, default=None)
 parser.add_argument('-cleanser', type=str, required=False, default=None,

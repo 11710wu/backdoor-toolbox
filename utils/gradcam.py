@@ -1,7 +1,15 @@
 import torch
 import torch.nn.functional as F
 
-from utils.gradcam_utils import find_alexnet_layer, find_vgg_layer, find_resnet_layer, find_densenet_layer, find_squeezenet_layer, find_mobilenet_layer
+from utils.gradcam_utils import (
+    find_alexnet_layer,
+    find_vgg_layer,
+    find_resnet_layer,
+    find_densenet_layer,
+    find_squeezenet_layer,
+    find_mobilenet_layer,
+    find_small_cnn_layer,
+)
 
 
 class GradCAM(object):
@@ -56,6 +64,10 @@ class GradCAM(object):
             target_layer = find_squeezenet_layer(self.model_arch, layer_name)
         elif 'mobilenet' in model_type.lower():
             target_layer = find_mobilenet_layer(self.model_arch, layer_name)
+        elif 'small_cnn' in model_type.lower() or 'smallcnn' in model_type.lower():
+            target_layer = find_small_cnn_layer(self.model_arch, layer_name)
+        else:
+            raise ValueError(f"Unsupported model_type for GradCAM: {model_type}")
 
         target_layer.register_forward_hook(forward_hook)
         target_layer.register_backward_hook(backward_hook)
@@ -104,7 +116,7 @@ class GradCAM(object):
         saliency_map = F.relu(saliency_map)
         saliency_map = F.upsample(saliency_map, size=(h, w), mode='bilinear', align_corners=False)
         saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
-        saliency_map = (saliency_map - saliency_map_min).div(saliency_map_max - saliency_map_min).data
+        saliency_map = (saliency_map - saliency_map_min).div(saliency_map_max - saliency_map_min + 1e-7).data
 
         return saliency_map, logit
 
@@ -178,6 +190,6 @@ class GradCAMpp(GradCAM):
         saliency_map = F.relu(saliency_map)
         saliency_map = F.upsample(saliency_map, size=(224, 224), mode='bilinear', align_corners=False)
         saliency_map_min, saliency_map_max = saliency_map.min(), saliency_map.max()
-        saliency_map = (saliency_map-saliency_map_min).div(saliency_map_max-saliency_map_min).data
+        saliency_map = (saliency_map-saliency_map_min).div(saliency_map_max-saliency_map_min + 1e-7).data
 
         return saliency_map, logit

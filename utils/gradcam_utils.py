@@ -218,6 +218,15 @@ def find_mobilenet_layer(arch, target_layer_name):
     raise ValueError(f"Cannot find layer: {target_layer_name}")
 
 
+def find_small_cnn_layer(arch, target_layer_name):
+    """Find a target layer in utils.small_cnn.SmallCNN for GradCAM."""
+    if target_layer_name == 'last':
+        target_layer_name = 'block3'
+    if target_layer_name in ['block1', 'block2', 'block3']:
+        return getattr(arch, target_layer_name)
+    raise ValueError(f"Cannot find SmallCNN layer: {target_layer_name}")
+
+
 def denormalize(tensor, mean, std):
     if not tensor.ndimension() == 4:
         raise TypeError('tensor should be 4D')

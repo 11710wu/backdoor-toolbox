@@ -308,6 +308,17 @@ def get_arch(args):
                     return resnet.ResNet18_mnistm
                 else:
                     return resnet.ResNet18
+            elif args.model == 'resnet34':
+                from utils import resnet
+                if args.dataset == 'tiny_imagenet':
+                    return resnet.ResNet34_tiny_imagenet
+                else:
+                    return resnet.ResNet34
+            elif args.model == 'small_cnn':
+                if args.dataset != 'cifar10':
+                    raise ValueError("small_cnn is only supported for dataset='cifar10'")
+                from utils import small_cnn
+                return small_cnn.SmallCNN_cifar10
             elif args.model == 'densenet121':
                 from utils import densenet
                 # 为不同数据集使用专门的模型函数
@@ -327,7 +338,11 @@ def get_arch(args):
                     # 默认使用 CIFAR-10 版本（适配 32x32 输入）
                     return densenet.densenet121_cifar10
             else:
-                raise ValueError(f"Unsupported model: {args.model}. Supported models: vgg19_bn, mobilenetv2, resnet18, densenet121")
+                raise ValueError(
+                    f"Unsupported model: {args.model}. "
+                    "Supported models: vgg19_bn, mobilenetv2, resnet18, resnet34, "
+                    "small_cnn, densenet121"
+                )
         else:
             return config.arch[args.dataset]
 

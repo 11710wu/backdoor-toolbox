@@ -60,7 +60,7 @@ parser.add_argument('-f', type=float, default=6,
 parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
                     help='BELT cover samples 的 mask 比例（默认 0.2）')
 parser.add_argument('-model', type=str, required=False, default=None,
-                    choices=['resnet18', 'vgg19_bn', 'mobilenetv2'],
+                    choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 # ========== [BELT 参数] 结束 ==========
 

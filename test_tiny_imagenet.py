@@ -360,7 +360,7 @@ def main():
     
     # ===== 模型参数 =====
     parser.add_argument('-model', type=str, required=False, default=None,
-                        choices=['resnet18', 'vgg19_bn', 'mobilenetv2'],
+                        choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
                         help='模型架构选择（覆盖config.py中的默认设置）')
     parser.add_argument('-model_path', required=False, default=None,
                         help='模型文件路径')
