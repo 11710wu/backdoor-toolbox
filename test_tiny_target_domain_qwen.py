@@ -268,7 +268,7 @@ def main():
 
     # Target domain dataset (Qwen full organized by default)
     parser.add_argument("-target_domain_dir", type=str,
-                        default="/workspace/data/tiny-target-domain-qwen-full-organized",
+                        default="/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized",
                         help="目标域数据集根目录（优先读取 test/，其次兼容 images/）")
 
     # System

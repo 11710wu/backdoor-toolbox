@@ -11,7 +11,6 @@
 # Useful overrides:
 #   PYTHON_BIN=/root/anaconda3/envs/backtool/bin/python bash run/run_tiny_imagenet_resnet34_subset_rate0005_complete.sh
 #   DEVICES=3 DRY_RUN=1 bash run/run_tiny_imagenet_resnet34_subset_rate0005_complete.sh
-#   SKIP_UPGD_PREP=1 bash run/run_tiny_imagenet_resnet34_subset_rate0005_complete.sh
 
 set +e
 
@@ -25,7 +24,6 @@ QWEN_TARGET_DOMAIN_DIR="${QWEN_TARGET_DOMAIN_DIR:-/workspace/data/tiny-target-do
 DEVICES="${DEVICES:-3}"
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
-SKIP_UPGD_PREP="${SKIP_UPGD_PREP:-0}"
 
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
@@ -217,20 +215,8 @@ echo "qwen transfer: ${QWEN_TRANSFER_SCRIPT}"
 echo "qwen domain  : ${QWEN_TARGET_DOMAIN_DIR}"
 echo "dry run      : ${DRY_RUN}"
 echo "stop on fail : ${STOP_ON_FAIL}"
-echo "skip upgd prep: ${SKIP_UPGD_PREP}"
 echo "error log    : ${ERROR_LOG}"
 echo "============================================================"
-
-if [ "$SKIP_UPGD_PREP" != "1" ]; then
-  echo
-  echo "----- 0. UPGD clean base model preparation -----"
-  run_command \
-    "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-    "Create clean set for UPGD base model"
-  run_command \
-    "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-    "Train clean base model for UPGD"
-fi
 
 echo
 echo "----- 1. Create poisoned datasets -----"
