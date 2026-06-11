@@ -28,6 +28,8 @@ poisoned_train_set2/*
 !poisoned_train_set2/.dummy
 poisoned_train_set3/*
 !poisoned_train_set3/.dummy
+poisoned_train_set4/*
+!poisoned_train_set4/.dummy
 UPGD-nonormalized/*
 !UPGD-nonormalized/.dummy
 # Keep analysis code trackable, but ignore generated result artifacts.

@@ -26,7 +26,9 @@ RUN_TRAIN="${RUN_TRAIN:-1}"
 RUN_TEST="${RUN_TEST:-1}"
 RUN_TRANSFER="${RUN_TRANSFER:-1}"
 RUN_DEFENSES="${RUN_DEFENSES:-1}"
-RUN_TINY_CORRUPTION="${RUN_TINY_CORRUPTION:-1}"
+# UPGD Tiny-ImageNet transfer defaults to the two target-domain suites only.
+# Set RUN_TINY_CORRUPTION=1 explicitly if you also want Tiny-ImageNet-C.
+RUN_TINY_CORRUPTION="${RUN_TINY_CORRUPTION:-0}"
 RUN_TINY_TARGET_DOMAIN="${RUN_TINY_TARGET_DOMAIN:-1}"
 
 DRY_RUN="${DRY_RUN:-0}"
@@ -36,6 +38,7 @@ DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC NC}"
 CORRUPTION_TYPES="${CORRUPTION_TYPES:-frost}"
 CORRUPTION_SEVERITIES="${CORRUPTION_SEVERITIES:-2 3}"
 TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
 
 case "${DATASET}:${MODEL}" in
     cifar10:resnet18)
@@ -214,6 +217,9 @@ if [ "$RUN_TRANSFER" = "1" ]; then
             run_stage_for_grid "4b. Tiny target-domain transfer testing" \
                 "${PYTHON_BIN} test_tiny_target_domain.py ${UPGD_SHARED_ARGS} -source_dataset=tiny_imagenet -poison_rate=__RATE__ -eps=__EPS__ -target_domain_dir=${TARGET_DOMAIN_DIR}" \
                 "Tiny target-domain transfer test: ${MODEL} rate=__RATE__ eps=__EPS__"
+            run_stage_for_grid "4c. Tiny target-domain Qwen transfer testing" \
+                "${PYTHON_BIN} test_tiny_target_domain_qwen.py ${UPGD_SHARED_ARGS} -source_dataset=tiny_imagenet -poison_rate=__RATE__ -eps=__EPS__ -target_domain_dir=${TARGET_DOMAIN_QWEN_DIR}" \
+                "Tiny target-domain Qwen transfer test: ${MODEL} rate=__RATE__ eps=__EPS__"
         fi
     fi
 fi
