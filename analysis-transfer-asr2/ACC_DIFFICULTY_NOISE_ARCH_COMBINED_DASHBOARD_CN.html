@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ACC 难度联合分析展示</title>
+  <style>
+    :root { --ink:#17202a; --muted:#5f6b7a; --line:#d8dee8; --band:#f5f7fb; --blue:#2457a6; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif; background:white; }
+    header { padding:28px 36px 20px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,#f8fafc 0%,#fff 100%); }
+    main { padding:0 36px 42px; max-width:1380px; }
+    h1 { margin:0 0 8px; font-size:28px; letter-spacing:0; }
+    h2 { margin:30px 0 12px; font-size:20px; }
+    h3 { margin:0 0 8px; font-size:16px; }
+    p { margin:0 0 10px; }
+    .summary-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:18px; }
+    .metric { border:1px solid var(--line); background:#fff; padding:14px 16px; border-radius:8px; }
+    .metric b { display:block; font-size:24px; margin-bottom:2px; }
+    .metric span { color:var(--muted); font-size:13px; }
+    .callout { border-left:4px solid var(--blue); background:var(--band); padding:14px 16px; margin:18px 0; }
+    .figure-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+    .figure-card { border:1px solid var(--line); border-radius:8px; padding:14px; background:#fff; }
+    .figure-card img { width:100%; height:auto; display:block; border:1px solid var(--line); background:#fff; }
+    .figure-card p { color:var(--muted); margin-top:8px; }
+    table { width:100%; border-collapse:collapse; margin:10px 0 20px; font-size:13px; }
+    th,td { border:1px solid var(--line); padding:6px 8px; text-align:left; vertical-align:top; }
+    th { background:#eef2f7; }
+    code { background:#eef2f7; padding:1px 4px; border-radius:4px; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+    ol,ul { padding-left:22px; }
+    @media (max-width:980px) { main,header { padding-left:18px; padding-right:18px; } .summary-grid,.figure-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>ACC 难度联合分析：噪声实验与架构实验</h1>
+    <p>静态 dashboard，数据来自 <code>combined_acc_effect_rows.csv</code>。目标是把 architecture 和 noise 两条证据链放在同一解释框架里。</p>
+    <div class="summary-grid">
+      <div class="metric"><b>-0.3756</b><span>architecture transfer-stealth Spearman</span></div>
+      <div class="metric"><b>-0.3465</b><span>noise transfer-stealth Spearman</span></div>
+      <div class="metric"><b>0.5571</b><span>architecture mean stealth</span></div>
+      <div class="metric"><b>0.3702</b><span>noise mean stealth</span></div>
+    </div>
+  </header>
+  <main>
+    <section class="callout">
+      <p><b>一句话结论：</b>两条证据链都显示 transfer-stealth 负相关，但 architecture 和 noise 的 clean_acc 与 transfer_rate 方向不同，因此联合分析不能直接写成“ACC 单因果解释”。</p>
+      <p><b>散点注意：</b>全体 transfer_rate 中位数为 <code>0.9208</code>，落在 [0.9, 1.1] 的比例为 <code>0.4853</code>，所以建议看分箱趋势和 ACC-bin 结果。</p>
+    </section>
+    <h2>建议展示顺序</h2>
+    <ol>
+      <li>先讲两条证据链总览：architecture 是模型/数据集生态对照，noise 更接近同模型 difficulty intervention。</li>
+      <li>再讲 transfer-stealth 共同负相关，但 difficulty/ACC 对 transfer 的方向不同。</li>
+      <li>用分箱趋势和 ACC-bin 图解释“关系强度会随难度区间变化”。</li>
+      <li>最后用攻击热力图提醒：attack type 是强混杂因素。</li>
+    </ol>
+    <h2>核心图表</h2>
+    <div class="figure-grid"><article class="figure-card"><h3>1. 两条证据链总览</h3><img src="arch_acc_analysis/figures/combined_metric_overview.png" alt="1. 两条证据链总览"><p>比较 architecture 和 noise 的 ACC、difficulty、transfer_rate、stealth_avg 均值。</p></article><article class="figure-card"><h3>2. Transfer-Stealth 分面散点</h3><img src="arch_acc_analysis/figures/combined_transfer_stealth_facets.png" alt="2. Transfer-Stealth 分面散点"><p>两条证据链都呈负相关，但点云结构不同。</p></article><article class="figure-card"><h3>3. Difficulty 关系</h3><img src="arch_acc_analysis/figures/combined_difficulty_relationships.png" alt="3. Difficulty 关系"><p>展示 architecture 和 noise 中 difficulty 与迁移/隐蔽的方向不完全一致。</p></article><article class="figure-card"><h3>4. 分箱中位数趋势</h3><img src="arch_acc_analysis/figures/combined_binned_median_trend.png" alt="4. 分箱中位数趋势"><p>减少普通散点重叠后展示趋势。</p></article><article class="figure-card"><h3>5. Rank 趋势</h3><img src="arch_acc_analysis/figures/combined_rank_binned_trend.png" alt="5. Rank 趋势"><p>对应 Spearman 排序相关。</p></article><article class="figure-card"><h3>6. ACC 分层 Spearman</h3><img src="arch_acc_analysis/figures/combined_acc_bin_spearman.png" alt="6. ACC 分层 Spearman"><p>看不同 ACC 区间内 transfer-stealth 强度如何变化。</p></article><article class="figure-card"><h3>7. 攻击类型热力图</h3><img src="arch_acc_analysis/figures/combined_attack_heatmap.png" alt="7. 攻击类型热力图"><p>说明两条证据链都受 attack type 强烈影响。</p></article></div>
+    <h2>总体汇总</h2>
+    <table><thead><tr><th>variation_source</th><th>n_rows</th><th>clean_acc_mean</th><th>difficulty_mean</th><th>transfer_rate_mean</th><th>transfer_rate_median</th><th>stealth_avg_mean</th><th>stealth_avg_median</th></tr></thead><tbody><tr><td>architecture</td><td>969.0000</td><td>0.7767</td><td>0.2233</td><td>0.7647</td><td>0.9286</td><td>0.5571</td><td>0.5952</td></tr><tr><td>noise</td><td>259.0000</td><td>0.7377</td><td>0.2623</td><td>0.8020</td><td>0.8407</td><td>0.3702</td><td>0.3850</td></tr></tbody></table>
+    <h2>相关性对比</h2>
+    <table><thead><tr><th>group_name</th><th>n_rows</th><th>pearson_clean_acc_transfer_rate</th><th>pearson_transfer_rate_stealth_avg</th><th>spearman_transfer_rate_stealth_avg</th></tr></thead><tbody><tr><td>architecture</td><td>969.0000</td><td>-0.4517</td><td>-0.3632</td><td>-0.3756</td></tr><tr><td>noise</td><td>259.0000</td><td>0.3612</td><td>-0.1179</td><td>-0.3465</td></tr></tbody></table>
+    <h2>ACC 分层</h2>
+    <table><thead><tr><th>variation_source</th><th>acc_bin</th><th>n_rows</th><th>clean_acc_mean</th><th>difficulty_mean</th><th>transfer_rate_median</th><th>stealth_avg_median</th><th>spearman_transfer_stealth</th></tr></thead><tbody><tr><td>architecture</td><td>high_acc</td><td>322.0000</td><td>0.9405</td><td>0.0595</td><td>0.6279</td><td>0.5933</td><td>-0.5821</td></tr><tr><td>architecture</td><td>low_acc</td><td>323.0000</td><td>0.5982</td><td>0.4018</td><td>1.0000</td><td>0.6091</td><td>-0.4011</td></tr><tr><td>architecture</td><td>mid_acc</td><td>324.0000</td><td>0.7919</td><td>0.2081</td><td>0.9427</td><td>0.5897</td><td>-0.3485</td></tr><tr><td>noise</td><td>high_acc</td><td>86.0000</td><td>0.8651</td><td>0.1349</td><td>0.9677</td><td>0.3410</td><td>-0.7711</td></tr><tr><td>noise</td><td>low_acc</td><td>87.0000</td><td>0.5324</td><td>0.4676</td><td>0.7030</td><td>0.3897</td><td>0.1479</td></tr><tr><td>noise</td><td>mid_acc</td><td>86.0000</td><td>0.8179</td><td>0.1821</td><td>1.0002</td><td>0.4223</td><td>-0.4233</td></tr></tbody></table>
+    <h2>攻击类型分层</h2>
+    <table><thead><tr><th>variation_source</th><th>attack_type</th><th>n_rows</th><th>clean_acc_mean</th><th>transfer_rate_mean</th><th>stealth_avg_mean</th></tr></thead><tbody><tr><td>architecture</td><td>SIG</td><td>97.0000</td><td>0.8140</td><td>0.6174</td><td>0.7566</td></tr><tr><td>noise</td><td>SIG</td><td>36.0000</td><td>0.8352</td><td>0.7587</td><td>0.3858</td></tr><tr><td>architecture</td><td>WaNet</td><td>145.0000</td><td>0.7708</td><td>0.5163</td><td>0.7505</td></tr><tr><td>noise</td><td>WaNet</td><td>36.0000</td><td>0.2225</td><td>0.2409</td><td>0.3165</td></tr><tr><td>architecture</td><td>adaptive_blend</td><td>111.0000</td><td>0.7615</td><td>0.7128</td><td>0.7124</td></tr><tr><td>noise</td><td>adaptive_blend</td><td>27.0000</td><td>0.8258</td><td>0.4937</td><td>0.6442</td></tr><tr><td>architecture</td><td>adaptive_patch</td><td>101.0000</td><td>0.7733</td><td>0.8995</td><td>0.3988</td></tr><tr><td>noise</td><td>adaptive_patch</td><td>36.0000</td><td>0.8298</td><td>0.9423</td><td>0.1483</td></tr><tr><td>architecture</td><td>badnet</td><td>161.0000</td><td>0.7777</td><td>0.9837</td><td>0.1717</td></tr><tr><td>noise</td><td>badnet</td><td>24.0000</td><td>0.8380</td><td>1.0131</td><td>0.0608</td></tr><tr><td>architecture</td><td>belt</td><td>117.0000</td><td>0.7430</td><td>0.7567</td><td>0.4571</td></tr><tr><td>noise</td><td>belt</td><td>36.0000</td><td>0.7695</td><td>1.0256</td><td>0.5017</td></tr><tr><td>architecture</td><td>blend</td><td>115.0000</td><td>0.7676</td><td>0.8160</td><td>0.6606</td></tr><tr><td>noise</td><td>blend</td><td>32.0000</td><td>0.8219</td><td>0.5278</td><td>0.5580</td></tr><tr><td>architecture</td><td>upgd</td><td>122.0000</td><td>0.8104</td><td>0.7827</td><td>0.6649</td></tr><tr><td>noise</td><td>upgd</td><td>32.0000</td><td>0.8343</td><td>1.4484</td><td>0.3275</td></tr></tbody></table>
+  </main>
+</body>
+</html>

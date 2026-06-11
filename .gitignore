@@ -38,11 +38,17 @@ analysis-*/**/*.pdf
 analysis-*/**/*.svg
 analysis-*/**/*.html
 analysis-*/**/*.xlsx
+analysis-*/**/*.txt
 analysis-*/**/*.pkl
 analysis-*/**/*.npy
 analysis-*/**/*.npz
 analysis-*/**/__pycache__/
 !analysis-*/**/README.md
+!analysis-*/**/ARCH_ACC_TRANSFER_STEALTH_RESULT_REPORT_CN.md
+!analysis-*/**/ARCH_ACC_TRANSFER_STEALTH_DASHBOARD_CN.html
+!analysis-*/**/ACC_DIFFICULTY_NOISE_ARCH_COMBINED_REPORT_CN.md
+!analysis-*/**/ACC_DIFFICULTY_NOISE_ARCH_COMBINED_DASHBOARD_CN.html
+!analysis-*/**/BASELINE_FULL_ACC_TRANSFER_STEALTH_REPORT_CN.md
 
 clean_set/cifar10/*
 !clean_set/cifar10/.dummy
@@ -50,6 +56,8 @@ clean_set/gtsrb/*
 !clean_set/gtsrb/.dummy
 clean_set/imagenette/*
 !clean_set/imagenette/.dummy
+target_domain_splits/*
+!target_domain_splits/.dummy
 
 logs/*
 !logs/.dummy
