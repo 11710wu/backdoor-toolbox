@@ -200,12 +200,13 @@ def poison_images_with_delta_raw(
     poison_rate: float,
     target_class: int,
     seed: int,
+    label_mode: str = "clean",
 ) -> Tuple[torch.Tensor, list, torch.Tensor]:
     """
-    生成投毒训练集（BadNet-style all-to-one）
+    生成投毒训练集
     - poison_rate 相对于全局数据集大小
-    - 从全体样本中抽样投毒，而非只从目标类中抽样
-    - 投毒样本标签改为 target_class
+    - label_mode=clean: 只从目标类中抽样投毒，标签保持不变
+    - label_mode=all2one: 从全体样本中抽样投毒，投毒样本标签改为 target_class
     
     Args:
         dataset: 训练集，数据范围 [0,1]
@@ -219,23 +220,45 @@ def poison_images_with_delta_raw(
         poison_indices: 被投毒的样本索引列表
         label_set: 所有标签张量 [N]
     """
+    if label_mode not in ("clean", "all2one"):
+        raise ValueError(f"Unsupported UPGD label_mode: {label_mode}")
+
     torch.manual_seed(seed)
     random.seed(seed)
 
     num_img = len(dataset)
     
     # =========================================================================
-    # 步骤1: 从全体样本中随机选择要投毒的样本（BadNet-style）
+    # 步骤1: 选择要投毒的样本
     # =========================================================================
     num_poison = int(poison_rate * num_img)
-    all_ids = list(range(num_img))
-    poison_indices = sorted(random.sample(all_ids, num_poison)) if num_poison > 0 else []
+    # clean-label 只选目标类样本并保持标签；all2one 复现旧的全数据集抽样翻标签。
+    if label_mode == "clean":
+        candidate_indices = []
+        print(f"[UPGD] 扫描目标类 {target_class} 的样本索引...")
+        for i in tqdm(range(num_img), desc='[UPGD] 扫描目标类', ncols=100):
+            _, y = dataset[i]
+            if int(y) == int(target_class):
+                candidate_indices.append(i)
+        print(f"[UPGD] 目标类 {target_class} 共有 {len(candidate_indices)} 个样本")
+        if num_poison > len(candidate_indices):
+            print(f"[UPGD Warning] clean-label requested {num_poison} poison samples, "
+                  f"but target class {target_class} only has {len(candidate_indices)} samples. "
+                  "Capping to target-class count.")
+            num_poison = len(candidate_indices)
+    else:
+        candidate_indices = list(range(num_img))
+
+    poison_indices = sorted(random.sample(candidate_indices, num_poison)) if num_poison > 0 else []
     poison_index_set = set(poison_indices)  # 用 set 加速查找
 
-    print(f"[UPGD] 投毒样本数: {num_poison} (占全数据集 {100*num_poison/num_img:.3f}%)")
+    if label_mode == "clean" and candidate_indices:
+        print(f"[UPGD] 投毒样本数: {num_poison} (占全数据集 {100*num_poison/num_img:.3f}%, 占目标类 {100*num_poison/len(candidate_indices):.1f}%)")
+    else:
+        print(f"[UPGD] 投毒样本数: {num_poison} (占全数据集 {100*num_poison/num_img:.3f}%)")
 
     # =========================================================================
-    # 步骤2: 遍历所有样本，对选中的样本加上扰动并改标签
+    # 步骤2: 遍历所有样本，对选中的样本加上扰动
     # =========================================================================
     img_set = []
     label_set = []
@@ -249,7 +272,8 @@ def poison_images_with_delta_raw(
             # 对投毒样本：原图 + delta，然后 clamp 到 [0,1]
             # 这确保像素值不会超出有效范围
             x = torch.clamp(x + delta_raw, 0.0, 1.0)
-            y = int(target_class)
+            if label_mode == "all2one":
+                y = int(target_class)
         
         img_set.append(x.unsqueeze(0))  # 添加 batch 维度
         label_set.append(int(y))
@@ -295,6 +319,8 @@ def save_upgd_artifacts(
         "batch_size": int(cfg.batch_size),
         "seed": int(cfg.seed),
         "base_model_path": str(base_model_path),
+        "base_model_input_space": "raw_0_1",
+        "delta_forward": "x_raw_plus_delta_clamp_then_model",
         "mean": list(mean),
         "std": list(std),
         "delta_path": delta_path,

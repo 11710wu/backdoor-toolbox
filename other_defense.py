@@ -27,6 +27,9 @@ parser.add_argument('-test_s', type=float, required=False, default=None,
                     help='测试时的WaNet s参数（覆盖训练阶段的s）')
 parser.add_argument('-test_delta', type=float, required=False, default=None,
                     help='测试时的SIG delta参数（覆盖训练阶段的delta）')
+parser.add_argument('-label_mode', type=str, required=False, default='clean',
+                    choices=['clean', 'all2one'],
+                    help='SIG/UPGD training-label mode used for poison-set/model path lookup')
 parser.add_argument('-trigger', type=str, required=False,
                     default=None)
 parser.add_argument('-no_aug', default=False, action='store_true')

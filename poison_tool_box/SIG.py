@@ -6,7 +6,7 @@ import numpy as np
 
 class poison_generator():
 
-    def __init__(self, img_size, dataset, poison_rate, path, target_class = 0, delta=30/255, f=6):
+    def __init__(self, img_size, dataset, poison_rate, path, target_class = 0, delta=30/255, f=6, label_mode='clean'):
 
         self.img_size = img_size
         self.dataset = dataset
@@ -15,6 +15,9 @@ class poison_generator():
         self.target_class = target_class # by default : target_class = 0
         self.delta = delta
         self.f = f
+        if label_mode not in ('clean', 'all2one'):
+            raise ValueError(f"Unsupported SIG label_mode: {label_mode}")
+        self.label_mode = label_mode
 
         self.pattern = np.zeros([img_size,img_size], dtype=float)
         for i in range(img_size):
@@ -28,11 +31,25 @@ class poison_generator():
 
     def generate_poisoned_training_set(self):
 
-        # BadNet-style all-to-one: sample from the whole dataset
-        id_set = list(range(0, self.num_img))
-        random.shuffle(id_set)
         num_poison = int(self.num_img * self.poison_rate)
-        poison_indices = id_set[:num_poison]
+        # clean 只在目标类样本上加 SIG pattern；all2one 保留旧的全数据集抽样翻标签。
+        if self.label_mode == 'clean':
+            candidate_indices = []
+            for i in range(self.num_img):
+                _, gt = self.dataset[i]
+                if int(gt) == int(self.target_class):
+                    candidate_indices.append(i)
+            if num_poison > len(candidate_indices):
+                print(
+                    f"[SIG Warning] clean-label requested {num_poison} poison samples, "
+                    f"but target class {self.target_class} only has {len(candidate_indices)} samples. "
+                    "Capping to target-class count."
+                )
+                num_poison = len(candidate_indices)
+        else:
+            candidate_indices = list(range(0, self.num_img))
+        random.shuffle(candidate_indices)
+        poison_indices = candidate_indices[:num_poison]
         poison_indices.sort() # increasing order
 
         img_set = []
@@ -44,7 +61,8 @@ class poison_generator():
             if pt < num_poison and poison_indices[pt] == i:
                 img = img + self.pattern
                 img = torch.clamp(img,0.0,1.0)
-                gt = self.target_class
+                if self.label_mode == 'all2one':
+                    gt = self.target_class
                 pt+=1
 
             # img_file_name = '%d.png' % i

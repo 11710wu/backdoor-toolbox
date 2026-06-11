@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
-# CIFAR-10 SmallCNN input-noise difficulty experiment.
+# CIFAR-10 SmallCNN input-noise clean-label SIG/UPGD experiment.
 #
-# Complete but non-exhaustive pipeline across eight attack methods and four
-# stealth/detection defenses. Noise is applied before the trigger when creating
-# poisoned CIFAR-10 training sets.
+# This script is intentionally limited to SIG and UPGD because label_mode only
+# changes the training-set semantics for these two attacks.
 
 set +e
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
-RUN_NAME="${RUN_NAME:-run_cifar10_small_cnn_noise_difficulty_subset}"
-TITLE="${RUN_TITLE:-CIFAR-10 SmallCNN gaussian/uniform input-noise difficulty subset experiment}"
+RUN_NAME="${RUN_NAME:-run_cifar10_small_cnn_noise_sig_upgd_clean_label}"
+TITLE="${RUN_TITLE:-CIFAR-10 SmallCNN input-noise clean-label SIG/UPGD experiment}"
 DATASET="cifar10"
 MODEL="small_cnn"
 TRANSFER_SCRIPT="test_stl10.py"
 DEVICES="${DEVICES:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
+SKIP_UPGD_PREP="${SKIP_UPGD_PREP:-0}"
 INPUT_NOISE_SEED="${INPUT_NOISE_SEED:-2333}"
 
 LOG_DIR="logs"
@@ -25,31 +25,16 @@ TIMESTAMP="$(date +"%Y%m%d_%H%M%S")"
 ERROR_LOG="$LOG_DIR/${RUN_NAME}_${TIMESTAMP}.log"
 
 POISON_RATES=("0.01" "0.005")
-
-ATTACKS=(
-  "badnet"
-  "blend"
-  "SIG"
-  "WaNet"
-  "adaptive_patch"
-  "adaptive_blend"
-  "belt"
-  "upgd"
-)
-
+ATTACKS=("SIG" "upgd")
 NOISE_TYPE_FILTER="${NOISE_TYPE_FILTER:-gaussian uniform}"
 read -r -a NOISE_TYPES <<< "$NOISE_TYPE_FILTER"
+DEFENSES=("SentiNet" "STRIP" "ScaleUp" "IBD_PSC")
 
-DEFENSES=(
-  "SentiNet"
-  "STRIP"
-  "ScaleUp"
-  "IBD_PSC"
-)
-
-UPGD_STEPS="100"
-UPGD_STEPS_MULTIPLIER="5"
-UPGD_CLEAN_MODEL_PATH="${UPGD_CLEAN_MODEL_PATH:-poisoned_train_set/${DATASET}/none_0.000_poison_seed=2333_arch=SmallCNN_cifar10/SmallCNN_cifar10.pt}"
+UPGD_STEPS="${UPGD_STEPS:-100}"
+UPGD_STEPS_MULTIPLIER="${UPGD_STEPS_MULTIPLIER:-5}"
+# UPGD uses a raw-input base model for delta generation, not the normal clean baseline.
+UPGD_RAW_BASE_DIR="${UPGD_RAW_BASE_DIR:-poisoned_train_set/${DATASET}/upgd_raw_base_0.000_poison_seed=2333_arch=SmallCNN_cifar10}"
+UPGD_CLEAN_MODEL_PATH="${UPGD_CLEAN_MODEL_PATH:-${UPGD_RAW_BASE_DIR}/upgd_raw_base_SmallCNN_cifar10.pt}"
 
 run_command() {
   local cmd="$1"
@@ -90,19 +75,6 @@ run_command() {
   return "$exit_code"
 }
 
-double_cover_rate() {
-  case "$1" in
-    "0.05") echo "0.1" ;;
-    "0.01") echo "0.02" ;;
-    "0.005") echo "0.01" ;;
-    "0.001") echo "0.002" ;;
-    *)
-      echo "Unsupported poison rate for fixed subset cover-rate mapping: $1" >&2
-      return 1
-      ;;
-  esac
-}
-
 noise_levels() {
   case "$1" in
     "gaussian") echo "0.030 0.060 0.100" ;;
@@ -116,13 +88,7 @@ noise_levels() {
 
 strength_values() {
   case "$1" in
-    "badnet") echo "0.2 0.5 1.0" ;;
-    "blend") echo "0.05 0.15 0.3" ;;
     "SIG") echo "20 30 40" ;;
-    "WaNet") echo "0.4 0.5 0.8" ;;
-    "adaptive_patch") echo "0.1 0.2 0.3" ;;
-    "adaptive_blend") echo "0.05 0.15 0.25" ;;
-    "belt") echo "0.1 0.2 0.3" ;;
     "upgd") echo "4 8 12" ;;
     *)
       echo "Unsupported attack: $1" >&2
@@ -133,30 +99,14 @@ strength_values() {
 
 attack_args() {
   local attack="$1"
-  local rate="$2"
-  local strength="$3"
+  local strength="$2"
 
   case "$attack" in
-    "badnet"|"blend")
-      echo "-alpha ${strength}"
-      ;;
     "SIG")
-      echo "-f 6 -delta ${strength} -label_mode all2one"
-      ;;
-    "WaNet")
-      echo "-cover_rate $(double_cover_rate "$rate") -s ${strength} -k 4"
-      ;;
-    "adaptive_patch")
-      echo "-cover_rate $(double_cover_rate "$rate") -alpha ${strength}"
-      ;;
-    "adaptive_blend")
-      echo "-cover_rate $rate -alpha ${strength}"
-      ;;
-    "belt")
-      echo "-cover_rate 0.5 -mask_rate ${strength} -alpha 1.0"
+      echo "-f 6 -delta ${strength} -label_mode clean"
       ;;
     "upgd")
-      echo "-eps ${strength} -constraint Linf -upgd_steps ${UPGD_STEPS} -upgd_steps_multiplier ${UPGD_STEPS_MULTIPLIER} -label_mode all2one"
+      echo "-eps ${strength} -constraint Linf -upgd_steps ${UPGD_STEPS} -upgd_steps_multiplier ${UPGD_STEPS_MULTIPLIER} -label_mode clean"
       ;;
     *)
       echo "Unsupported attack: $attack" >&2
@@ -167,10 +117,7 @@ attack_args() {
 
 strength_label() {
   case "$1" in
-    "badnet"|"blend"|"adaptive_patch"|"adaptive_blend") echo "alpha=$2" ;;
     "SIG") echo "delta=$2" ;;
-    "WaNet") echo "s=$2" ;;
-    "belt") echo "mask_rate=$2" ;;
     "upgd") echo "eps=$2" ;;
     *) echo "strength=$2" ;;
   esac
@@ -211,20 +158,18 @@ echo "stop on fail : ${STOP_ON_FAIL}"
 echo "error log    : ${ERROR_LOG}"
 echo "============================================================"
 
-echo
-echo "----- 0. UPGD clean base model preparation -----"
-if [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
-  echo "UPGD clean base model already exists: ${UPGD_CLEAN_MODEL_PATH}"
-else
-  run_command \
-    "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-    "Create clean set for UPGD base model"
-  run_command \
-    "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-    "Train clean base model for UPGD"
-  if [ "$DRY_RUN" != "1" ] && [ ! -f "$UPGD_CLEAN_MODEL_PATH" ]; then
-    echo "UPGD clean base model missing after preparation: ${UPGD_CLEAN_MODEL_PATH}" >&2
-    exit 1
+if [ "$SKIP_UPGD_PREP" != "1" ]; then
+  echo
+  echo "----- 0. UPGD clean base model preparation -----"
+  if [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+    echo "UPGD clean base model already exists: ${UPGD_CLEAN_MODEL_PATH}"
+  else
+    run_command \
+      "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
+      "Create clean set for UPGD base model"
+    run_command \
+      "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0 -no_normalize -model_path=${UPGD_CLEAN_MODEL_PATH}" \
+      "Train raw-input clean base model for UPGD"
   fi
 fi
 
@@ -236,14 +181,14 @@ for noise_type in "${NOISE_TYPES[@]}"; do
     for attack in "${ATTACKS[@]}"; do
       for rate in "${POISON_RATES[@]}"; do
         for strength in $(strength_values "$attack"); do
-          args="$(attack_args "$attack" "$rate" "$strength")"
+          args="$(attack_args "$attack" "$strength")"
           if [ "$attack" = "upgd" ]; then
             args="${args} -upgd_model_path ${UPGD_CLEAN_MODEL_PATH}"
           fi
           label="$(strength_label "$attack" "$strength")"
           run_command \
             "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=${attack} -poison_rate=${rate} ${args} ${noise}" \
-            "Create poisoned set: noise=${noise_type}/${noise_level}, ${attack}, poison_rate=${rate}, ${label}"
+            "Create clean-label poisoned set: noise=${noise_type}/${noise_level}, ${attack}, poison_rate=${rate}, ${label}"
         done
       done
     done
@@ -258,11 +203,11 @@ for noise_type in "${NOISE_TYPES[@]}"; do
     for attack in "${ATTACKS[@]}"; do
       for rate in "${POISON_RATES[@]}"; do
         for strength in $(strength_values "$attack"); do
-          args="$(attack_args "$attack" "$rate" "$strength")"
+          args="$(attack_args "$attack" "$strength")"
           label="$(strength_label "$attack" "$strength")"
           run_command \
             "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=${attack} -poison_rate=${rate} ${args} ${noise}" \
-            "Train model: noise=${noise_type}/${noise_level}, ${attack}, poison_rate=${rate}, ${label}"
+            "Train clean-label model: noise=${noise_type}/${noise_level}, ${attack}, poison_rate=${rate}, ${label}"
         done
       done
     done
@@ -277,7 +222,7 @@ for noise_type in "${NOISE_TYPES[@]}"; do
     for attack in "${ATTACKS[@]}"; do
       for rate in "${POISON_RATES[@]}"; do
         for strength in $(strength_values "$attack"); do
-          args="$(attack_args "$attack" "$rate" "$strength")"
+          args="$(attack_args "$attack" "$strength")"
           label="$(strength_label "$attack" "$strength")"
           run_command \
             "${PYTHON_BIN} test_model.py $(base_args) -poison_type=${attack} -poison_rate=${rate} ${args} ${noise}" \
@@ -296,7 +241,7 @@ for noise_type in "${NOISE_TYPES[@]}"; do
     for attack in "${ATTACKS[@]}"; do
       for rate in "${POISON_RATES[@]}"; do
         for strength in $(strength_values "$attack"); do
-          args="$(attack_args "$attack" "$rate" "$strength")"
+          args="$(attack_args "$attack" "$strength")"
           label="$(strength_label "$attack" "$strength")"
           run_command \
             "$(transfer_command "$attack" "$rate" "$args" "$noise")" \
@@ -318,7 +263,7 @@ for defense in "${DEFENSES[@]}"; do
       for attack in "${ATTACKS[@]}"; do
         for rate in "${POISON_RATES[@]}"; do
           for strength in $(strength_values "$attack"); do
-            args="$(attack_args "$attack" "$rate" "$strength")"
+            args="$(attack_args "$attack" "$strength")"
             label="$(strength_label "$attack" "$strength")"
             run_command \
               "${PYTHON_BIN} other_defense.py $(base_args) -defense=${defense} -poison_type=${attack} -poison_rate=${rate} ${args} ${noise}" \
@@ -332,5 +277,5 @@ done
 
 echo
 echo "============================================================"
-echo "Noise difficulty subset pipeline finished. Check ${ERROR_LOG} for failures."
+echo "Input-noise clean-label SIG/UPGD pipeline finished. Check ${ERROR_LOG} for failures."
 echo "============================================================"

@@ -141,7 +141,7 @@ attack_args() {
       echo "-alpha ${strength}"
       ;;
     "SIG")
-      echo "-f 6 -delta ${strength}"
+      echo "-f 6 -delta ${strength} -label_mode all2one"
       ;;
     "WaNet")
       echo "-cover_rate $(double_cover_rate "$rate") -s ${strength} -k 4"
@@ -156,7 +156,7 @@ attack_args() {
       echo "-cover_rate 0.5 -mask_rate ${strength} -alpha 1.0"
       ;;
     "upgd")
-      echo "-eps ${strength} -constraint Linf -upgd_steps ${UPGD_STEPS} -upgd_steps_multiplier ${UPGD_STEPS_MULTIPLIER}"
+      echo "-eps ${strength} -constraint Linf -upgd_steps ${UPGD_STEPS} -upgd_steps_multiplier ${UPGD_STEPS_MULTIPLIER} -label_mode all2one"
       ;;
     *)
       echo "Unsupported attack: $attack" >&2

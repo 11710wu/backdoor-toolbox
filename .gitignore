@@ -26,6 +26,8 @@ poisoned_train_set2/*
 !poisoned_train_set2/.dummy
 poisoned_train_set3/*
 !poisoned_train_set3/.dummy
+UPGD-nonormalized/*
+!UPGD-nonormalized/.dummy
 
 # Keep analysis code trackable, but ignore generated result artifacts.
 analysis-*/**/*.csv
@@ -57,6 +59,7 @@ logs/*
 
 cleansers_tool_box/spectre/output/*
 !cleansers_tool_box/spectre/output/.dummy
+
 
 other_defenses_tool_box/logs
 other_defenses_tool_box/results/*

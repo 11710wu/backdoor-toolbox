@@ -248,6 +248,9 @@ def main():
     parser.add_argument("-test_alpha", type=float, default=None)
     parser.add_argument("-test_s", type=float, default=None)
     parser.add_argument("-test_delta", type=float, default=None)
+    parser.add_argument("-label_mode", type=str, default="clean",
+                        choices=["clean", "all2one"],
+                        help="SIG/UPGD training-label mode used for poison-set/model path lookup")
 
     # Trigger
     parser.add_argument("-trigger", type=str, default=None)
