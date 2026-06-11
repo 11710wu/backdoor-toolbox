@@ -246,6 +246,9 @@ def main():
     parser.add_argument('-cover_rate', type=float, default=default_args.parser_default['cover_rate'])
     parser.add_argument('-alpha', type=float, default=default_args.parser_default['alpha'])
     parser.add_argument('-test_alpha', type=float, default=None)
+    parser.add_argument('-label_mode', type=str, default='clean',
+                        choices=['clean', 'all2one'],
+                        help='SIG/UPGD training-label mode used for poison-set/model path lookup')
     parser.add_argument('-trigger', type=str, default=None)
     parser.add_argument('-model', type=str, default='resnet18',
                         help='Only ResNet18 supported for TAC; used to load arch and model path')

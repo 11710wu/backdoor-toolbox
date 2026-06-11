@@ -25,6 +25,9 @@ parser.add_argument('-ember_options', type=str, required=False,
 parser.add_argument('-alpha', type=float, required=False,
                     default=default_args.parser_default['alpha'])
 parser.add_argument('-test_alpha', type=float, required=False, default=None)
+parser.add_argument('-label_mode', type=str, required=False, default='clean',
+                    choices=['clean', 'all2one'],
+                    help='SIG/UPGD training-label mode used for poison-set/model path lookup')
 parser.add_argument('-resume', type=int, required=False, default=0)
 parser.add_argument('-resume_from_meta_info', default=False, action='store_true')
 parser.add_argument('-trigger', type=str, required=False,
@@ -76,6 +79,8 @@ parser.add_argument('-belt_model', type=str, required=False, default='aug',
 parser.add_argument('-model', type=str, required=False, default=None,
                     choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
+parser.add_argument('-model_path', type=str, required=False, default=None,
+                    help='Optional explicit checkpoint path for saving/loading the model')
 # ========== [BELT 参数] 结束 ==========
 
 args = parser.parse_args()
@@ -437,6 +442,9 @@ if args.poison_type == 'belt':
 # ========== [BELT 训练分支] 结束 ==========
 
 # Train Code
+model_parent = os.path.dirname(model_path)
+if model_parent:
+    os.makedirs(model_parent, exist_ok=True)
 print(f"Will save to '{model_path}'.")
 if os.path.exists(model_path):
     print(f"Model '{model_path}' already exists!")

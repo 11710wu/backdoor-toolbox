@@ -12,6 +12,13 @@ import argparse
 import config
 from utils import default_args
 
+
+def get_label_mode(args):
+    mode = getattr(args, 'label_mode', 'clean') or 'clean'
+    if mode not in ('clean', 'all2one'):
+        raise ValueError(f"Unsupported label_mode: {mode}")
+    return mode
+
 """
 In our defensive setting, we assume a poisoned training set and a small clean 
 set at hand, i.e. we train base model jointly with the poisoned set and 
@@ -36,7 +43,7 @@ def get_cleansed_set_indices_dir(args):
 def get_model_name(args, cleanse=False, defense=False):
     # `args.model_path` > `args.model` > by default 'full_base'
     if hasattr(args, 'model_path') and args.model_path is not None:
-        model_name = args.model_path
+        model_name = os.path.basename(args.model_path)
     elif hasattr(args, 'model') and args.model is not None:
         # 当使用 -model 参数且启用架构记录时，直接使用架构名称，避免重复
         if config.record_model_arch:
@@ -113,8 +120,9 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
     elif args.poison_type == 'SIG':
         delta_param = int(getattr(args, 'delta', 30))
         f_param = int(getattr(args, 'f', 6))
-        dir_core = '%s_%s_%s_delta=%s_f=%s_mode=all2one' % (
-            args.dataset, args.poison_type, ratio, delta_param, f_param
+        label_mode = get_label_mode(args)
+        dir_core = '%s_%s_%s_delta=%s_f=%s_mode=%s' % (
+            args.dataset, args.poison_type, ratio, delta_param, f_param, label_mode
         )
     elif args.poison_type == 'upgd':
         # ---------------------------------------------------------------------
@@ -122,7 +130,7 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
         # ---------------------------------------------------------------------
         # UPGD 不依赖固定的图案触发器文件（trigger_name='none'），而是：
         # 1) 用一个干净基模型生成 universal targeted perturbation（delta）
-        # 2) 把 delta 加到训练集中的一部分样本（all-to-one，标签改为目标类）
+        # 2) 把 delta 加到训练集中的一部分样本（clean 或 all-to-one）
         # 3) 测试/防御阶段再把 delta 作为“触发器”加到输入上
         #
         # 目录命名需要包含 UPGD 的关键生成参数，否则不同 UPGD 设置会覆盖同一个目录。
@@ -131,8 +139,9 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
         upgd_constraint = getattr(args, 'constraint', 'Linf')
         upgd_steps = getattr(args, 'upgd_steps', 100)
         upgd_steps_multiplier = getattr(args, 'upgd_steps_multiplier', 5)
-        dir_core = '%s_%s_%s_eps=%s_constraint=%s_steps=%s_mode=all2one' % (
-            args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps)
+        label_mode = get_label_mode(args)
+        dir_core = '%s_%s_%s_eps=%s_constraint=%s_steps=%s_mode=%s' % (
+            args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps), label_mode
         )
         dir_core = f'{dir_core}_mult={upgd_steps_multiplier}'
     else:
@@ -199,7 +208,7 @@ def get_poison_set_dir(args):
         # ========== [SIG目录路径修改] 开始 ==========
         # 对于SIG攻击，需要在目录路径中包含delta和f参数
         # 原因：不同的delta和f会生成不同的频域扰动，对应不同的中毒数据集
-        # 例如：poisoned_train_set/cifar10/SIG_0.020_delta=20_f=6_mode=all2one
+        # 例如：poisoned_train_set/cifar10/SIG_0.020_delta=20_f=6_mode=clean
         #      poisoned_train_set/cifar10/SIG_0.020_delta=30_f=6_mode=all2one
         # 这样可以确保：
         # 1. create_poisoned_set.py 根据delta和f创建不同的数据集目录
@@ -209,8 +218,9 @@ def get_poison_set_dir(args):
         delta_param = int(getattr(args, 'delta', 30))
         # 获取f参数（频率参数，默认为6）
         f_param = int(getattr(args, 'f', 6))
+        label_mode = get_label_mode(args)
         # 构建包含delta和f的目录路径
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_delta=%s_f=%s_mode=all2one' % (args.dataset, args.poison_type, ratio, delta_param, f_param)
+        poison_set_dir = 'poisoned_train_set/%s/%s_%s_delta=%s_f=%s_mode=%s' % (args.dataset, args.poison_type, ratio, delta_param, f_param, label_mode)
         # ========== [SIG目录路径修改] 结束 ==========
     elif args.poison_type == 'upgd':
         # Parameter backdoor (UPGD): include eps/constraint/steps(/mult) to avoid collisions
@@ -218,8 +228,9 @@ def get_poison_set_dir(args):
         upgd_constraint = getattr(args, 'constraint', 'Linf')
         upgd_steps = getattr(args, 'upgd_steps', 100)
         upgd_steps_multiplier = getattr(args, 'upgd_steps_multiplier', 5)
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_eps=%s_constraint=%s_steps=%s_mode=all2one' % (
-            args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps)
+        label_mode = get_label_mode(args)
+        poison_set_dir = 'poisoned_train_set/%s/%s_%s_eps=%s_constraint=%s_steps=%s_mode=%s' % (
+            args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps), label_mode
         )
         poison_set_dir = f'{poison_set_dir}_mult={upgd_steps_multiplier}'
     elif args.poison_type == 'belt':

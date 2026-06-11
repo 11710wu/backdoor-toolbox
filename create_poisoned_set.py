@@ -26,6 +26,9 @@ parser.add_argument('-cover_rate', type=float,  required=False,
                     default=default_args.parser_default['cover_rate'])
 parser.add_argument('-alpha', type=float,  required=False,
                     default=default_args.parser_default['alpha'])
+parser.add_argument('-label_mode', type=str, required=False, default='clean',
+                    choices=['clean', 'all2one'],
+                    help='SIG/UPGD training-label mode: clean keeps poisoned training labels unchanged; all2one flips poisoned labels to target_class')
 parser.add_argument('-trigger', type=str,  required=False,
                     default=None)
 # ========== [UPGD 参数] 开始 ==========
@@ -575,7 +578,7 @@ if args.poison_type in ['basic', 'badnet', 'blend', 'clean_label', 'refool',
         poison_generator = SIG.poison_generator(img_size=img_size, dataset=train_set,
                                                 poison_rate=args.poison_rate,
                                                 path=poison_set_dir, target_class=config.target_class[args.dataset],
-                                                delta=delta, f=f)
+                                                delta=delta, f=f, label_mode=args.label_mode)
 
     elif args.poison_type == 'clean_label':
 
@@ -684,8 +687,8 @@ elif args.poison_type == 'upgd':
     """
     Parameter Backdoor (UPGD):
     - 先用干净基模型生成 universal targeted perturbation（delta_raw，raw-space [0,1]）
-    - 从全体样本中按 poison_rate 抽样加上 delta_raw（BadNet-style）
-    - 被投毒样本标签统一改为 target_class（all-to-one）
+    - clean-label 模式只从目标类样本中抽样加上 delta_raw，并保持训练标签不变
+    - all2one 模式从全体样本中抽样加上 delta_raw，并把训练标签改为 target_class
     - 保存 imgs/labels/poison_indices，同时保存 upgd_{target_class}.pth 与 upgd_meta.json
     """
     # -------------------------------------------------------------------------
@@ -695,8 +698,10 @@ elif args.poison_type == 'upgd':
     # - delta 的优化目标是：对很多输入图像 x，x+delta 都更容易被判为目标类
     # - 这个优化必须依赖一个固定的模型 f（这里用干净基模型）
     #
-    # 因此必须提供 `-upgd_model_path`，指向一个干净模型的 state_dict
-    #（推荐：poison_type=none, poison_rate=0 训练得到）
+    # 因此必须提供 `-upgd_model_path`，指向一个干净模型的 state_dict。
+    # 由于当前 UPGD 优化过程与 parameter_backdoor 源码一致，模型前向直接吃
+    # raw [0,1] 张量，推荐用 `poison_type=none, poison_rate=0, -no_normalize`
+    # 单独训练 raw-input clean base，避免复用常规 normalize clean baseline。
     # -------------------------------------------------------------------------
     if args.upgd_model_path is None:
         raise ValueError("poison_type=upgd 需要提供 -upgd_model_path（干净基模型权重路径）")
@@ -704,16 +709,16 @@ elif args.poison_type == 'upgd':
         raise FileNotFoundError(f"UPGD 基模型权重文件不存在: {args.upgd_model_path}")
 
     # -------------------------------------------------------------------------
-    # 归一化处理（关键工程点）
+    # raw-input 处理（关键工程点）
     # -------------------------------------------------------------------------
     # - delta 是在 raw 像素空间 [0,1] 中生成的（与 ToTensor 输出一致）
-    # - 但模型前向通常吃 normalize 后的输入
+    # - parameter_backdoor 源码的 generate_upgd.py/utils.py 不做 Normalize
     #
-    # 所以生成 delta 时的前向流程是：
-    #   x_raw -> (x_raw + delta_raw) -> clamp -> normalize(mean,std) -> model
+    # 所以当前生成 delta 时的前向流程是：
+    #   x_raw -> (x_raw + delta_raw) -> clamp -> model
     #
-    # 测试/防御阶段由 `supervisor.get_poison_transform('upgd')` 读取保存的 delta，
-    # 并用同一组 mean/std 执行：denorm -> 加delta -> clamp -> renorm。
+    # mean/std 会保存在 metadata 中，主要用于路径/兼容记录；当前 UPGD 生成和
+    # get_poison_transform('upgd') 都按 raw 张量加 delta。
     # -------------------------------------------------------------------------
     if args.dataset == 'cifar10':
         mean = (0.4914, 0.4822, 0.4465)
@@ -736,13 +741,30 @@ elif args.poison_type == 'upgd':
     else:
         raise NotImplementedError(f"UPGD 暂不支持的数据集: {args.dataset}")
 
-    # 载入干净基模型（state_dict）
+    # 载入 raw-input 干净基模型（state_dict）
+    # 当前 generate_upgd_delta_raw 直接执行 model(x_raw + delta)，所以这里的
+    # -upgd_model_path 应当来自 `train_on_poisoned_set.py ... -no_normalize`。
     arch = supervisor.get_arch(args)
     model = arch(num_classes=num_classes) if args.dataset != 'ember' else arch()
     state_dict = torch.load(args.upgd_model_path, map_location='cpu')
-    if isinstance(state_dict, dict) and any(k.startswith('module.') for k in state_dict.keys()):
-        state_dict = {k.replace('module.', '', 1): v for k, v in state_dict.items()}
-    model.load_state_dict(state_dict, strict=False)
+    # 只兼容常见 checkpoint 包装；真正加载时必须 strict=True，避免错模型路径被吞掉。
+    if isinstance(state_dict, dict) and isinstance(state_dict.get('model'), dict):
+        state_dict = state_dict['model']
+    elif isinstance(state_dict, dict) and isinstance(state_dict.get('model_state_dict'), dict):
+        state_dict = state_dict['model_state_dict']
+    if not isinstance(state_dict, dict):
+        raise TypeError(f"UPGD 基模型权重不是 state_dict/checkpoint dict: {args.upgd_model_path}")
+    if any(isinstance(k, str) and k.startswith('module.') for k in state_dict.keys()):
+        state_dict = {k.replace('module.', '', 1) if isinstance(k, str) else k: v for k, v in state_dict.items()}
+    try:
+        model.load_state_dict(state_dict, strict=True)
+    except RuntimeError as exc:
+        raise RuntimeError(
+            "UPGD 基模型权重与当前模型架构不匹配。"
+            f" dataset={args.dataset}, model={args.model}, path={args.upgd_model_path}. "
+            "请使用相同 -dataset/-model 训练的 raw-input clean base "
+            "（train_on_poisoned_set.py ... -poison_type=none -poison_rate=0.0 -no_normalize -model_path=...）。"
+        ) from exc
     model = nn.DataParallel(model).cuda()
     model.eval()
 
@@ -764,14 +786,16 @@ elif args.poison_type == 'upgd':
         steps_multiplier=int(args.upgd_steps_multiplier),
         batch_size=int(args.upgd_batch_size),
         num_workers=0,  # 改为 0，与原始代码一致（parameter_backdoor 使用单进程加载）
-        seed=2333,  # 与原始代码一致（parameter_backdoor/generate_upgd.py 默认 seed=0）
+        seed=config.poison_seed,
     )
 
     target_cls = int(config.target_class[args.dataset])
     print(f"[UPGD] target_class={target_cls}")
+    print(f"[UPGD] label_mode={args.label_mode}")
     print(f"[UPGD] poison_rate(overall)={args.poison_rate}")
     print(f"[UPGD] constraint={cfg.constraint}, eps={cfg.eps}, num_steps={cfg.num_steps}, multiplier={cfg.steps_multiplier}, batch_size={cfg.batch_size}")
     print(f"[UPGD] base_model={args.upgd_model_path}")
+    print("[UPGD] base_model_input_space=raw_0_1")
 
     # 1) 生成通用扰动（raw-space delta）
     delta_raw = upgd_mod.generate_upgd_delta_raw(
@@ -795,19 +819,21 @@ elif args.poison_type == 'upgd':
         std=std,
     )
 
-    # 3) 生成投毒训练集（BadNet-style all-to-one）：
-    #    - 从全体样本中按 poison_rate 抽样
-    #    - 被投毒样本标签改为 target_class
+    # 3) 生成投毒训练集：
+    #    - clean: 只从目标类抽样并保持标签不变
+    #    - all2one: 从全体样本抽样并把标签改为 target_class
     img_set, poison_indices, label_set = upgd_mod.poison_images_with_delta_raw(
         dataset=train_set,
         delta_raw=delta_raw,
         poison_rate=args.poison_rate,
         target_class=target_cls,
-        seed=2333,
+        seed=config.poison_seed,
+        label_mode=args.label_mode,
     )
 
+    sample_scope = 'target class' if args.label_mode == 'clean' else 'full dataset'
     print('poison_indicies : ', poison_indices, flush=True)
-    print('[Generate Poisoned Set] Save %d Images (poisoned: %d; sampled from full dataset)' % (len(label_set), len(poison_indices)), flush=True)
+    print('[Generate Poisoned Set] Save %d Images (poisoned: %d; sampled from %s)' % (len(label_set), len(poison_indices), sample_scope), flush=True)
     sys.stdout.flush()
 
     # 只有 Tiny-ImageNet 使用 'imgs' 目录，其他数据集使用 'data' 目录

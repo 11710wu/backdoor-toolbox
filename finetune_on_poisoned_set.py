@@ -30,6 +30,9 @@ parser.add_argument('-ember_options', type=str, required=False,
 parser.add_argument('-alpha', type=float, required=False,
                     default=default_args.parser_default['alpha'])
 parser.add_argument('-test_alpha', type=float, required=False, default=None)
+parser.add_argument('-label_mode', type=str, required=False, default='clean',
+                    choices=['clean', 'all2one'],
+                    help='SIG/UPGD training-label mode used for poison-set/model path lookup')
 parser.add_argument('-resume', type=int, required=False, default=0)
 parser.add_argument('-resume_from_meta_info', default=False, action='store_true')
 parser.add_argument('-trigger', type=str, required=False,
