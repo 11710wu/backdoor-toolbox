@@ -49,7 +49,7 @@ DEFENSES=(
 
 UPGD_STEPS="100"
 UPGD_STEPS_MULTIPLIER="5"
-UPGD_CLEAN_MODEL_PATH="poisoned_train_set/${DATASET}/none_0.000_poison_seed=2333_arch=SmallCNN_cifar10/SmallCNN_cifar10.pt"
+UPGD_CLEAN_MODEL_PATH="${UPGD_CLEAN_MODEL_PATH:-poisoned_train_set/${DATASET}/none_0.000_poison_seed=2333_arch=SmallCNN_cifar10/SmallCNN_cifar10.pt}"
 
 run_command() {
   local cmd="$1"
@@ -105,11 +105,8 @@ double_cover_rate() {
 
 noise_levels() {
   case "$1" in
-    "none") echo "0.000" ;;
     "gaussian") echo "0.030 0.060 0.100" ;;
     "uniform") echo "0.030 0.060 0.100" ;;
-    "salt_pepper") echo "0.010 0.030 0.050" ;;
-    "speckle") echo "0.030 0.060 0.100" ;;
     *)
       echo "Unsupported noise type: $1" >&2
       return 1
@@ -208,6 +205,7 @@ echo "attacks      : ${ATTACKS[*]}"
 echo "noise types  : ${NOISE_TYPES[*]}"
 echo "defenses     : ${DEFENSES[*]}"
 echo "transfer     : ${TRANSFER_SCRIPT}"
+echo "upgd clean   : ${UPGD_CLEAN_MODEL_PATH}"
 echo "dry run      : ${DRY_RUN}"
 echo "stop on fail : ${STOP_ON_FAIL}"
 echo "error log    : ${ERROR_LOG}"
@@ -215,12 +213,20 @@ echo "============================================================"
 
 echo
 echo "----- 0. UPGD clean base model preparation -----"
-run_command \
-  "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-  "Create clean set for UPGD base model"
-run_command \
-  "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
-  "Train clean base model for UPGD"
+if [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+  echo "UPGD clean base model already exists: ${UPGD_CLEAN_MODEL_PATH}"
+else
+  run_command \
+    "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
+    "Create clean set for UPGD base model"
+  run_command \
+    "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
+    "Train clean base model for UPGD"
+  if [ "$DRY_RUN" != "1" ] && [ ! -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+    echo "UPGD clean base model missing after preparation: ${UPGD_CLEAN_MODEL_PATH}" >&2
+    exit 1
+  fi
+fi
 
 echo
 echo "----- 1. Create poisoned datasets -----"

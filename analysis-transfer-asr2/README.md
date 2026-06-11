@@ -51,3 +51,8 @@ python analysis-transfer-asr2/generate_complete_tradeoff_report.py \
 - `extract_all_results.py`：主提取脚本
 - `validate_extraction.py`、`analyze_stats.py`、`build_*_report.py`：与 testASR 版对应
 - `alltoone/`：SIG/UPGD 模式对比（已同步新指标）
+- **噪声难度实验（CIFAR-10 + noise）**
+  - `analyze_noise_acc_transfer_stealth.py`：ACC / transfer / stealth 分析
+  - `NOISE_ACC_TRANSFER_STEALTH_ANALYSIS_CN.md`：实验与输出文件总说明
+  - `INTERACTION_REGRESSION_EXPLAINED_CN.md`：**交互项回归怎么算、怎么读**（含虚拟变量与 OLS）
+  - `noise_analysis/`：上述脚本生成的 CSV、图表与 `noise_acc_transfer_stealth_regression.txt`

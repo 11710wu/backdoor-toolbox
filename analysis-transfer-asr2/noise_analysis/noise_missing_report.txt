@@ -1,0 +1,12 @@
+# Noise analysis missing/data-quality report
+
+total_rows: 288
+complete_defense_results: 288
+valid_transfer_rate: 288
+include_main_analysis: 259
+
+## Missing item counts
+- none
+
+## Rows with missing items
+none

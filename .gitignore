@@ -41,6 +41,9 @@ analysis-*/**/*.npy
 analysis-*/**/*.npz
 analysis-*/**/__pycache__/
 !analysis-*/**/README.md
+!analysis-*/**/README_CN.md
+!analysis-*/**/NOISE_ACC_TRANSFER_STEALTH_ANALYSIS_CN.md
+!analysis-*/**/NOISE_ACC_TRANSFER_STEALTH_RESULT_SUMMARY_CN.md
 
 clean_set/cifar10/*
 !clean_set/cifar10/.dummy

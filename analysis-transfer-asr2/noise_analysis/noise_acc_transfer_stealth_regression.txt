@@ -1,0 +1,48 @@
+# Noise ACC transfer stealth regression
+
+Model:
+stealth_avg ~ transfer_rate * difficulty + C(attack_type) + C(poison_rate) + C(input_noise_type)
+
+n_rows: 259
+
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:            stealth_avg   R-squared:                       0.693
+Model:                            OLS   Adj. R-squared:                  0.678
+Method:                 Least Squares   F-statistic:                     46.27
+Date:                Wed, 10 Jun 2026   Prob (F-statistic):           3.63e-56
+Time:                        14:11:24   Log-Likelihood:                 183.50
+No. Observations:                 259   AIC:                            -341.0
+Df Residuals:                     246   BIC:                            -294.8
+Df Model:                          12                                         
+Covariance Type:            nonrobust                                         
+====================================================================================================
+                                       coef    std err          t      P>|t|      [0.025      0.975]
+----------------------------------------------------------------------------------------------------
+Intercept                            0.4039      0.040     10.046      0.000       0.325       0.483
+C(attack_type)[T.WaNet]             -0.0177      0.095     -0.187      0.852      -0.205       0.169
+C(attack_type)[T.adaptive_blend]     0.2707      0.032      8.584      0.000       0.209       0.333
+C(attack_type)[T.adaptive_patch]    -0.2444      0.029     -8.414      0.000      -0.302      -0.187
+C(attack_type)[T.badnet]            -0.3315      0.033    -10.178      0.000      -0.396      -0.267
+C(attack_type)[T.belt]               0.1139      0.031      3.732      0.000       0.054       0.174
+C(attack_type)[T.blend]              0.1817      0.030      6.046      0.000       0.122       0.241
+C(attack_type)[T.upgd]              -0.0807      0.032     -2.514      0.013      -0.144      -0.017
+C(poison_rate)[T.0.01]              -0.0426      0.015     -2.774      0.006      -0.073      -0.012
+C(input_noise_type)[T.uniform]      -0.0427      0.016     -2.601      0.010      -0.075      -0.010
+transfer_rate                        0.0544      0.035      1.553      0.122      -0.015       0.123
+difficulty                          -0.0263      0.167     -0.157      0.875      -0.355       0.302
+transfer_rate:difficulty            -0.0988      0.150     -0.660      0.510      -0.394       0.196
+==============================================================================
+Omnibus:                      115.181   Durbin-Watson:                   1.697
+Prob(Omnibus):                  0.000   Jarque-Bera (JB):              550.858
+Skew:                           1.780   Prob(JB):                    2.41e-120
+Kurtosis:                       9.194   Cond. No.                         45.3
+==============================================================================
+
+Notes:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
+
+## Auto interpretation
+transfer_rate:difficulty coefficient: -0.0988468946743683
+transfer_rate:difficulty p-value: 0.5101413377810533
+The interaction is not statistically notable at 0.05; current noisy results do not strongly prove moderation by ACC/difficulty.
