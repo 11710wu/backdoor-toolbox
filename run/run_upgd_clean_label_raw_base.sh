@@ -44,14 +44,29 @@ case "${DATASET}:${MODEL}" in
     cifar10:resnet18)
         ARCH_NAME="ResNet18_cifar10"
         ;;
+    cifar10:small_cnn)
+        ARCH_NAME="SmallCNN_cifar10"
+        ;;
     cifar10:mobilenetv2)
         ARCH_NAME="mobilenetv2_cifar10"
         ;;
     cifar10:vgg19_bn)
         ARCH_NAME="vgg19_bn_cifar10"
         ;;
+    mnistm:resnet18)
+        ARCH_NAME="ResNet18_mnistm"
+        ;;
+    mnistm:mobilenetv2)
+        ARCH_NAME="mobilenetv2_mnistm"
+        ;;
+    mnistm:vgg19_bn)
+        ARCH_NAME="vgg19_bn_mnistm"
+        ;;
     tiny_imagenet:resnet18)
         ARCH_NAME="ResNet18_tiny_imagenet"
+        ;;
+    tiny_imagenet:resnet34)
+        ARCH_NAME="ResNet34_tiny_imagenet"
         ;;
     tiny_imagenet:mobilenetv2)
         ARCH_NAME="mobilenetv2_tiny_imagenet"
@@ -61,15 +76,15 @@ case "${DATASET}:${MODEL}" in
         ;;
     *)
         echo "[ERROR] Unsupported DATASET/MODEL pair: DATASET=${DATASET}, MODEL=${MODEL}"
-        echo "        Supported models: resnet18, mobilenetv2, vgg19_bn"
-        echo "        Supported datasets: cifar10, tiny_imagenet"
+        echo "        Supported models: resnet18, mobilenetv2, vgg19_bn, plus cifar10:small_cnn and tiny_imagenet:resnet34"
+        echo "        Supported datasets: cifar10, tiny_imagenet, mnistm"
         exit 2
         ;;
 esac
 
 if [ -n "${POISON_RATES:-}" ]; then
     read -r -a POISON_RATE_LIST <<< "$POISON_RATES"
-elif [ "$DATASET" = "cifar10" ]; then
+elif [ "$DATASET" = "cifar10" ] || [ "$DATASET" = "mnistm" ]; then
     POISON_RATE_LIST=(0.05 0.01 0.005)
 else
     POISON_RATE_LIST=(0.005 0.001)
@@ -83,7 +98,8 @@ fi
 
 # UPGD delta generation feeds raw [0,1] tensors to the base model, so keep this
 # checkpoint separate from the normal clean baseline trained with Normalize.
-RAW_BASE_DIR="${RAW_BASE_DIR:-poisoned_train_set/${DATASET}/upgd_raw_base_0.000_poison_seed=2333_arch=${ARCH_NAME}}"
+POISON_ROOT="${POISONED_TRAIN_SET_ROOT:-poisoned_train_set}"
+RAW_BASE_DIR="${RAW_BASE_DIR:-${POISON_ROOT}/${DATASET}/upgd_raw_base_0.000_poison_seed=2333_arch=${ARCH_NAME}}"
 UPGD_CLEAN_MODEL_PATH="${UPGD_CLEAN_MODEL_PATH:-${RAW_BASE_DIR}/upgd_raw_base_${ARCH_NAME}.pt}"
 
 BASE_ARGS="-dataset=${DATASET} -model=${MODEL} -devices=${DEVICES}"
@@ -155,7 +171,9 @@ echo "dataset=${DATASET}"
 echo "model=${MODEL}"
 echo "arch=${ARCH_NAME}"
 echo "label_mode=${LABEL_MODE}"
+echo "output_root=${POISONED_TRAIN_SET_ROOT}"
 echo "raw_base=${UPGD_CLEAN_MODEL_PATH}"
+echo "output_note=each poisoned-set dir under this root stores poisoned data, model checkpoints, test/transfer files, and defense outputs"
 echo "error_log=${ERROR_LOG}"
 echo "=========================================="
 
@@ -197,6 +215,10 @@ if [ "$RUN_TRANSFER" = "1" ]; then
         run_stage_for_grid "4. Transfer testing on STL-10" \
             "${PYTHON_BIN} test_stl10.py ${UPGD_SHARED_ARGS} -poison_rate=__RATE__ -eps=__EPS__" \
             "STL-10 transfer test: ${DATASET} ${MODEL} rate=__RATE__ eps=__EPS__"
+    elif [ "$DATASET" = "mnistm" ]; then
+        run_stage_for_grid "4. Transfer testing on MNIST" \
+            "${PYTHON_BIN} test_mnist.py ${UPGD_SHARED_ARGS} -poison_rate=__RATE__ -eps=__EPS__" \
+            "MNIST transfer test: ${DATASET} ${MODEL} rate=__RATE__ eps=__EPS__"
     else
         if [ "$RUN_TINY_CORRUPTION" = "1" ]; then
             echo

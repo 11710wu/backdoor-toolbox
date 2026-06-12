@@ -19,6 +19,8 @@ DEVICES="${DEVICES:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 SKIP_UPGD_PREP="${SKIP_UPGD_PREP:-0}"
+POISONED_TRAIN_SET_ROOT="${POISONED_TRAIN_SET_ROOT:-poisoned_train_set4}"
+export POISONED_TRAIN_SET_ROOT
 
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
@@ -32,7 +34,7 @@ DEFENSES=("SentiNet" "STRIP" "ScaleUp" "IBD_PSC")
 UPGD_STEPS="${UPGD_STEPS:-100}"
 UPGD_STEPS_MULTIPLIER="${UPGD_STEPS_MULTIPLIER:-5}"
 # UPGD uses a raw-input base model for delta generation, not the normal clean baseline.
-UPGD_RAW_BASE_DIR="${UPGD_RAW_BASE_DIR:-poisoned_train_set/${DATASET}/upgd_raw_base_0.000_poison_seed=2333_arch=ResNet34_tiny_imagenet}"
+UPGD_RAW_BASE_DIR="${UPGD_RAW_BASE_DIR:-${POISONED_TRAIN_SET_ROOT}/${DATASET}/upgd_raw_base_0.000_poison_seed=2333_arch=ResNet34_tiny_imagenet}"
 UPGD_CLEAN_MODEL_PATH="${UPGD_CLEAN_MODEL_PATH:-${UPGD_RAW_BASE_DIR}/upgd_raw_base_ResNet34_tiny_imagenet.pt}"
 
 run_command() {
@@ -144,6 +146,8 @@ echo "defenses     : ${DEFENSES[*]}"
 echo "transfer     : ${TRANSFER_SCRIPT}"
 echo "qwen transfer: ${QWEN_TRANSFER_SCRIPT} (enabled=${RUN_QWEN_TRANSFER})"
 echo "qwen domain  : ${QWEN_TARGET_DOMAIN_DIR}"
+echo "output root : ${POISONED_TRAIN_SET_ROOT}"
+echo "output note : each poisoned-set dir under this root stores poisoned data, model checkpoints, test/transfer files, and defense outputs"
 echo "upgd clean   : ${UPGD_CLEAN_MODEL_PATH}"
 echo "dry run      : ${DRY_RUN}"
 echo "stop on fail : ${STOP_ON_FAIL}"

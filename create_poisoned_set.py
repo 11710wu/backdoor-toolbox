@@ -97,8 +97,7 @@ data_dir = config.data_dir  # directory to save standard clean set
 if args.trigger is None:
     args.trigger = config.trigger_default[args.dataset][args.poison_type]
 
-if not os.path.exists(os.path.join('poisoned_train_set', args.dataset)):
-    os.mkdir(os.path.join('poisoned_train_set', args.dataset))
+os.makedirs(os.path.join(supervisor.get_poisoned_train_set_root(), args.dataset), exist_ok=True)
 
 if args.poison_type == 'dynamic':
 

@@ -83,6 +83,10 @@ def get_model_dir(args, cleanse=False, defense=False):
         return f"{get_poison_set_dir(args)}/{get_model_name(args, cleanse=cleanse, defense=defense)}"
 
 
+def get_poisoned_train_set_root():
+    return os.environ.get('POISONED_TRAIN_SET_ROOT', 'poisoned_train_set')
+
+
 def get_dir_core(args, include_model_name=False, include_poison_seed=False):
     ratio = '%.3f' % args.poison_rate
     # ratio = '%.1f' % (args.poison_rate * 100) + '%'
@@ -157,6 +161,7 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
 
 
 def get_poison_set_dir(args):
+    root = get_poisoned_train_set_root()
     ratio = '%.3f' % args.poison_rate
     # ratio = '%.1f' % (args.poison_rate * 100) + '%'
     if args.poison_type in ['trojannn', 'BadEncoder', 'SRA']:
@@ -165,27 +170,27 @@ def get_poison_set_dir(args):
     elif args.poison_type == 'blend' or args.poison_type == 'basic' or args.poison_type == 'clean_label' or args.poison_type == 'badnet':
         blend_alpha = '%.3f' % args.alpha
         if args.poison_type == 'badnet':
-            poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s' % (
-            args.dataset, args.poison_type, ratio, blend_alpha)
+            poison_set_dir = '%s/%s/%s_%s_alpha=%s' % (
+                root, args.dataset, args.poison_type, ratio, blend_alpha)
         else:
-            poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s_trigger=%s' % (
-            args.dataset, args.poison_type, ratio, blend_alpha, args.trigger)
+            poison_set_dir = '%s/%s/%s_%s_alpha=%s_trigger=%s' % (
+                root, args.dataset, args.poison_type, ratio, blend_alpha, args.trigger)
     elif args.poison_type == 'adaptive_blend':
         blend_alpha = '%.3f' % args.alpha
         cover_rate = '%.3f' % args.cover_rate
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s_cover=%s_trigger=%s' % (
-        args.dataset, args.poison_type, ratio, blend_alpha, cover_rate, args.trigger)
+        poison_set_dir = '%s/%s/%s_%s_alpha=%s_cover=%s_trigger=%s' % (
+            root, args.dataset, args.poison_type, ratio, blend_alpha, cover_rate, args.trigger)
     elif args.poison_type == 'adaptive_patch':
         # ========== [Adaptive Patch Alpha参数修改] 开始 ==========
         # 修改：始终在目录路径中包含alpha参数，便于区分不同配置
         blend_alpha = '%.3f' % args.alpha
         cover_rate = '%.3f' % args.cover_rate
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s_cover=%s' % (
-            args.dataset, args.poison_type, ratio, blend_alpha, cover_rate)
+        poison_set_dir = '%s/%s/%s_%s_alpha=%s_cover=%s' % (
+            root, args.dataset, args.poison_type, ratio, blend_alpha, cover_rate)
         # ========== [Adaptive Patch Alpha参数修改] 结束 ==========
     elif args.poison_type == 'TaCT':
         cover_rate = '%.3f' % args.cover_rate
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_cover=%s' % (args.dataset, args.poison_type, ratio, cover_rate)
+        poison_set_dir = '%s/%s/%s_%s_cover=%s' % (root, args.dataset, args.poison_type, ratio, cover_rate)
     elif args.poison_type == 'WaNet':
         # ========== [WaNet目录路径修改] 开始 ==========
         # 对于WaNet攻击，需要在目录路径中包含s和k参数
@@ -202,7 +207,7 @@ def get_poison_set_dir(args):
         # 获取k参数（默认为4）
         k_param = getattr(args, 'k', 4)
         # 构建包含s和k的目录路径
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_cover=%s_s=%s_k=%s' % (args.dataset, args.poison_type, ratio, cover_rate, s_param, k_param)
+        poison_set_dir = '%s/%s/%s_%s_cover=%s_s=%s_k=%s' % (root, args.dataset, args.poison_type, ratio, cover_rate, s_param, k_param)
         # ========== [WaNet目录路径修改] 结束 ==========
     elif args.poison_type == 'SIG':
         # ========== [SIG目录路径修改] 开始 ==========
@@ -220,7 +225,7 @@ def get_poison_set_dir(args):
         f_param = int(getattr(args, 'f', 6))
         label_mode = get_label_mode(args)
         # 构建包含delta和f的目录路径
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_delta=%s_f=%s_mode=%s' % (args.dataset, args.poison_type, ratio, delta_param, f_param, label_mode)
+        poison_set_dir = '%s/%s/%s_%s_delta=%s_f=%s_mode=%s' % (root, args.dataset, args.poison_type, ratio, delta_param, f_param, label_mode)
         # ========== [SIG目录路径修改] 结束 ==========
     elif args.poison_type == 'upgd':
         # Parameter backdoor (UPGD): include eps/constraint/steps(/mult) to avoid collisions
@@ -229,18 +234,18 @@ def get_poison_set_dir(args):
         upgd_steps = getattr(args, 'upgd_steps', 100)
         upgd_steps_multiplier = getattr(args, 'upgd_steps_multiplier', 5)
         label_mode = get_label_mode(args)
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_eps=%s_constraint=%s_steps=%s_mode=%s' % (
-            args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps), label_mode
+        poison_set_dir = '%s/%s/%s_%s_eps=%s_constraint=%s_steps=%s_mode=%s' % (
+            root, args.dataset, args.poison_type, ratio, str(upgd_eps), str(upgd_constraint), str(upgd_steps), label_mode
         )
         poison_set_dir = f'{poison_set_dir}_mult={upgd_steps_multiplier}'
     elif args.poison_type == 'belt':
         belt_alpha = '%.3f' % getattr(args, 'alpha', 1.0)
         cover_rate = '%.3f' % getattr(args, 'cover_rate', 0.5)
         mask_rate = '%.3f' % getattr(args, 'mask_rate', 0.2)
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s_alpha=%s_cover=%s_mask=%s' % (
-            args.dataset, args.poison_type, ratio, belt_alpha, cover_rate, mask_rate)
+        poison_set_dir = '%s/%s/%s_%s_alpha=%s_cover=%s_mask=%s' % (
+            root, args.dataset, args.poison_type, ratio, belt_alpha, cover_rate, mask_rate)
     else:
-        poison_set_dir = 'poisoned_train_set/%s/%s_%s' % (args.dataset, args.poison_type, ratio)
+        poison_set_dir = '%s/%s/%s_%s' % (root, args.dataset, args.poison_type, ratio)
 
     if config.record_poison_seed: poison_set_dir = f'{poison_set_dir}_poison_seed={config.poison_seed}'  # debug
     if config.record_model_arch:
