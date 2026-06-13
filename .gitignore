@@ -32,6 +32,8 @@ poisoned_train_set4/*
 !poisoned_train_set4/.dummy
 UPGD-nonormalized/*
 !UPGD-nonormalized/.dummy
+alltoone/*
+!alltoone/.dummy
 # Keep analysis code trackable, but ignore generated result artifacts.
 analysis-*/**/*.csv
 analysis-*/**/*.json
