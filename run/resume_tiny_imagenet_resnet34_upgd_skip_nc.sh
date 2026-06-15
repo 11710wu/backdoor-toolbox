@@ -37,7 +37,7 @@ FORCE="${FORCE:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized}"
 TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized}"
 
 LOG_DIR="${LOG_DIR:-logs}"

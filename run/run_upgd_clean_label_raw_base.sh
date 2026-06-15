@@ -37,7 +37,7 @@ STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC NC}"
 CORRUPTION_TYPES="${CORRUPTION_TYPES:-frost}"
 CORRUPTION_SEVERITIES="${CORRUPTION_SEVERITIES:-2 3}"
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized}"
 TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized}"
 
 defenses_for_dataset() {

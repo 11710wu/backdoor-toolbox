@@ -252,7 +252,7 @@ def main():
 
     # Target domain dataset
     parser.add_argument("-target_domain_dir", type=str,
-                        default="./data/imagenetv2-matched-frequency-tiny-organized",
+                        default="/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized",
                         help="目标域数据集根目录（优先读取 test/，其次兼容 images/）")
 
     # System

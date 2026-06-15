@@ -27,7 +27,7 @@ UPGD_STEPS="${UPGD_STEPS:-100}"
 UPGD_STEPS_MULTIPLIER="${UPGD_STEPS_MULTIPLIER:-5}"
 EPS_VALUES="${EPS_VALUES:-4 6 8 10 12 16 20 24}"
 DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC NC}"
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized}"
 TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized}"
 
 DATASETS="${DATASETS:-cifar10 tiny_imagenet mnistm}"
