@@ -22,9 +22,12 @@ UPGD_STEPS="${UPGD_STEPS:-100}"
 UPGD_STEPS_MULTIPLIER="${UPGD_STEPS_MULTIPLIER:-5}"
 DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC}"
 
-RUN_PREP="${RUN_PREP:-1}"
-RUN_CREATE="${RUN_CREATE:-1}"
-RUN_TRAIN="${RUN_TRAIN:-1}"
+# Resume mode is conservative by default: do not regenerate raw bases, poison
+# tensors, poison indices, or trained checkpoints. Set these to 1 explicitly
+# only when you really want to rebuild missing upstream artifacts.
+RUN_PREP="${RUN_PREP:-0}"
+RUN_CREATE="${RUN_CREATE:-0}"
+RUN_TRAIN="${RUN_TRAIN:-0}"
 RUN_TEST="${RUN_TEST:-1}"
 RUN_TRANSFER="${RUN_TRANSFER:-1}"
 RUN_QWEN_TRANSFER="${RUN_QWEN_TRANSFER:-0}"
@@ -35,7 +38,7 @@ DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 
 TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
-TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized}"
 
 LOG_DIR="${LOG_DIR:-logs}"
 mkdir -p "$LOG_DIR"
@@ -149,10 +152,26 @@ skip_poison_creation() {
   if [ "$FORCE" = "1" ]; then
     return 1
   fi
-  if [ -d "$dir/data" ] && [ -e "$labels_path" ] && compgen -G "${dir}/upgd_*.pth" >/dev/null; then
+
+  # Existing Tiny-ImageNet poison sets may store images under either data/ or
+  # imgs/. Treat downstream artifacts as a hard skip too, so resume mode never
+  # overwrites poison indices for a model that was already trained/tested.
+  if { [ -d "$dir/data" ] || [ -d "$dir/imgs" ]; } \
+    && [ -e "$labels_path" ] \
+    && [ -e "$dir/poison_indices" ] \
+    && compgen -G "${dir}/upgd_*.pth" >/dev/null; then
     echo "[SKIP] poison set exists: ${dir}"
     return 0
   fi
+
+  if [ -s "${dir}/${ARCH_NAME}.pt" ] \
+    || [ -s "${dir}/train_results_seed=2333.json" ] \
+    || [ -s "${dir}/test_results_seed=2333.json" ] \
+    || compgen -G "${dir}/*_defense_results.json" >/dev/null; then
+    echo "[SKIP] poison creation skipped because downstream artifacts exist: ${dir}"
+    return 0
+  fi
+
   return 1
 }
 
@@ -166,6 +185,7 @@ echo "label_mode        : ${LABEL_MODE}"
 echo "poison_rates      : ${POISON_RATES}"
 echo "eps_values        : ${EPS_VALUES}"
 echo "defenses          : $(filtered_defenses | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
+echo "run_prep/create/train: ${RUN_PREP}/${RUN_CREATE}/${RUN_TRAIN}"
 echo "force             : ${FORCE}"
 echo "dry_run           : ${DRY_RUN}"
 echo "error_log         : ${ERROR_LOG}"

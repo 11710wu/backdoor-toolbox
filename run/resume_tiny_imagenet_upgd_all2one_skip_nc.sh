@@ -9,20 +9,26 @@ PYTHON_BIN="${PYTHON_BIN:-python}"
 DEVICES="${DEVICES:-0}"
 DATASET="tiny_imagenet"
 MODEL="${MODEL:-resnet18}"
-POISONED_TRAIN_SET_ROOT="${POISONED_TRAIN_SET_ROOT:-poisoned_train_set2}"
+POISONED_TRAIN_SET_ROOT="${POISONED_TRAIN_SET_ROOT:-/workspace/backdoor-toolbox/poisoned_train_set2}"
 export POISONED_TRAIN_SET_ROOT
 
 LABEL_MODE="all2one"
 POISON_RATES="${POISON_RATES:-0.001 0.005}"
 EPS_VALUES="${EPS_VALUES:-4 6 8 10 12 16 20 24}"
+START_RATE="${START_RATE:-}"
+START_EPS="${START_EPS:-}"
+START_AFTER="${START_AFTER:-1}"
 UPGD_CONSTRAINT="${UPGD_CONSTRAINT:-Linf}"
 UPGD_STEPS="${UPGD_STEPS:-100}"
 UPGD_STEPS_MULTIPLIER="${UPGD_STEPS_MULTIPLIER:-5}"
 DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC}"
 
-RUN_PREP="${RUN_PREP:-1}"
-RUN_CREATE="${RUN_CREATE:-1}"
-RUN_TRAIN="${RUN_TRAIN:-1}"
+# Resume mode is conservative by default: do not regenerate raw bases, poison
+# tensors, poison indices, or trained checkpoints. Set these to 1 explicitly
+# only when you really want to rebuild missing upstream artifacts.
+RUN_PREP="${RUN_PREP:-0}"
+RUN_CREATE="${RUN_CREATE:-0}"
+RUN_TRAIN="${RUN_TRAIN:-0}"
 RUN_TEST="${RUN_TEST:-1}"
 RUN_TRANSFER="${RUN_TRANSFER:-1}"
 RUN_QWEN_TRANSFER="${RUN_QWEN_TRANSFER:-1}"
@@ -33,7 +39,7 @@ DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 
 TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
-TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized}"
 
 LOG_DIR="${LOG_DIR:-logs}"
 mkdir -p "$LOG_DIR"
@@ -79,6 +85,50 @@ poison_dir() {
 
 model_path_for() {
   echo "$(poison_dir "$1" "$2")/${ARCH_NAME}.pt"
+}
+
+num_lt() {
+  awk -v a="$1" -v b="$2" 'BEGIN { exit !((a + 0) < (b + 0)) }'
+}
+
+num_gt() {
+  awk -v a="$1" -v b="$2" 'BEGIN { exit !((a + 0) > (b + 0)) }'
+}
+
+num_le() {
+  awk -v a="$1" -v b="$2" 'BEGIN { exit !((a + 0) <= (b + 0)) }'
+}
+
+should_skip_combo_for_resume_start() {
+  local rate="$1"
+  local eps="$2"
+
+  if [ -z "$START_RATE" ]; then
+    return 1
+  fi
+
+  if num_lt "$rate" "$START_RATE"; then
+    return 0
+  fi
+  if num_gt "$rate" "$START_RATE"; then
+    return 1
+  fi
+
+  if [ -z "$START_EPS" ]; then
+    return 1
+  fi
+
+  if [ "$START_AFTER" = "1" ]; then
+    if num_le "$eps" "$START_EPS"; then
+      return 0
+    fi
+  else
+    if num_lt "$eps" "$START_EPS"; then
+      return 0
+    fi
+  fi
+
+  return 1
 }
 
 defense_result_file() {
@@ -156,10 +206,26 @@ skip_poison_creation() {
   if [ "$FORCE" = "1" ]; then
     return 1
   fi
-  if [ -d "$dir/data" ] && [ -e "$dir/labels" ] && compgen -G "${dir}/upgd_*.pth" >/dev/null; then
+
+  # Existing Tiny-ImageNet poison sets may store images under either data/ or
+  # imgs/. Treat downstream artifacts as a hard skip too, so resume mode never
+  # overwrites poison indices for a model that was already trained/tested.
+  if { [ -d "$dir/data" ] || [ -d "$dir/imgs" ]; } \
+    && [ -e "$dir/labels" ] \
+    && [ -e "$dir/poison_indices" ] \
+    && compgen -G "${dir}/upgd_*.pth" >/dev/null; then
     echo "[SKIP] poison set exists: ${dir}"
     return 0
   fi
+
+  if [ -s "${dir}/${ARCH_NAME}.pt" ] \
+    || [ -s "${dir}/train_results_seed=2333.json" ] \
+    || [ -s "${dir}/test_results_seed=2333.json" ] \
+    || compgen -G "${dir}/*_defense_results.json" >/dev/null; then
+    echo "[SKIP] poison creation skipped because downstream artifacts exist: ${dir}"
+    return 0
+  fi
+
   return 1
 }
 
@@ -172,8 +238,10 @@ echo "arch              : ${ARCH_NAME}"
 echo "label_mode        : ${LABEL_MODE}"
 echo "poison_rates      : ${POISON_RATES}"
 echo "eps_values        : ${EPS_VALUES}"
+echo "resume_start      : rate=${START_RATE:-none}, eps=${START_EPS:-none}, start_after=${START_AFTER}"
 echo "defenses          : $(filtered_defenses | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
 echo "qwen_transfer     : ${RUN_QWEN_TRANSFER}"
+echo "run_prep/create/train: ${RUN_PREP}/${RUN_CREATE}/${RUN_TRAIN}"
 echo "force             : ${FORCE}"
 echo "dry_run           : ${DRY_RUN}"
 echo "error_log         : ${ERROR_LOG}"
@@ -197,6 +265,11 @@ fi
 
 for rate in ${POISON_RATES}; do
   for eps in ${EPS_VALUES}; do
+    if should_skip_combo_for_resume_start "$rate" "$eps"; then
+      echo "[SKIP] before resume start: ${MODEL} rate=${rate} eps=${eps}"
+      continue
+    fi
+
     dir="$(poison_dir "$rate" "$eps")"
     model_path="$(model_path_for "$rate" "$eps")"
     shared="$(upgd_args) -poison_rate=${rate} -eps=${eps}"
