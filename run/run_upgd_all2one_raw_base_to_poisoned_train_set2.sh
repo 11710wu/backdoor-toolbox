@@ -28,7 +28,7 @@ UPGD_STEPS_MULTIPLIER="${UPGD_STEPS_MULTIPLIER:-5}"
 EPS_VALUES="${EPS_VALUES:-4 6 8 10 12 16 20 24}"
 DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC NC}"
 TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
-TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
 
 DATASETS="${DATASETS:-cifar10 tiny_imagenet mnistm}"
 CIFAR10_MODELS="${CIFAR10_MODELS:-resnet18 mobilenetv2 vgg19_bn}"
@@ -131,6 +131,17 @@ upgd_args() {
   echo "-poison_type=upgd -label_mode=${LABEL_MODE} -constraint=${UPGD_CONSTRAINT} -upgd_steps=${UPGD_STEPS} -upgd_steps_multiplier=${UPGD_STEPS_MULTIPLIER}"
 }
 
+defenses_for_dataset() {
+  local dataset="$1"
+  local defense
+  for defense in ${DEFENSES}; do
+    if [ "$dataset" = "tiny_imagenet" ] && [ "$defense" = "NC" ]; then
+      continue
+    fi
+    echo "$defense"
+  done
+}
+
 raw_base_path() {
   local dataset="$1"
   local arch="$2"
@@ -202,6 +213,7 @@ echo "datasets     : ${DATASETS}"
 echo "eps values   : ${EPS_VALUES}"
 echo "label_mode   : ${LABEL_MODE}"
 echo "defenses     : ${DEFENSES}"
+echo "tiny note    : NC is automatically skipped for tiny_imagenet"
 echo "dry run      : ${DRY_RUN}"
 echo "error log    : ${ERROR_LOG}"
 echo "============================================================"
@@ -242,7 +254,7 @@ for dataset in ${DATASETS}; do
         fi
 
         if [ "$RUN_DEFENSES" = "1" ]; then
-          for defense in ${DEFENSES}; do
+          for defense in $(defenses_for_dataset "$dataset"); do
             run_command \
               "${PYTHON_BIN} other_defense.py -defense=${defense} ${shared}" \
               "Defense ${defense}: ${dataset}/${model} rate=${rate} eps=${eps}"

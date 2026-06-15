@@ -13,7 +13,8 @@ DATASET="tiny_imagenet"
 MODEL="resnet34"
 TRANSFER_SCRIPT="test_tiny_target_domain.py"
 QWEN_TRANSFER_SCRIPT="test_tiny_target_domain_qwen.py"
-QWEN_TARGET_DOMAIN_DIR="${QWEN_TARGET_DOMAIN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
+QWEN_TARGET_DOMAIN_DIR="${QWEN_TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
 RUN_QWEN_TRANSFER="${RUN_QWEN_TRANSFER:-1}"
 DEVICES="${DEVICES:-0}"
 DRY_RUN="${DRY_RUN:-0}"
@@ -122,7 +123,7 @@ transfer_command() {
   local rate="$2"
   local args="$3"
 
-  echo "${PYTHON_BIN} ${TRANSFER_SCRIPT} $(base_args) -source_dataset=${DATASET} -poison_type=${attack} -poison_rate=${rate} ${args}"
+  echo "${PYTHON_BIN} ${TRANSFER_SCRIPT} $(base_args) -source_dataset=${DATASET} -poison_type=${attack} -poison_rate=${rate} ${args} -target_domain_dir=${TARGET_DOMAIN_DIR}"
 }
 
 qwen_transfer_command() {
@@ -144,6 +145,7 @@ echo "poison rates : ${POISON_RATES[*]}"
 echo "attacks      : ${ATTACKS[*]}"
 echo "defenses     : ${DEFENSES[*]}"
 echo "transfer     : ${TRANSFER_SCRIPT}"
+echo "target domain: ${TARGET_DOMAIN_DIR}"
 echo "qwen transfer: ${QWEN_TRANSFER_SCRIPT} (enabled=${RUN_QWEN_TRANSFER})"
 echo "qwen domain  : ${QWEN_TARGET_DOMAIN_DIR}"
 echo "output root : ${POISONED_TRAIN_SET_ROOT}"

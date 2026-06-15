@@ -38,7 +38,17 @@ DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC NC}"
 CORRUPTION_TYPES="${CORRUPTION_TYPES:-frost}"
 CORRUPTION_SEVERITIES="${CORRUPTION_SEVERITIES:-2 3}"
 TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
-TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
+
+defenses_for_dataset() {
+    local defense
+    for defense in ${DEFENSES}; do
+        if [ "$DATASET" = "tiny_imagenet" ] && [ "$defense" = "NC" ]; then
+            continue
+        fi
+        echo "$defense"
+    done
+}
 
 case "${DATASET}:${MODEL}" in
     cifar10:resnet18)
@@ -173,6 +183,8 @@ echo "arch=${ARCH_NAME}"
 echo "label_mode=${LABEL_MODE}"
 echo "output_root=${POISONED_TRAIN_SET_ROOT}"
 echo "raw_base=${UPGD_CLEAN_MODEL_PATH}"
+echo "defenses=${DEFENSES}"
+echo "effective_defenses=$(defenses_for_dataset | tr '\n' ' ' | sed 's/[[:space:]]*$//')"
 echo "output_note=each poisoned-set dir under this root stores poisoned data, model checkpoints, test/transfer files, and defense outputs"
 echo "error_log=${ERROR_LOG}"
 echo "=========================================="
@@ -249,7 +261,7 @@ fi
 if [ "$RUN_DEFENSES" = "1" ]; then
     echo
     echo "----- 5. Defenses: ${DATASET} ${MODEL} -----"
-    for defense in ${DEFENSES}; do
+    for defense in $(defenses_for_dataset); do
         run_stage_for_grid "Defense ${defense}" \
             "${PYTHON_BIN} other_defense.py -defense=${defense} ${UPGD_SHARED_ARGS} -poison_rate=__RATE__ -eps=__EPS__" \
             "Defense ${defense}: ${DATASET} ${MODEL} rate=__RATE__ eps=__EPS__"

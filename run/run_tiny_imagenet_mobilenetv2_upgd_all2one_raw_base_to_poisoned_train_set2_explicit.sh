@@ -10,7 +10,7 @@ set +e
 DEVICES="${DEVICES:-0}"
 export POISONED_TRAIN_SET_ROOT="${POISONED_TRAIN_SET_ROOT:-poisoned_train_set2}"
 TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/data/imagenetv2-matched-frequency-tiny-organized}"
-TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
 
 run_command() {
     local original_cmd="$1"
@@ -222,6 +222,10 @@ run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -mo
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -model=mobilenetv2 -devices=${DEVICES} -poison_type=upgd -label_mode=all2one -constraint=Linf -upgd_steps=100 -upgd_steps_multiplier=5 -poison_rate=0.005 -eps=16" "Defense: IBD_PSC tiny_imagenet upgd all2one rate=0.005 eps=16 (mobilenetv2)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -model=mobilenetv2 -devices=${DEVICES} -poison_type=upgd -label_mode=all2one -constraint=Linf -upgd_steps=100 -upgd_steps_multiplier=5 -poison_rate=0.005 -eps=20" "Defense: IBD_PSC tiny_imagenet upgd all2one rate=0.005 eps=20 (mobilenetv2)"
 run_command "python other_defense.py -defense=IBD_PSC -dataset=tiny_imagenet -model=mobilenetv2 -devices=${DEVICES} -poison_type=upgd -label_mode=all2one -constraint=Linf -upgd_steps=100 -upgd_steps_multiplier=5 -poison_rate=0.005 -eps=24" "Defense: IBD_PSC tiny_imagenet upgd all2one rate=0.005 eps=24 (mobilenetv2)"
+
+echo '----- Defense: NC skipped for tiny_imagenet mobilenetv2 -----'
+echo '[SKIP] NC is disabled for Tiny-ImageNet all-to-one runs; script complete.'
+exit 0
 
 echo '----- Defense: NC (tiny_imagenet mobilenetv2) -----'
 run_command "python other_defense.py -defense=NC -dataset=tiny_imagenet -model=mobilenetv2 -devices=${DEVICES} -poison_type=upgd -label_mode=all2one -constraint=Linf -upgd_steps=100 -upgd_steps_multiplier=5 -poison_rate=0.001 -eps=4" "Defense: NC tiny_imagenet upgd all2one rate=0.001 eps=4 (mobilenetv2)"
