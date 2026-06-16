@@ -107,6 +107,8 @@ noise_levels() {
   case "$1" in
     "gaussian") echo "0.030 0.060 0.100" ;;
     "uniform") echo "0.030 0.060 0.100" ;;
+    "salt_pepper") echo "0.030 0.060 0.100" ;;
+    "speckle") echo "0.030 0.060 0.100" ;;
     *)
       echo "Unsupported noise type: $1" >&2
       return 1
