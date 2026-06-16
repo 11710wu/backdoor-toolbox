@@ -16,6 +16,7 @@ ARCH_NAME="ResNet18_cifar10"
 TRANSFER_SCRIPT="test_stl10.py"
 DEVICES="${DEVICES:-0}"
 INPUT_NOISE_SEED="${INPUT_NOISE_SEED:-2333}"
+SIG_UPGD_LABEL_MODE="${SIG_UPGD_LABEL_MODE:-clean}"
 
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
@@ -147,7 +148,7 @@ attack_args() {
       echo "-alpha ${strength}"
       ;;
     "SIG")
-      echo "-f 6 -delta ${strength} -label_mode all2one"
+      echo "-f 6 -delta ${strength} -label_mode ${SIG_UPGD_LABEL_MODE}"
       ;;
     "WaNet")
       echo "-cover_rate $(double_cover_rate "$rate") -s ${strength} -k 4"
@@ -162,7 +163,7 @@ attack_args() {
       echo "-cover_rate 0.5 -mask_rate ${strength} -alpha 1.0"
       ;;
     "upgd")
-      echo "-eps ${strength} -constraint Linf -upgd_steps ${UPGD_STEPS} -upgd_steps_multiplier ${UPGD_STEPS_MULTIPLIER} -label_mode all2one"
+      echo "-eps ${strength} -constraint Linf -upgd_steps ${UPGD_STEPS} -upgd_steps_multiplier ${UPGD_STEPS_MULTIPLIER} -label_mode ${SIG_UPGD_LABEL_MODE}"
       ;;
     *)
       echo "Unsupported attack: $attack" >&2
@@ -203,7 +204,7 @@ echo "attacks      : ${ATTACKS[*]}"
 echo "noise types  : ${NOISE_TYPES[*]}"
 echo "noise levels : gaussian=${GAUSSIAN_NOISE_LEVELS:-0.030 0.060 0.100}; uniform=${UNIFORM_NOISE_LEVELS:-0.030 0.060 0.100}; salt_pepper=${SALT_PEPPER_NOISE_LEVELS:-0.030 0.060 0.100}; speckle=${SPECKLE_NOISE_LEVELS:-0.030 0.060 0.100}"
 echo "noise seed   : ${INPUT_NOISE_SEED}"
-echo "label mode   : all2one for SIG/UPGD"
+echo "label mode   : ${SIG_UPGD_LABEL_MODE} for SIG/UPGD"
 echo "transfer     : ${TRANSFER_SCRIPT}"
 echo "defenses     : ${DEFENSES}"
 echo "upgd raw base: ${UPGD_CLEAN_MODEL_PATH}"
