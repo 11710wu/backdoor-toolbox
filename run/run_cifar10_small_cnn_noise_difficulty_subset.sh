@@ -18,6 +18,10 @@ DEVICES="${DEVICES:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 INPUT_NOISE_SEED="${INPUT_NOISE_SEED:-2333}"
+SKIP_UPGD_PREP="${SKIP_UPGD_PREP:-0}"
+WAIT_FOR_UPGD_BASE="${WAIT_FOR_UPGD_BASE:-0}"
+UPGD_BASE_WAIT_SECONDS="${UPGD_BASE_WAIT_SECONDS:-7200}"
+UPGD_BASE_WAIT_INTERVAL="${UPGD_BASE_WAIT_INTERVAL:-60}"
 
 LOG_DIR="logs"
 mkdir -p "$LOG_DIR"
@@ -88,6 +92,38 @@ run_command() {
 
   rm -f "$tmp_out"
   return "$exit_code"
+}
+
+wait_for_upgd_base() {
+  if [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+    return 0
+  fi
+
+  if [ "$DRY_RUN" = "1" ]; then
+    echo "[DRY_RUN] would wait for UPGD clean base: ${UPGD_CLEAN_MODEL_PATH}"
+    return 0
+  fi
+
+  if [ "$WAIT_FOR_UPGD_BASE" != "1" ]; then
+    echo "UPGD clean base model missing: ${UPGD_CLEAN_MODEL_PATH}" >&2
+    return 1
+  fi
+
+  echo "Waiting for UPGD clean base model: ${UPGD_CLEAN_MODEL_PATH}"
+  local waited=0
+  while [ ! -f "$UPGD_CLEAN_MODEL_PATH" ] && [ "$waited" -lt "$UPGD_BASE_WAIT_SECONDS" ]; do
+    sleep "$UPGD_BASE_WAIT_INTERVAL"
+    waited=$((waited + UPGD_BASE_WAIT_INTERVAL))
+    echo "Still waiting for UPGD clean base... ${waited}s"
+  done
+
+  if [ ! -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+    echo "Timed out waiting for UPGD clean base after ${UPGD_BASE_WAIT_SECONDS}s: ${UPGD_CLEAN_MODEL_PATH}" >&2
+    return 1
+  fi
+
+  echo "Found UPGD clean base model: ${UPGD_CLEAN_MODEL_PATH}"
+  return 0
 }
 
 double_cover_rate() {
@@ -208,6 +244,8 @@ echo "noise types  : ${NOISE_TYPES[*]}"
 echo "defenses     : ${DEFENSES[*]}"
 echo "transfer     : ${TRANSFER_SCRIPT}"
 echo "upgd clean   : ${UPGD_CLEAN_MODEL_PATH}"
+echo "skip upgd prep: ${SKIP_UPGD_PREP}"
+echo "wait upgd base: ${WAIT_FOR_UPGD_BASE}"
 echo "dry run      : ${DRY_RUN}"
 echo "stop on fail : ${STOP_ON_FAIL}"
 echo "error log    : ${ERROR_LOG}"
@@ -215,7 +253,9 @@ echo "============================================================"
 
 echo
 echo "----- 0. UPGD clean base model preparation -----"
-if [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+if [ "$SKIP_UPGD_PREP" = "1" ]; then
+  echo "Skipping UPGD clean base preparation in this script."
+elif [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
   echo "UPGD clean base model already exists: ${UPGD_CLEAN_MODEL_PATH}"
 else
   run_command \
@@ -240,6 +280,7 @@ for noise_type in "${NOISE_TYPES[@]}"; do
         for strength in $(strength_values "$attack"); do
           args="$(attack_args "$attack" "$rate" "$strength")"
           if [ "$attack" = "upgd" ]; then
+            wait_for_upgd_base || exit 1
             args="${args} -upgd_model_path ${UPGD_CLEAN_MODEL_PATH}"
           fi
           label="$(strength_label "$attack" "$strength")"
