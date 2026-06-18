@@ -16,27 +16,30 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     outputs: dict[str, pd.DataFrame] = {}
 
     outputs["overall"] = grouped_correlations(d, [])
+    outputs["by_result_group"] = grouped_correlations(d, ["result_group"])
     outputs["by_dataset"] = grouped_correlations(d, ["dataset"])
+    outputs["by_transfer_dataset"] = grouped_correlations(d, ["dataset", "transfer_dataset"])
     outputs["by_attack"] = grouped_correlations(d, ["attack_type"])
     outputs["by_dataset_attack"] = grouped_correlations(d, ["dataset", "attack_type"])
-    outputs["by_arch"] = grouped_correlations(d, ["dataset", "arch_base"])
+    outputs["by_transfer_dataset_attack"] = grouped_correlations(d, ["dataset", "transfer_dataset", "attack_type"])
+    outputs["by_arch"] = grouped_correlations(d, ["dataset", "transfer_dataset", "arch_base"])
 
     for name, table in [
         ("rq1_overall_correlations.csv", outputs["overall"]),
+        ("rq1_by_result_group_correlations.csv", outputs["by_result_group"]),
         ("rq1_by_dataset_correlations.csv", outputs["by_dataset"]),
+        ("rq1_by_transfer_dataset_correlations.csv", outputs["by_transfer_dataset"]),
         ("rq1_by_attack_correlations.csv", outputs["by_attack"]),
         ("rq1_by_dataset_attack_correlations.csv", outputs["by_dataset_attack"]),
+        ("rq1_by_transfer_dataset_attack_correlations.csv", outputs["by_transfer_dataset_attack"]),
         ("rq1_by_arch_correlations.csv", outputs["by_arch"]),
     ]:
         save_csv_and_md(table, COEFFICIENT_DIR / name, name.replace(".csv", ""))
 
     sensitivity_rows = []
     for threshold in [0.05, 0.10]:
-        sub = df[
-            (df["complete_source"].astype(bool))
-            & (df["complete_transfer"].astype(bool))
-            & (df["complete_defense_results"].astype(bool))
-            & (pd.to_numeric(df["source_asr"], errors="coerce") >= threshold)
+        sub = d[
+            (pd.to_numeric(d["source_asr"], errors="coerce") >= threshold)
         ].copy()
         rec = grouped_correlations(sub, []).iloc[0].to_dict()
         rec["source_asr_threshold"] = threshold
@@ -44,6 +47,24 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     sensitivity = pd.DataFrame(sensitivity_rows)
     outputs["sensitivity"] = sensitivity
     save_csv_and_md(sensitivity, COEFFICIENT_DIR / "rq1_source_asr_threshold_sensitivity.csv", "RQ1 Source ASR Threshold Sensitivity")
+
+    metric_sensitivity_rows = []
+    for metric in [
+        "transferability",
+        "transfer_asr_chance_adjusted",
+        "transfer_retention_rate",
+        "transfer_gap",
+        "joint_transfer",
+        "legacy_transfer_rate",
+    ]:
+        if metric not in d.columns:
+            continue
+        rec = grouped_correlations(d, [], x=metric, y="stealthiness").iloc[0].to_dict()
+        rec["transfer_metric"] = metric
+        metric_sensitivity_rows.append(rec)
+    metric_sensitivity = pd.DataFrame(metric_sensitivity_rows)
+    outputs["metric_sensitivity"] = metric_sensitivity
+    save_csv_and_md(metric_sensitivity, COEFFICIENT_DIR / "rq1_transfer_metric_sensitivity.csv", "RQ1 Transfer Metric Sensitivity")
 
     ols_basic = ols_records(d, "stealthiness ~ transfer_rate", "stealthiness", ["transfer_rate"])
     ols_controls = ols_records(
@@ -57,17 +78,19 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     save_csv_and_md(ols_controls, COEFFICIENT_DIR / "rq1_ols_with_controls.csv", "RQ1 OLS With Controls")
 
     summary = (
-        d.groupby(["dataset", "attack_type"], dropna=False)
+        d.groupby(["dataset", "transfer_dataset", "attack_type"], dropna=False)
         .agg(
             n=("transfer_rate", "size"),
             transfer_rate_median=("transfer_rate", "median"),
             stealthiness_median=("stealthiness", "median"),
             source_asr_median=("source_asr", "median"),
+            transfer_acc_median=("transfer_acc", "median"),
         )
         .reset_index()
     )
     save_csv_and_md(summary, TABLE_DIR / "table_3_rq1_by_dataset_attack.csv", "RQ1 by Dataset and Attack")
     save_csv_and_md(outputs["overall"], TABLE_DIR / "table_2_rq1_overall_summary.csv", "RQ1 Overall Summary")
+    save_csv_and_md(outputs["by_result_group"], TABLE_DIR / "table_2b_rq1_by_result_group_summary.csv", "RQ1 by Result Group Summary")
 
     defense = d.melt(
         id_vars=["attack_type"],
@@ -106,6 +129,7 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
 
     line_plot(rank_df, "rq1_rank_binned_trend_by_dataset.png", "rank_bin", "stealthiness", "dataset", "RQ1 Rank-binned Trend by Dataset")
     simple_heatmap(outputs["by_dataset_attack"], "rq1_attack_dataset_spearman_heatmap.png", "attack_type", "dataset", "spearman", "RQ1 Spearman by Attack and Dataset")
+    grouped_bar(outputs["by_result_group"], "rq1_result_group_spearman.png", "result_group", "spearman", None, "RQ1 Transfer-Stealth Spearman by Result Group")
 
     metric_heat = summary.copy()
     metric_heat["transfer_rate_median_norm"] = metric_heat.groupby("dataset")["transfer_rate_median"].transform(lambda s: (s - s.min()) / (s.max() - s.min()) if s.max() > s.min() else 0.0)
@@ -120,13 +144,17 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
         "01 RQ1 Transfer-Stealth Full Analysis",
         [
             ("Overall correlation", md_table(outputs["overall"])),
+            ("Result-group correlations", md_table(outputs["by_result_group"])),
             ("Dataset correlations", md_table(outputs["by_dataset"])),
+            ("Transfer-dataset correlations", md_table(outputs["by_transfer_dataset"], 40)),
             ("Attack correlations", md_table(outputs["by_attack"], 40)),
             ("Dataset-attack correlations", md_table(outputs["by_dataset_attack"], 60)),
+            ("Transfer-dataset attack correlations", md_table(outputs["by_transfer_dataset_attack"], 80)),
             ("Source-ASR threshold sensitivity", md_table(sensitivity)),
+            ("Transfer metric sensitivity", md_table(metric_sensitivity, 40)),
             (
                 "Interpretation draft",
-                "Negative Spearman values support a transfer-stealth tradeoff. Weak or positive cells should be checked against sample size, pending results, and attack-specific behavior.",
+                "Negative Spearman values support a transfer-stealth tradeoff. transfer_rate is kept as a compatibility column and equals target-domain ASR in this analysis; legacy_transfer_rate keeps the old transfer_asr^2/source_asr formula for sensitivity only. Weak or positive cells should be checked against sample size, pending results, and attack-specific behavior.",
             ),
         ],
     )

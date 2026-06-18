@@ -12,6 +12,26 @@ from scipy import stats
 from config import BOOTSTRAP_N, MIN_GROUP_N, RANDOM_SEED
 
 
+STRICT_CONFIG_BASE_KEYS = [
+    "dataset",
+    "transfer_dataset",
+    "transfer_variant",
+    "attack_type",
+    "poison_rate",
+    "strength_name",
+    "strength_value",
+    "cover_rate",
+    "label_mode",
+]
+
+
+def strict_config_key_columns(df: pd.DataFrame) -> List[str]:
+    keys = [col for col in STRICT_CONFIG_BASE_KEYS if col in df.columns]
+    if "mask_rate" in df.columns:
+        keys.append("mask_rate")
+    return keys
+
+
 def _stat_value(result) -> float:
     if hasattr(result, "statistic"):
         return result.statistic
@@ -26,10 +46,77 @@ def _p_value(result) -> float:
     return result[1]
 
 
-def main_df(df: pd.DataFrame) -> pd.DataFrame:
-    if "include_main_analysis" not in df.columns:
-        return df.copy()
-    return df[df["include_main_analysis"].astype(bool)].copy()
+def _matched_resnet18_row_ids(df: pd.DataFrame, row_mask: pd.Series, *, dataset: str | None = None, transfer_dataset: str | None = None) -> set:
+    if "result_group" not in df.columns or "arch_base" not in df.columns:
+        return set()
+    baseline_mask = (df["result_group"] == "baseline_strength") & (df["arch_base"] == "ResNet18")
+    if dataset is not None and "dataset" in df.columns:
+        baseline_mask &= df["dataset"] == dataset
+    if transfer_dataset is not None and "transfer_dataset" in df.columns:
+        baseline_mask &= df["transfer_dataset"] == transfer_dataset
+
+    baseline = df[baseline_mask].copy()
+    rows = df[row_mask].copy()
+    keys = strict_config_key_columns(df)
+    missing = [c for c in keys if c not in baseline.columns or c not in rows.columns]
+    if baseline.empty or rows.empty or missing:
+        return set()
+
+    rows["_strict_row_id"] = rows.index
+    matched = rows.merge(baseline[keys].drop_duplicates(), on=keys, how="inner")
+    return set(matched["_strict_row_id"])
+
+
+def _filter_unmatched_noise_rows(df: pd.DataFrame) -> pd.DataFrame:
+    if "result_group" not in df.columns:
+        return df
+    input_noise = df["input_noise_type"] if "input_noise_type" in df.columns else pd.Series("", index=df.index)
+    noise_mask = (df["result_group"] == "noise_acc") & (input_noise.astype(str) != "")
+    if not noise_mask.any():
+        return df
+
+    matched_ids = _matched_resnet18_row_ids(df, noise_mask, dataset="cifar10", transfer_dataset="stl10")
+    keep_mask = ~noise_mask | df.index.isin(matched_ids)
+    return df[keep_mask].copy()
+
+
+def _filter_unmatched_arch_rows(df: pd.DataFrame) -> pd.DataFrame:
+    if "result_group" not in df.columns:
+        return df
+    arch_mask = df["result_group"] == "arch_acc"
+    if not arch_mask.any():
+        return df
+    matched_ids = _matched_resnet18_row_ids(df, arch_mask)
+    keep_mask = ~arch_mask | df.index.isin(matched_ids)
+    return df[keep_mask].copy()
+
+
+def analysis_df(
+    df: pd.DataFrame,
+    *,
+    main_transfer_only: bool = True,
+    include_unmatched_noise: bool = False,
+    include_unmatched_arch: bool = False,
+) -> pd.DataFrame:
+    flag_col = "include_main_analysis" if main_transfer_only else "complete_analysis_row"
+    if flag_col not in df.columns:
+        out = df.copy()
+    else:
+        out = df[df[flag_col].astype(bool)].copy()
+    if not include_unmatched_noise:
+        out = _filter_unmatched_noise_rows(out)
+    if not include_unmatched_arch:
+        out = _filter_unmatched_arch_rows(out)
+    return out
+
+
+def main_df(df: pd.DataFrame, *, include_unmatched_noise: bool = False, include_unmatched_arch: bool = False) -> pd.DataFrame:
+    return analysis_df(
+        df,
+        main_transfer_only=True,
+        include_unmatched_noise=include_unmatched_noise,
+        include_unmatched_arch=include_unmatched_arch,
+    )
 
 
 def numeric_df(df: pd.DataFrame, cols: Sequence[str]) -> pd.DataFrame:

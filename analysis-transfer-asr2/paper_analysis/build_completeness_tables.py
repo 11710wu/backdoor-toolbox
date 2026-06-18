@@ -11,7 +11,7 @@ from stats_utils import save_csv_and_md
 
 
 def build_completeness_tables(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    status_cols = ["result_group", "dataset", "arch_base", "attack_type", "analysis_status"]
+    status_cols = ["result_group", "dataset", "transfer_dataset", "arch_base", "attack_type", "analysis_status"]
     comp = (
         df.groupby(status_cols, dropna=False)
         .size()
@@ -28,6 +28,7 @@ def build_completeness_tables(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFr
                 {
                     "result_group": row.get("result_group", ""),
                     "dataset": row.get("dataset", ""),
+                    "transfer_dataset": row.get("transfer_dataset", ""),
                     "arch_base": row.get("arch_base", ""),
                     "attack_type": row.get("attack_type", ""),
                     "missing_item": item,
@@ -37,7 +38,7 @@ def build_completeness_tables(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFr
             )
     missing = pd.DataFrame(missing_rows)
     missing_summary = (
-        missing.groupby(["result_group", "dataset", "arch_base", "attack_type", "missing_item"], dropna=False)
+        missing.groupby(["result_group", "dataset", "transfer_dataset", "arch_base", "attack_type", "missing_item"], dropna=False)
         .size()
         .reset_index(name="n")
         .sort_values(["result_group", "dataset", "arch_base", "attack_type", "missing_item"])

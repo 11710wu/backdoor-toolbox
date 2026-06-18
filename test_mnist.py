@@ -118,26 +118,26 @@ def save_poisoned_example_to_dir(original_img, poisoned_img, attack_type, method
     # 创建保存目录
     save_dir = os.path.join(model_dir, "mnist_cross_examples")
     os.makedirs(save_dir, exist_ok=True)
-    
-    # 反归一化图片（使用 MNIST-M 的归一化参数）
-    # MNIST-M 归一化参数: Mean=[0.46, 0.46, 0.46], Std=[0.23, 0.23, 0.23]
-    mean = torch.tensor([0.46, 0.46, 0.46]).view(3, 1, 1).cuda()
-    std = torch.tensor([0.23, 0.23, 0.23]).view(3, 1, 1).cuda()
-    
-    original_denorm = original_img * std + mean
-    poisoned_denorm = poisoned_img * std + mean
-    
-    # 限制像素值在[0, 1]范围内
-    original_denorm = torch.clamp(original_denorm, 0, 1)
-    poisoned_denorm = torch.clamp(poisoned_denorm, 0, 1)
+
+    if attack_type in ['upgd', 'belt']:
+        # UPGD/BELT 在 MNIST-M 分支中不使用 Normalize，输入已经在 [0, 1]。
+        original_vis = torch.clamp(original_img, 0, 1)
+        poisoned_vis = torch.clamp(poisoned_img, 0, 1)
+    else:
+        # 反归一化图片（使用 MNIST-M 的归一化参数）
+        # MNIST-M 归一化参数: Mean=[0.46, 0.46, 0.46], Std=[0.23, 0.23, 0.23]
+        mean = torch.tensor([0.46, 0.46, 0.46], device=original_img.device, dtype=original_img.dtype).view(3, 1, 1)
+        std = torch.tensor([0.23, 0.23, 0.23], device=original_img.device, dtype=original_img.dtype).view(3, 1, 1)
+        original_vis = torch.clamp(original_img * std + mean, 0, 1)
+        poisoned_vis = torch.clamp(poisoned_img * std + mean, 0, 1)
     
     # 计算差异图
-    diff = torch.abs(poisoned_denorm - original_denorm)
+    diff = torch.abs(poisoned_vis - original_vis)
     diff = diff / (diff.max() + 1e-8)
     
     # 保存图片
-    save_image(original_denorm, os.path.join(save_dir, f"{attack_type}_{method_name}_original.png"))
-    save_image(poisoned_denorm, os.path.join(save_dir, f"{attack_type}_{method_name}_poisoned.png"))
+    save_image(original_vis, os.path.join(save_dir, f"{attack_type}_{method_name}_original.png"))
+    save_image(poisoned_vis, os.path.join(save_dir, f"{attack_type}_{method_name}_poisoned.png"))
     save_image(diff, os.path.join(save_dir, f"{attack_type}_{method_name}_diff.png"))
     
     print(f"示例图片已保存到模型目录: {save_dir}")

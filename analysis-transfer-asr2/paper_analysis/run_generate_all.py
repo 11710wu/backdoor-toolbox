@@ -13,6 +13,7 @@ from analyze_overall_synthesis import run as run_overall
 from analyze_rq1_tradeoff import run as run_rq1
 from analyze_rq2_acc_moderation import run as run_rq2
 from analyze_strength import run as run_strength
+from analyze_target_domain_acc import run as run_target_domain
 from analysis_stage_plan import run as run_stage_plan
 from build_completeness_tables import build_completeness_tables
 from build_master_table import build_master_table
@@ -34,7 +35,13 @@ def main() -> None:
     outputs["label"] = run_label(df)
     outputs["arch"] = run_arch(df)
     outputs["noise"] = run_noise(df)
-    outputs["rq2"] = run_rq2(df, arch_outputs=outputs["arch"], noise_outputs=outputs["noise"])
+    outputs["target_domain"] = run_target_domain(df)
+    outputs["rq2"] = run_rq2(
+        df,
+        arch_outputs=outputs["arch"],
+        noise_outputs=outputs["noise"],
+        target_domain_outputs=outputs["target_domain"],
+    )
     outputs["bootstrap"] = run_extra_coefficients(df, outputs)
     run_overall(df, outputs)
     run_teacher()

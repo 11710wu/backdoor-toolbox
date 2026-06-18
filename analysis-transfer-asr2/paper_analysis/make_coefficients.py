@@ -63,8 +63,9 @@ def _bootstrap_delta_tables(outputs: dict[str, dict]) -> pd.DataFrame:
 def run(df: pd.DataFrame, outputs: dict[str, dict]) -> dict[str, pd.DataFrame]:
     corr_overall = _bootstrap_spearman(df, [])
     corr_dataset = _bootstrap_spearman(df, ["dataset"])
+    corr_transfer_dataset = _bootstrap_spearman(df, ["dataset", "transfer_dataset"])
     corr_attack = _bootstrap_spearman(df, ["attack_type"])
-    corr = pd.concat([corr_overall, corr_dataset, corr_attack], ignore_index=True)
+    corr = pd.concat([corr_overall, corr_dataset, corr_transfer_dataset, corr_attack], ignore_index=True)
     delta = _bootstrap_delta_tables(outputs)
     save_csv_and_md(corr, COEFFICIENT_DIR / "bootstrap_ci_correlations.csv", "Bootstrap CI Correlations")
     save_csv_and_md(delta, COEFFICIENT_DIR / "bootstrap_ci_pairwise_delta.csv", "Bootstrap CI Pairwise Delta")

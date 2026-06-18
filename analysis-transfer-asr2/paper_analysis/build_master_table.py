@@ -18,7 +18,7 @@ def build_master_table() -> pd.DataFrame:
         result_group = source["result_group"]
         dataset_hint = source.get("dataset")
         for folder, folder_dataset_hint in iter_result_folders(root, dataset_hint=dataset_hint):
-            rows.append(parse_result_folder(folder, result_group=result_group, dataset_hint=folder_dataset_hint))
+            rows.extend(parse_result_folder(folder, result_group=result_group, dataset_hint=folder_dataset_hint))
     df = pd.DataFrame(rows)
     for col in MASTER_COLUMNS:
         if col not in df.columns:

@@ -58,7 +58,7 @@ def write_figure_doc(filename: str, status: str = "generated", extra_note: str =
         f.write(f"# {filename}\n\n")
         f.write(f"## Purpose\n{spec.purpose}\n\n")
         f.write(f"## Data Source\n{spec.data_source}\n\n")
-        f.write("## Filters\nComplete rows are used unless this figure is explicitly a completeness figure. Main analysis uses source_asr >= 0.05.\n\n")
+        f.write("## Filters\nComplete rows are used unless this figure is explicitly a completeness figure. Main analysis uses source_asr >= 0.05 and each dataset's default transfer target; Tiny-ImageNet's default transfer target is ImageNetV2. The transfer_rate compatibility column equals target-domain ASR in this analysis.\n\n")
         f.write(f"## How To Read\n{spec.how_to_read}\n\n")
         f.write(f"## Focus\n{spec.focus}\n\n")
         f.write(f"## Corresponding Coefficients\n{spec.coefficient_files or 'None'}\n\n")

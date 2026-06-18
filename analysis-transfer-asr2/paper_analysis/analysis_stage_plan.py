@@ -85,15 +85,15 @@ WORKFLOW_STAGES = [
         "stage_order": 2,
         "stage": "Metric sanity",
         "tool_basis": "experiment-audit + statistical analysis skill",
-        "purpose": "Check fixed metric formulas and denominator sensitivity.",
-        "outputs": "transfer_rate, stealthiness, difficulty, source_asr threshold sensitivity",
+        "purpose": "Check fixed metric formulas and source_asr validity-threshold sensitivity.",
+        "outputs": "target-domain ASR, auxiliary transferability metrics, stealthiness, difficulty, source_asr threshold sensitivity",
         "gate": "Rows with unstable source_asr are not main evidence.",
     },
     {
         "stage_order": 3,
         "stage": "RQ1 relationship analysis",
         "tool_basis": "statistical analysis skill",
-        "purpose": "Estimate transfer_rate vs stealthiness overall and by dataset / attack / architecture.",
+        "purpose": "Estimate target-domain ASR vs stealthiness overall and by dataset / attack / architecture.",
         "outputs": "RQ1 correlations, heatmaps, rank trends, defense breakdown",
         "gate": "Report n and heterogeneity; do not claim universality from pooled trends.",
     },
@@ -109,9 +109,9 @@ WORKFLOW_STAGES = [
         "stage_order": 5,
         "stage": "RQ2 ACC/difficulty moderation",
         "tool_basis": "Frontiers robustness + statistical analysis skill",
-        "purpose": "Test whether ACC/difficulty changes the transfer-stealth relation.",
-        "outputs": "ACC-bin correlations, interaction regressions, arch-vs-noise comparison",
-        "gate": "Phrase ACC as a moderator unless causal evidence is explicit.",
+        "purpose": "Test whether ACC/difficulty/target-domain ACC changes the transfer-stealth relation through explicit comparison designs.",
+        "outputs": "architecture comparison, noise-vs-baseline comparison, ImageNetV2-vs-Qwen target-domain comparison, ACC-bin diagnostics, interaction regressions",
+        "gate": "Phrase ACC as a moderator unless causal evidence is explicit; keep Qwen in RQ2 target-domain ACC analysis rather than the RQ1 default-transfer pool.",
     },
     {
         "stage_order": 6,
@@ -147,6 +147,8 @@ def _analysis_area(filename: str) -> str:
         return "Noise / difficulty"
     if filename.startswith("rq2_"):
         return "RQ2 ACC moderation"
+    if filename.startswith("target_domain_"):
+        return "Target-domain ACC"
     return "Other"
 
 

@@ -25,12 +25,61 @@ def normalize_rate(value: object) -> float:
 
 
 def compute_transfer_rate(transfer_asr: object, source_asr: object) -> float:
-    """transfer_rate = transfer_asr^2 / source_asr."""
+    """Legacy transfer score: transfer_asr^2 / source_asr."""
     transfer = normalize_rate(transfer_asr)
     source = normalize_rate(source_asr)
     if math.isnan(transfer) or math.isnan(source) or source <= 0:
         return float("nan")
     return (transfer * transfer) / source
+
+
+def compute_transferability(transfer_asr: object) -> float:
+    """Main transferability definition: target-domain ASR."""
+    return normalize_rate(transfer_asr)
+
+
+def chance_rate_for_dataset(dataset: object, transfer_dataset: object = "") -> float:
+    """Return the random target-class rate for chance-adjusted ASR."""
+    dataset_s = str(dataset)
+    transfer_s = str(transfer_dataset)
+    if dataset_s == "tiny_imagenet" or "tiny" in transfer_s or "qwen" in transfer_s or "imagenetv2" in transfer_s:
+        return 1.0 / 200.0
+    if dataset_s in {"cifar10", "mnistm"} or transfer_s in {"stl10", "mnist_cross"}:
+        return 1.0 / 10.0
+    return 0.0
+
+
+def compute_chance_adjusted_rate(value: object, chance_rate: float) -> float:
+    val = normalize_rate(value)
+    if math.isnan(val):
+        return float("nan")
+    if chance_rate >= 1.0:
+        return float("nan")
+    return max(0.0, (val - chance_rate) / (1.0 - chance_rate))
+
+
+def compute_transfer_retention_rate(transfer_asr: object, source_asr: object) -> float:
+    transfer = normalize_rate(transfer_asr)
+    source = normalize_rate(source_asr)
+    if math.isnan(transfer) or math.isnan(source) or source <= 0:
+        return float("nan")
+    return transfer / source
+
+
+def compute_transfer_gap(transfer_asr: object, source_asr: object) -> float:
+    transfer = normalize_rate(transfer_asr)
+    source = normalize_rate(source_asr)
+    if math.isnan(transfer) or math.isnan(source):
+        return float("nan")
+    return transfer - source
+
+
+def compute_joint_transfer(source_asr: object, transfer_asr: object, chance_rate: float) -> float:
+    source_adj = compute_chance_adjusted_rate(source_asr, chance_rate)
+    transfer_adj = compute_chance_adjusted_rate(transfer_asr, chance_rate)
+    if math.isnan(source_adj) or math.isnan(transfer_adj):
+        return float("nan")
+    return math.sqrt(source_adj * transfer_adj)
 
 
 def compute_difficulty(clean_acc: object) -> float:

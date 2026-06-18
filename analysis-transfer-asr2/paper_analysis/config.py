@@ -24,6 +24,8 @@ SOURCE_ASR_SENSITIVITY_THRESHOLDS = [0.05, 0.10]
 MIN_GROUP_N = 3
 BOOTSTRAP_N = 500
 RANDOM_SEED = 2333
+MAIN_TRANSFER_METRIC = "transfer_asr"
+MAIN_TRANSFER_LABEL = "Target-domain ASR"
 
 DEFENSES = {
     "sentinet": "sentinet",
@@ -87,13 +89,20 @@ ARCH_LABELS = {
 
 RECOMMENDED_FIGURES = [
     "rq1_dataset_facets_scatter_binned.png",
+    "rq1_result_group_spearman.png",
     "rq1_attack_dataset_spearman_heatmap.png",
     "strength_transfer_stealth_paths_by_attack.png",
     "cover_rate_pairwise_delta_heatmap.png",
+    "label_mode_clean_to_dirty_arrows.png",
+    "label_mode_delta_quadrant.png",
     "arch_pairwise_delta_summary.png",
     "arch_relationship_shift_spearman.png",
     "noise_paired_delta_by_level.png",
+    "noise_clean_acc_metric_scatter.png",
+    "noise_vs_baseline_delta_acc_effect.png",
     "rq2_arch_vs_noise_comparison.png",
+    "target_domain_paired_delta.png",
+    "target_domain_acc_vs_transfer.png",
 ]
 
 REQUIRED_REPORTS = [
@@ -110,6 +119,7 @@ REQUIRED_REPORTS = [
     "10_analysis_toolkit_selection.md",
     "11_analysis_workflow_plan.md",
     "12_figure_plan_and_purpose.md",
+    "13_target_domain_acc_analysis.md",
 ]
 
 MASTER_COLUMNS = [
@@ -123,6 +133,7 @@ MASTER_COLUMNS = [
     "strength_name",
     "strength_value",
     "cover_rate",
+    "mask_rate",
     "label_mode",
     "input_noise_type",
     "input_noise_level",
@@ -131,7 +142,17 @@ MASTER_COLUMNS = [
     "source_asr",
     "transfer_acc",
     "transfer_asr",
+    "transferability",
+    "transfer_asr_chance_adjusted",
     "transfer_rate",
+    "legacy_transfer_rate",
+    "transfer_retention_rate",
+    "transfer_gap",
+    "joint_transfer",
+    "transfer_variant",
+    "transfer_file",
+    "is_main_transfer_dataset",
+    "complete_analysis_row",
     "sentinet_tpr",
     "scaleup_tpr",
     "strip_tpr",
