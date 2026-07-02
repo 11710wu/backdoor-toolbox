@@ -17,6 +17,8 @@ DEVICES="${DEVICES:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 SKIP_UPGD_PREP="${SKIP_UPGD_PREP:-0}"
+WAIT_FOR_UPGD_BASE="${WAIT_FOR_UPGD_BASE:-0}"
+UPGD_BASE_WAIT_SECONDS="${UPGD_BASE_WAIT_SECONDS:-7200}"
 INPUT_NOISE_SEED="${INPUT_NOISE_SEED:-2333}"
 
 LOG_DIR="logs"
@@ -79,11 +81,46 @@ noise_levels() {
   case "$1" in
     "gaussian") echo "0.030 0.060 0.100" ;;
     "uniform") echo "0.030 0.060 0.100" ;;
+    "salt_pepper") echo "0.030 0.060 0.100" ;;
+    "speckle") echo "0.030 0.060 0.100" ;;
     *)
       echo "Unsupported noise type: $1" >&2
       return 1
       ;;
   esac
+}
+
+wait_for_upgd_base() {
+  if [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+    echo "Found UPGD clean base model: ${UPGD_CLEAN_MODEL_PATH}"
+    return 0
+  fi
+
+  if [ "$DRY_RUN" = "1" ]; then
+    echo "[DRY_RUN] would wait/check for UPGD clean base model: ${UPGD_CLEAN_MODEL_PATH}"
+    return 0
+  fi
+
+  if [ "$WAIT_FOR_UPGD_BASE" != "1" ]; then
+    echo "UPGD clean base model missing: ${UPGD_CLEAN_MODEL_PATH}" >&2
+    return 1
+  fi
+
+  echo "Waiting for UPGD clean base model: ${UPGD_CLEAN_MODEL_PATH}"
+  local waited=0
+  while [ ! -f "$UPGD_CLEAN_MODEL_PATH" ] && [ "$waited" -lt "$UPGD_BASE_WAIT_SECONDS" ]; do
+    sleep 60
+    waited=$((waited + 60))
+    echo "Still waiting for UPGD clean base... ${waited}s"
+  done
+
+  if [ ! -f "$UPGD_CLEAN_MODEL_PATH" ]; then
+    echo "Timed out waiting for UPGD clean base after ${UPGD_BASE_WAIT_SECONDS}s: ${UPGD_CLEAN_MODEL_PATH}" >&2
+    return 1
+  fi
+
+  echo "Found UPGD clean base model: ${UPGD_CLEAN_MODEL_PATH}"
+  return 0
 }
 
 strength_values() {
@@ -148,7 +185,7 @@ echo "dataset      : ${DATASET}"
 echo "model        : ${MODEL}"
 echo "devices      : ${DEVICES}"
 echo "output root  : poisoned_train_set/${DATASET}"
-echo "output dirs  : SIG/upgd clean-label dirs with _noise={gaussian,uniform}_level={0.030,0.060,0.100}_arch=SmallCNN_cifar10"
+echo "output dirs  : SIG/upgd clean-label dirs with _noise={gaussian,uniform,salt_pepper,speckle}_level={0.030,0.060,0.100}_arch=SmallCNN_cifar10"
 echo "poison rates : ${POISON_RATES[*]}"
 echo "attacks      : ${ATTACKS[*]}"
 echo "noise types  : ${NOISE_TYPES[*]}"
@@ -157,6 +194,8 @@ echo "transfer     : ${TRANSFER_SCRIPT}"
 echo "upgd raw base: ${UPGD_CLEAN_MODEL_PATH}"
 echo "dry run      : ${DRY_RUN}"
 echo "stop on fail : ${STOP_ON_FAIL}"
+echo "skip upgd prep: ${SKIP_UPGD_PREP}"
+echo "wait upgd base: ${WAIT_FOR_UPGD_BASE}"
 echo "error log    : ${ERROR_LOG}"
 echo "============================================================"
 
@@ -185,6 +224,7 @@ for noise_type in "${NOISE_TYPES[@]}"; do
         for strength in $(strength_values "$attack"); do
           args="$(attack_args "$attack" "$strength")"
           if [ "$attack" = "upgd" ]; then
+            wait_for_upgd_base || exit 1
             args="${args} -upgd_model_path ${UPGD_CLEAN_MODEL_PATH}"
           fi
           label="$(strength_label "$attack" "$strength")"
