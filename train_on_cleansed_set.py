@@ -56,7 +56,7 @@ parser.add_argument('-f', type=float, default=6,
 # ========== [SIG参数修改] 结束 ==========
 # ========== [模型选择参数] 开始 ==========
 parser.add_argument('-model', type=str, required=False, default=None,
-                    choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
+                    choices=['resnet18', 'resnet34', 'resnet50', 'vgg19_bn', 'mobilenetv2', 'small_cnn', 'densenet121'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 # ========== [模型选择参数] 结束 ==========
 

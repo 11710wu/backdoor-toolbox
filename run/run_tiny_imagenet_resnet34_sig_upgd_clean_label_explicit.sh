@@ -9,7 +9,7 @@ set +e
 
 DEVICES="${DEVICES:-0}"
 export POISONED_TRAIN_SET_ROOT="${POISONED_TRAIN_SET_ROOT:-poisoned_train_set4}"
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox-new1/data/imagenetv2-matched-frequency-tiny-organized}"
 
 run_command() {
     local original_cmd="$1"

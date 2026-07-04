@@ -18,8 +18,8 @@ UPGD_STEPS="${UPGD_STEPS:-100}"
 UPGD_STEPS_MULTIPLIER="${UPGD_STEPS_MULTIPLIER:-5}"
 LABEL_MODE="${LABEL_MODE:-clean}"
 
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized}"
-TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox-new1/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
 RUN_TARGET_DOMAIN="${RUN_TARGET_DOMAIN:-1}"
 RUN_QWEN_TRANSFER="${RUN_QWEN_TRANSFER:-1}"
 

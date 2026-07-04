@@ -22,7 +22,7 @@ RUN_DEFENSES="${RUN_DEFENSES:-1}"
 
 SIG_DELTAS="${SIG_DELTAS:-4 12 20 28 36 44 56}"
 DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC NC}"
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox-new1/data/imagenetv2-matched-frequency-tiny-organized}"
 TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/data/tiny-target-domain-qwen-full-organized}"
 
 DATASETS="${DATASETS:-cifar10 tiny_imagenet mnistm}"

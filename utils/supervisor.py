@@ -330,6 +330,16 @@ def get_arch(args):
                     return resnet.ResNet34_tiny_imagenet
                 else:
                     return resnet.ResNet34
+            elif args.model == 'resnet50':
+                from utils import resnet
+                if args.dataset == 'cifar10':
+                    return resnet.ResNet50_cifar10
+                elif args.dataset == 'tiny_imagenet':
+                    return resnet.ResNet50_tiny_imagenet
+                elif args.dataset == 'mnistm':
+                    return resnet.ResNet50_mnistm
+                else:
+                    return resnet.ResNet50
             elif args.model == 'small_cnn':
                 if args.dataset != 'cifar10':
                     raise ValueError("small_cnn is only supported for dataset='cifar10'")
@@ -357,7 +367,7 @@ def get_arch(args):
                 raise ValueError(
                     f"Unsupported model: {args.model}. "
                     "Supported models: vgg19_bn, mobilenetv2, resnet18, resnet34, "
-                    "small_cnn, densenet121"
+                    "resnet50, small_cnn, densenet121"
                 )
         else:
             return config.arch[args.dataset]

@@ -201,6 +201,18 @@ def _assert_matches_tiny_imagenet_train(dataset: datasets.ImageFolder):
     print(f"[OK] class_to_idx matches Tiny-ImageNet train ({len(train_c2i)} classes)")
 
 
+def _resolve_legacy_model_path(model_path: str) -> str:
+    """Compat fallback for older SIG/UPGD all2one result folders."""
+    if os.path.exists(model_path):
+        return model_path
+    if "_mode=all2one" in model_path:
+        alt = model_path.replace("_mode=all2one", "")
+        if os.path.exists(alt):
+            print(f"[路径回退] 默认目录缺失，改用无 _mode=all2one 的目录:\n  {alt}")
+            return alt
+    return model_path
+
+
 # ============================================================================
 # Main
 # ============================================================================
@@ -239,7 +251,7 @@ def main():
 
     # Model
     parser.add_argument("-model", type=str, default=None,
-                        choices=["resnet18", "resnet34", "vgg19_bn", "mobilenetv2", "small_cnn"])
+                        choices=["resnet18", "resnet34", "resnet50", "vgg19_bn", "mobilenetv2", "small_cnn", "densenet121"])
     parser.add_argument("-model_path", default=None)
     parser.add_argument("-cleanser", type=str, default=None,
                         choices=default_args.parser_choices["cleanser"])
@@ -252,7 +264,7 @@ def main():
 
     # Target domain dataset
     parser.add_argument("-target_domain_dir", type=str,
-                        default="/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized",
+                        default="/workspace/backdoor-toolbox-new1/data/imagenetv2-matched-frequency-tiny-organized",
                         help="目标域数据集根目录（优先读取 test/，其次兼容 images/）")
 
     # System
@@ -325,6 +337,10 @@ def main():
     if args.poison_type == "SIG" and args.test_delta is not None:
         args.delta = args.test_delta
 
+    model_path = _resolve_legacy_model_path(model_path)
+    if args.poison_type == "upgd":
+        args.train_poison_dir = os.path.dirname(model_path)
+
     # BELT special handling
     if args.poison_type == "belt":
         model_dir = os.path.dirname(model_path)
@@ -356,7 +372,7 @@ def main():
                 new_sd[nk] = v
             state_dict = new_sd
 
-    model.load_state_dict(state_dict, strict=False)
+    model.load_state_dict(state_dict, strict=True)
     print(f"模型加载成功: {model_path}")
 
     model = nn.DataParallel(model)

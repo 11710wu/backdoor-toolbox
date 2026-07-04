@@ -53,7 +53,7 @@ RESULT_SOURCES = [
     {
         "result_group": "arch_acc",
         "root": REPO_ROOT / "poisoned_train_set4",
-        "description": "SmallCNN / ResNet34 architecture and ACC experiments",
+        "description": "SmallCNN / ResNet34 / ResNet50 / DenseNet121 architecture and ACC experiments",
     },
     {
         "result_group": "noise_acc",
@@ -82,7 +82,9 @@ ATTACK_ORDER = [
 ARCH_LABELS = {
     "ResNet18": "ResNet18",
     "ResNet34": "ResNet34",
+    "ResNet50": "ResNet50",
     "SmallCNN": "SmallCNN",
+    "densenet121": "DenseNet121",
     "mobilenetv2": "MobileNetV2",
     "vgg19_bn": "VGG19-BN",
 }
@@ -96,7 +98,9 @@ RECOMMENDED_FIGURES = [
     "label_mode_clean_to_dirty_arrows.png",
     "label_mode_delta_quadrant.png",
     "arch_pairwise_delta_summary.png",
+    "arch_tiny_archs_vs_resnet18.png",
     "arch_relationship_shift_spearman.png",
+    "arch_tiny_archs_relationship_shift.png",
     "noise_paired_delta_by_level.png",
     "noise_clean_acc_metric_scatter.png",
     "noise_vs_baseline_delta_acc_effect.png",

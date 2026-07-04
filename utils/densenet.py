@@ -126,38 +126,14 @@ def densenet121_imagenette(num_classes=10):
 
 def densenet121_tiny_imagenet(num_classes=200):
     """
-    DenseNet-121 adapted for Tiny ImageNet (32x32 input, 200 classes)
-    
-    Modifications:
-    - First conv layer: kernel_size 7->3, stride 2->1, padding 3->1 (for 32x32 input)
-    - Remove first pooling layer (Identity)
-    - Classifier: 1000->num_classes (200 classes for Tiny ImageNet)
-    - Wrapped with DenseNetWrapper to support return_hidden parameter
-    
-    Note: Tiny ImageNet images are resized to 32×32 before training/testing,
-    so this model is adapted for 32×32 input (same as CIFAR-10).
+    DenseNet-121 adapted for Tiny ImageNet (64x64 input, 200 classes).
+
+    The current Tiny-ImageNet pipeline keeps the original 64x64 image size.
+    A 3x3/stride-1 stem without the initial max-pool avoids excessive early
+    downsampling while remaining compatible with the existing 64x64 transforms.
     """
     model = torchvision.models.densenet121(pretrained=False, num_classes=num_classes)
-    
-    # Modify first conv layer for 32x32 input (same as CIFAR-10)
-    # model.features.conv0 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
-    
-    # Remove first pooling layer (MaxPool) - use Identity instead
-    # model.features.pool0 = nn.Identity()
-    
-    # For 64x64 input, using standard structure or specific modifications?
-    # Current codebase normalizes Tiny ImageNet to 32x32 generally, but user says 64x64.
-    # If strictly 64x64 input, we can keep some pooling or larger stride, 
-    # BUT existing `supervisor.py` for 'tiny_imagenet' often resize to (32,32).
-    # Assuming user changed that or wants to adapt:
-    
-    # If input is REALLY 64x64, let's use a 64x64 adapted first layer (3x3 conv, stride 1, padding 1) 
-    # but maybe KEEP the first pool? Or remove it?
-    # Downsampling trail:
-    # 32x32: Conv0(s1) -> 32. Blocks+Trans -> 16 -> 8 -> 4. AvgPool -> 1x1. Good.
-    # 64x64: Conv0(s1) -> 64. Blocks+Trans -> 32 -> 16 -> 8. AvgPool -> 1x1. Good.
-    # So the CIFAR-10 structure works fine for 64x64 too, just ends with more features before GlobalAvgPool.
-    
+
     model.features.conv0 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
     model.features.pool0 = nn.Identity()
 

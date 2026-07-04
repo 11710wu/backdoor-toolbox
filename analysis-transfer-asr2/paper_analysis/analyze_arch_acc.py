@@ -15,6 +15,14 @@ from stats_utils import correlation_record, grouped_correlations, main_df, save_
 PRIMARY_ARCH_COMPARISONS = {
     ("cifar10", "stl10", "SmallCNN-ResNet18"),
     ("tiny_imagenet", "imagenetv2_tiny", "ResNet34-ResNet18"),
+    ("tiny_imagenet", "imagenetv2_tiny", "ResNet50-ResNet18"),
+    ("tiny_imagenet", "imagenetv2_tiny", "densenet121-ResNet18"),
+}
+
+TINY_RESNET18_ARCH_COMPARISONS = {
+    "ResNet34-ResNet18",
+    "ResNet50-ResNet18",
+    "densenet121-ResNet18",
 }
 
 
@@ -119,6 +127,46 @@ def _write_arch_unmatched_detail(d: pd.DataFrame, matched: pd.DataFrame, unmatch
     return summary
 
 
+def _tiny_arch_vs_resnet18(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return pd.DataFrame()
+    needed = {"dataset", "transfer_dataset", "comparison_group"}
+    if not needed.issubset(df.columns):
+        return pd.DataFrame()
+
+    out = df[
+        (df["dataset"] == "tiny_imagenet")
+        & (df["transfer_dataset"] == "imagenetv2_tiny")
+        & (df["comparison_group"].isin(TINY_RESNET18_ARCH_COMPARISONS))
+    ].copy()
+    if out.empty:
+        return out
+
+    order = {"ResNet34-ResNet18": 0, "ResNet50-ResNet18": 1, "densenet121-ResNet18": 2}
+    out["_comparison_order"] = out["comparison_group"].map(order).fillna(99)
+    preferred_cols = [
+        "dataset",
+        "transfer_dataset",
+        "comparison_group",
+        "new_arch",
+        "base_arch",
+        "n_pairs",
+        "delta_clean_acc_mean",
+        "delta_source_asr_mean",
+        "delta_transfer_asr_mean",
+        "delta_transfer_rate_mean",
+        "delta_stealthiness_mean",
+        "base_n",
+        "new_n",
+        "base_spearman",
+        "new_spearman",
+        "delta_spearman",
+    ]
+    cols = [c for c in preferred_cols if c in out.columns]
+    cols += [c for c in out.columns if c not in cols and c != "_comparison_order"]
+    return out.sort_values("_comparison_order")[cols].reset_index(drop=True)
+
+
 def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     d_all = main_df(df, include_unmatched_arch=True)
     matched_rows, unmatched_rows = _arch_vs_resnet18_baseline_rows(d_all)
@@ -180,6 +228,8 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
         if not rel.empty
         else pd.DataFrame()
     )
+    tiny_vs_resnet18_summary = _tiny_arch_vs_resnet18(primary_summary)
+    tiny_vs_resnet18_relationship = _tiny_arch_vs_resnet18(primary_rel)
     acc_transfer = grouped_correlations(arch_df, ["dataset", "transfer_dataset", "arch_base"], x="clean_acc", y="transfer_rate")
     acc_stealth = grouped_correlations(arch_df, ["dataset", "transfer_dataset", "arch_base"], x="clean_acc", y="stealthiness")
     acc_shift = acc_transfer[["dataset", "transfer_dataset", "arch_base", "n", "spearman", "pearson"]].rename(columns={"spearman": "spearman_acc_transfer", "pearson": "pearson_acc_transfer"})
@@ -192,8 +242,10 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     save_csv_and_md(delta, COEFFICIENT_DIR / "arch_pairwise_delta.csv", "Architecture Pairwise Delta")
     save_csv_and_md(primary_delta, COEFFICIENT_DIR / "arch_primary_pairwise_delta.csv", "Architecture Primary Pairwise Delta")
     save_csv_and_md(primary_summary, COEFFICIENT_DIR / "arch_primary_pairwise_summary.csv", "Architecture Primary Pairwise Summary")
+    save_csv_and_md(tiny_vs_resnet18_summary, COEFFICIENT_DIR / "arch_tiny_archs_vs_resnet18_summary.csv", "Tiny-ImageNet Architecture Supplements vs ResNet18 Summary")
     save_csv_and_md(rel, COEFFICIENT_DIR / "arch_relationship_shift.csv", "Architecture Relationship Shift")
     save_csv_and_md(primary_rel, COEFFICIENT_DIR / "arch_primary_relationship_shift.csv", "Architecture Primary Relationship Shift")
+    save_csv_and_md(tiny_vs_resnet18_relationship, COEFFICIENT_DIR / "arch_tiny_archs_vs_resnet18_relationship.csv", "Tiny-ImageNet Architecture Supplements vs ResNet18 Relationship Shift")
     save_csv_and_md(rel_by_arch, COEFFICIENT_DIR / "arch_relationship_by_arch.csv", "Architecture Relationship by Arch")
     save_csv_and_md(acc_shift, COEFFICIENT_DIR / "arch_acc_correlation_shift.csv", "Architecture ACC Correlation Shift")
     arch_summary = (
@@ -211,8 +263,20 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
     plot_delta_source = primary_summary if not primary_summary.empty else summary
     plot_delta = plot_delta_source.melt(id_vars=["dataset", "transfer_dataset", "comparison_group"], value_vars=[c for c in plot_delta_source.columns if c in ["delta_clean_acc_mean", "delta_transfer_rate_mean", "delta_stealthiness_mean"]], var_name="metric", value_name="delta") if not plot_delta_source.empty else pd.DataFrame()
     grouped_bar(plot_delta, "arch_pairwise_delta_summary.png", "comparison_group", "delta", "metric", "Architecture Pairwise Delta Summary")
+    tiny_delta = (
+        tiny_vs_resnet18_summary.melt(
+            id_vars=["comparison_group"],
+            value_vars=[c for c in tiny_vs_resnet18_summary.columns if c in ["delta_clean_acc_mean", "delta_source_asr_mean", "delta_transfer_rate_mean", "delta_stealthiness_mean"]],
+            var_name="metric",
+            value_name="delta",
+        )
+        if not tiny_vs_resnet18_summary.empty
+        else pd.DataFrame()
+    )
+    grouped_bar(tiny_delta, "arch_tiny_archs_vs_resnet18.png", "comparison_group", "delta", "metric", "Tiny-ImageNet Architecture Deltas vs ResNet18")
     rel_plot = primary_rel if not primary_rel.empty else rel
     grouped_bar(rel_plot, "arch_relationship_shift_spearman.png", "comparison_group", "delta_spearman", "dataset", "Architecture Spearman Relationship Shift")
+    grouped_bar(tiny_vs_resnet18_relationship, "arch_tiny_archs_relationship_shift.png", "comparison_group", "delta_spearman", "new_arch", "Tiny-ImageNet Transfer-Stealth Relationship Shift vs ResNet18")
     acc_long = acc_shift.melt(id_vars=["dataset", "transfer_dataset", "arch_base"], value_vars=["spearman_acc_transfer", "spearman_acc_stealth"], var_name="metric", value_name="spearman")
     grouped_bar(acc_long, "arch_acc_vs_transfer_and_stealth.png", "arch_base", "spearman", "metric", "ACC Relationships with Transfer and Stealth")
     scatter_with_binned_line(arch_df, "arch_transfer_vs_stealth_by_arch.png", "transfer_rate", "stealthiness", hue="arch_base", col="dataset", title="Architecture Transfer-Stealth Plane")
@@ -232,11 +296,17 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
             ),
             (
                 "Primary architecture contrasts",
-                "The main architecture evidence is not an average over all architectures. It uses two intended strict matched contrasts as windows into the transfer-stealth plane: CIFAR-10 SmallCNN minus original ResNet18, and Tiny-ImageNet ResNet34 minus original ResNet18. Matching requires the same attack type, poison rate, strength, cover rate, label mode, and BELT mask rate where present. Other baseline architectures are kept only as diagnostics. Read delta transfer_rate and delta stealthiness together as movement in that plane.\n\n"
+                "The main architecture evidence is not an average over all architectures. It uses intended strict matched contrasts as windows into the transfer-stealth plane: CIFAR-10 SmallCNN minus original ResNet18, Tiny-ImageNet ResNet34 minus original ResNet18, Tiny-ImageNet ResNet50 minus original ResNet18, and Tiny-ImageNet DenseNet121 minus original ResNet18. Matching requires the same attack type, poison rate, strength, cover rate, label mode, and BELT mask rate where present. Other baseline architectures are kept only as diagnostics. Read delta transfer_rate and delta stealthiness together as movement in that plane.\n\n"
                 + md_table(primary_summary, 40),
+            ),
+            (
+                "Tiny-ImageNet ResNet18 matched architecture contrasts",
+                "This section places the Tiny-ImageNet supplement architectures side by side, but still keeps them as independent contrasts against the same original ResNet18 baseline. ResNet34-ResNet18, ResNet50-ResNet18, and DenseNet121-ResNet18 should be compared by their matched deltas, not by pooling all architecture rows. If supplement rows have not been run yet, this table will contain only the currently available matched contrast and will fill automatically after regenerating the analysis.\n\n"
+                + md_table(tiny_vs_resnet18_summary, 40),
             ),
             ("Strict architecture match summary", md_table(strict_match_summary, 20)),
             ("Primary transfer-stealth relationship shift", md_table(primary_rel, 40)),
+            ("Tiny-ImageNet relationship shift vs ResNet18", md_table(tiny_vs_resnet18_relationship, 40)),
             ("All architecture pairwise comparisons (diagnostic)", md_table(summary, 80)),
             ("All transfer-stealth relationship shifts (diagnostic)", md_table(rel, 80)),
             ("Transfer-stealth relationship by architecture", md_table(rel_by_arch, 80)),
@@ -249,8 +319,10 @@ def run(df: pd.DataFrame) -> dict[str, pd.DataFrame]:
         "summary": summary,
         "primary_delta": primary_delta,
         "primary_summary": primary_summary,
+        "tiny_vs_resnet18_summary": tiny_vs_resnet18_summary,
         "relationship": rel,
         "primary_relationship": primary_rel,
+        "tiny_vs_resnet18_relationship": tiny_vs_resnet18_relationship,
         "relationship_by_arch": rel_by_arch,
         "acc_shift": acc_shift,
         "strict_match_summary": strict_match_summary,

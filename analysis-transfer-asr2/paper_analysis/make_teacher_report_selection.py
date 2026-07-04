@@ -33,6 +33,7 @@ def run() -> None:
             "- `coefficients/cover_rate_pairwise_delta.csv`",
             "- `coefficients/label_mode_pairwise_delta.csv`",
             "- `coefficients/arch_primary_pairwise_summary.csv`",
+            "- `coefficients/arch_tiny_archs_vs_resnet18_summary.csv`",
             "- `coefficients/noise_vs_baseline_overall.csv`",
             "- `coefficients/rq2_acc_intervention_comparison.csv`",
             "- `coefficients/rq2_interaction_regression.csv`",

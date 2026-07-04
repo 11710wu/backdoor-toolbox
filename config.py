@@ -158,7 +158,7 @@ arch = {
     # ========== 模型架构选择说明 ==========
     # 默认使用 ResNet18（Conv->BN 结构，与 CLP/ABI 假设完全对齐）
     # 可选架构:
-    #   - resnet.ResNet18: Conv->BN 结构，CLP 完全兼容
+    #   - resnet.ResNet18/ResNet50: Conv->BN 结构，CLP 完全兼容
     #   - densenet.densenet121_*: BN->Conv 结构，CLP 不兼容（BN-Conv 配对错误）
     #   - vit.ViT_*: LayerNorm+Linear 结构，CLP 已适配（使用 Attention Head 裁剪）
     #   - preact_resnet.PreActResNet18: BN->Conv 结构，CLP 不兼容（BN-Conv 配对错误）
@@ -169,6 +169,7 @@ arch = {
     # 'cifar10': preact_resnet.PreActResNet18,  # PreActResNet-18 (BN->Conv)
     # 'cifar10': densenet.densenet121_cifar10,  # DenseNet-121 (BN->Conv)
     # 'cifar10': vit.ViT_cifar10,               # ViT-Small (LayerNorm+Linear)
+    # 'cifar10': resnet.ResNet50_cifar10,        # ResNet-50
     # 'cifar10': resnet.ResNet18,               # ResNet-18 (Conv->BN)
     # 'cifar10': vgg.vgg19_bn,                  # VGG-19-BN
     'cifar10': mobilenetv2.mobilenetv2,         # MobileNetV2 [默认]
@@ -191,6 +192,7 @@ arch = {
     # Tiny ImageNet: 64×64 输入，200 类
     # 'tiny_imagenet': densenet.densenet121_tiny_imagenet_64x64,  # DenseNet-121 (64x64)
     # 'tiny_imagenet': vit.ViT_tiny_imagenet,                     # ViT-Small (64x64)
+    # 'tiny_imagenet': resnet.ResNet50_tiny_imagenet,             # ResNet-50
     # 'tiny_imagenet': resnet.ResNet18_tiny_imagenet,             # ResNet-18
     # 'tiny_imagenet': vgg.vgg19_bn,                              # VGG-19-BN
     'tiny_imagenet': mobilenetv2.mobilenetv2,                     # MobileNetV2 [默认]
@@ -207,6 +209,7 @@ arch = {
     # ========== [MNIST-M 支持] 模型架构配置 ==========
     # MNIST-M: 28×28 输入（RGB 3 通道），10 类
     # 'mnistm': resnet.ResNet18,                # ResNet-18
+    # 'mnistm': resnet.ResNet50_mnistm,         # ResNet-50
     # 'mnistm': vgg.vgg19_bn,                   # VGG-19-BN
     'mnistm': mobilenetv2.mobilenetv2,          # MobileNetV2 [默认]
     # ========== [MNIST-M 支持] 结束 ==========

@@ -248,6 +248,17 @@ def ResNet50(num_classes=10):
     return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes)
 
 
+def ResNet50_cifar10(num_classes=10):
+    """
+    ResNet-50 for CIFAR-10 (32x32 input, 10 classes).
+
+    Uses the same CIFAR-style 3x3/stride-1 stem as the local ResNet-18/34
+    implementation, with adaptive pooling for stable feature shape.
+    """
+    print(f"[MODEL] Creating ResNet50_CIFAR10 with {num_classes} classes")
+    return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes)
+
+
 def ResNet101(num_classes=10):
     return ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes)
 
@@ -277,6 +288,17 @@ def ResNet34_tiny_imagenet(num_classes=200):
     return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes)
 
 
+def ResNet50_tiny_imagenet(num_classes=200):
+    """
+    ResNet-50 for Tiny ImageNet (64x64 input, 200 classes).
+
+    This keeps the local small-image ResNet stem and swaps in Bottleneck blocks,
+    giving a higher-capacity same-family contrast against ResNet18/ResNet34.
+    """
+    print(f"[MODEL] Creating ResNet50_TinyImageNet with {num_classes} classes")
+    return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes)
+
+
 def test():
     net = ResNet18()
     y = net(torch.randn(1, 3, 32, 32))
@@ -292,3 +314,11 @@ def ResNet18_mnistm(num_classes=10):
     """
     print(f"[MODEL] Creating ResNet18_MNISTM with {num_classes} classes")
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
+
+
+def ResNet50_mnistm(num_classes=10):
+    """
+    ResNet-50 for MNIST-M (28x28 RGB input, 10 classes).
+    """
+    print(f"[MODEL] Creating ResNet50_MNISTM with {num_classes} classes")
+    return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes)

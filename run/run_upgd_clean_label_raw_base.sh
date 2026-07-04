@@ -37,8 +37,8 @@ STOP_ON_FAIL="${STOP_ON_FAIL:-0}"
 DEFENSES="${DEFENSES:-SentiNet STRIP ScaleUp IBD_PSC NC}"
 CORRUPTION_TYPES="${CORRUPTION_TYPES:-frost}"
 CORRUPTION_SEVERITIES="${CORRUPTION_SEVERITIES:-2 3}"
-TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox/data/imagenetv2-matched-frequency-tiny-organized}"
-TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized}"
+TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-/workspace/backdoor-toolbox-new1/data/imagenetv2-matched-frequency-tiny-organized}"
+TARGET_DOMAIN_QWEN_DIR="${TARGET_DOMAIN_QWEN_DIR:-/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized}"
 
 defenses_for_dataset() {
     local defense
@@ -54,6 +54,12 @@ case "${DATASET}:${MODEL}" in
     cifar10:resnet18)
         ARCH_NAME="ResNet18_cifar10"
         ;;
+    cifar10:resnet50)
+        ARCH_NAME="ResNet50_cifar10"
+        ;;
+    cifar10:densenet121)
+        ARCH_NAME="densenet121_cifar10"
+        ;;
     cifar10:small_cnn)
         ARCH_NAME="SmallCNN_cifar10"
         ;;
@@ -65,6 +71,12 @@ case "${DATASET}:${MODEL}" in
         ;;
     mnistm:resnet18)
         ARCH_NAME="ResNet18_mnistm"
+        ;;
+    mnistm:resnet50)
+        ARCH_NAME="ResNet50_mnistm"
+        ;;
+    mnistm:densenet121)
+        ARCH_NAME="densenet121_mnistm"
         ;;
     mnistm:mobilenetv2)
         ARCH_NAME="mobilenetv2_mnistm"
@@ -78,6 +90,12 @@ case "${DATASET}:${MODEL}" in
     tiny_imagenet:resnet34)
         ARCH_NAME="ResNet34_tiny_imagenet"
         ;;
+    tiny_imagenet:resnet50)
+        ARCH_NAME="ResNet50_tiny_imagenet"
+        ;;
+    tiny_imagenet:densenet121)
+        ARCH_NAME="densenet121_tiny_imagenet"
+        ;;
     tiny_imagenet:mobilenetv2)
         ARCH_NAME="mobilenetv2_tiny_imagenet"
         ;;
@@ -86,7 +104,7 @@ case "${DATASET}:${MODEL}" in
         ;;
     *)
         echo "[ERROR] Unsupported DATASET/MODEL pair: DATASET=${DATASET}, MODEL=${MODEL}"
-        echo "        Supported models: resnet18, mobilenetv2, vgg19_bn, plus cifar10:small_cnn and tiny_imagenet:resnet34"
+        echo "        Supported models: resnet18, resnet50, mobilenetv2, vgg19_bn, densenet121, plus cifar10:small_cnn and tiny_imagenet:resnet34"
         echo "        Supported datasets: cifar10, tiny_imagenet, mnistm"
         exit 2
         ;;

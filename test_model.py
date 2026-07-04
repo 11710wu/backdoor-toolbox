@@ -40,7 +40,7 @@ parser.add_argument('-label_mode', type=str, required=False, default='clean',
                     help='SIG/UPGD training-label mode used for poison-set/model path lookup')
 parser.add_argument('-trigger', type=str, required=False, default=None)
 parser.add_argument('-model', type=str, required=False, default=None,
-                    choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
+                    choices=['resnet18', 'resnet34', 'resnet50', 'vgg19_bn', 'mobilenetv2', 'small_cnn', 'densenet121'],
                     help='模型架构选择（覆盖config.py中的默认设置）')
 parser.add_argument('-model_path', required=False, default=None)
 parser.add_argument('-cleanser', type=str, required=False, default=None,

@@ -258,7 +258,7 @@ def main():
 
     # Model
     parser.add_argument("-model", type=str, default=None,
-                        choices=["resnet18", "resnet34", "vgg19_bn", "mobilenetv2", "small_cnn"])
+                        choices=["resnet18", "resnet34", "resnet50", "vgg19_bn", "mobilenetv2", "small_cnn", "densenet121"])
     parser.add_argument("-model_path", default=None)
     parser.add_argument("-cleanser", type=str, default=None,
                         choices=default_args.parser_choices["cleanser"])
@@ -271,7 +271,7 @@ def main():
 
     # Target domain dataset (Qwen full organized by default)
     parser.add_argument("-target_domain_dir", type=str,
-                        default="/workspace/backdoor-toolbox/data/tiny-target-domain-qwen-full-organized",
+                        default="/workspace/backdoor-toolbox-new1/data/tiny-target-domain-qwen-full-organized",
                         help="目标域数据集根目录（优先读取 test/，其次兼容 images/）")
 
     # System
@@ -383,7 +383,7 @@ def main():
                 new_sd[nk] = v
             state_dict = new_sd
 
-    model.load_state_dict(state_dict, strict=False)
+    model.load_state_dict(state_dict, strict=True)
     print(f"模型加载成功: {model_path}")
 
     model = nn.DataParallel(model)

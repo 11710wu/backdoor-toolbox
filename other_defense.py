@@ -33,7 +33,8 @@ parser.add_argument('-label_mode', type=str, required=False, default='clean',
 parser.add_argument('-trigger', type=str, required=False,
                     default=None)
 parser.add_argument('-no_aug', default=False, action='store_true')
-parser.add_argument('-model', type=str, required=False, default=None)
+parser.add_argument('-model', type=str, required=False, default=None,
+                    choices=['resnet18', 'resnet34', 'resnet50', 'vgg19_bn', 'mobilenetv2', 'small_cnn', 'densenet121'])
 parser.add_argument('-model_path', required=False, default=None)
 parser.add_argument('-no_normalize', default=False, action='store_true')
 parser.add_argument('-defense', type=str, required=True,

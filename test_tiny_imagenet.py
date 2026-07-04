@@ -363,7 +363,7 @@ def main():
     
     # ===== 模型参数 =====
     parser.add_argument('-model', type=str, required=False, default=None,
-                        choices=['resnet18', 'resnet34', 'vgg19_bn', 'mobilenetv2', 'small_cnn'],
+                        choices=['resnet18', 'resnet34', 'resnet50', 'vgg19_bn', 'mobilenetv2', 'small_cnn', 'densenet121'],
                         help='模型架构选择（覆盖config.py中的默认设置）')
     parser.add_argument('-model_path', required=False, default=None,
                         help='模型文件路径')
@@ -588,17 +588,9 @@ def main():
     print(f"模型期望的键名示例（前5个）: {list(model.state_dict().keys())[:5]}")
     print(f"state_dict 中的键名示例（前5个）: {list(state_dict.keys())[:5]}")
     
-    # 尝试加载 state_dict
+    # 尝试加载 state_dict；必须严格匹配，避免权重/架构不一致时静默产出错误结果。
     try:
-        missing_keys, unexpected_keys = model.load_state_dict(state_dict, strict=False)
-        if missing_keys:
-            print(f"警告: 以下键在模型中缺失: {missing_keys[:5]}... (共 {len(missing_keys)} 个)")
-            # 如果缺失键太多，可能是键名映射问题
-            if len(missing_keys) > 100:
-                print(f"⚠️  警告: 缺失键过多（{len(missing_keys)} 个），可能是键名映射问题！")
-                print(f"   建议检查模型保存和加载时的结构是否一致")
-        if unexpected_keys:
-            print(f"警告: 以下键在 state_dict 中多余: {unexpected_keys[:5]}... (共 {len(unexpected_keys)} 个)")
+        model.load_state_dict(state_dict, strict=True)
     except RuntimeError as e:
         print(f"错误: 加载 state_dict 失败: {e}")
         raise

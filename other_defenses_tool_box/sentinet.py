@@ -56,6 +56,7 @@ class SentiNet(BackdoorDefense):
                                     dataset_path=config.data_dir,
                                     batch_size=1,
                                     split='valid',
+                                    data_transform=self.data_transform,
                                     shuffle=True,
                                     drop_last=False)
         loader = tqdm(loader)
@@ -64,6 +65,7 @@ class SentiNet(BackdoorDefense):
                                             dataset_path=config.data_dir,
                                             batch_size=100,
                                             split='test',
+                                            data_transform=self.data_transform,
                                             shuffle=True,
                                             drop_last=False)
         clean_subset, val_subset, _ = torch.utils.data.random_split(clean_loader.dataset, [self.N, 400, len(clean_loader.dataset) - self.N - 400])
@@ -103,11 +105,11 @@ class SentiNet(BackdoorDefense):
         
         if 'densenet' in model_arch_name:
             # ========== [修改] DenseNet 支持 ==========
-            # DenseNet-121 的 denseblock4 有 16 个 dense layers (denselayer0 到 denselayer15)
+            # DenseNet-121 的 denseblock4 有 16 个 dense layers (denselayer1 到 denselayer16)
             # 使用最后一个 dense layer 以获得更精确的梯度
             # ========== [修改结束] ==========
             model_type = 'densenet'
-            layer_name = 'features_denseblock4_denselayer15'
+            layer_name = 'features_denseblock4_denselayer16'
         elif 'resnet' in model_arch_name or 'wresnet' in model_arch_name or 'wideresnet' in model_arch_name:
             # ========== [修改] ResNet 和 WideResNet 支持 ==========
             # ResNet: 使用标准的 layer4
