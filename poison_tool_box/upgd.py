@@ -336,7 +336,7 @@ def save_upgd_artifacts(
 class poison_transform:
     """
     测试/防御阶段直接在输入上叠加 UPGD 通用扰动（默认假设输入未做归一化）。
-    - 与 parameter_backdoor 源代码一致：raw [0,1] 张量直接加 delta，不做 clamp。
+    - 与训练阶段生成 poisoned set 一致：raw [0,1] 张量加 delta 后 clamp 到 [0,1]。
     - 标签全部改为 target_class 用于 ASR 计算。
     """
 
@@ -367,8 +367,8 @@ class poison_transform:
         device = data.device
         upgd_data = self.upgd_data.to(device=device, dtype=data.dtype).view(1, 3, *self.upgd_data.shape[1:])
 
-        # UPGD 默认假设输入未归一化：直接加扰动
-        data = data + upgd_data
+        # UPGD 默认假设输入未归一化；与训练样本生成保持一致，加扰动后限制到有效像素范围。
+        data = torch.clamp(data + upgd_data, 0.0, 1.0)
 
         labels[:] = self.target_class
         return data, labels

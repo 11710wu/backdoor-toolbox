@@ -56,7 +56,8 @@ class NC(BackdoorDefense):
         if not os.path.exists(self.detection_dir):
             os.makedirs(self.detection_dir, exist_ok=True)
         self.criterion = torch.nn.CrossEntropyLoss()
-        self.loader = generate_dataloader(dataset=self.dataset, dataset_path=config.data_dir, batch_size=batch_size, split='val')
+        self.loader = generate_dataloader(dataset=self.dataset, dataset_path=config.data_dir, batch_size=batch_size,
+                                          split='val', data_transform=self.data_transform)
         self.tqdm = True
         self.suspect_class = config.target_class[args.dataset] # default with oracle
 
