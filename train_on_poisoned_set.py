@@ -227,6 +227,11 @@ else:
     print('<Undefined Dataset> Dataset = %s' % args.dataset)
     raise NotImplementedError('<To Be Implemented> Dataset = %s' % args.dataset)
 
+# DenseNet121 concatenates feature maps and uses a 64x64 stem without early pooling;
+# batch_size=256 exceeds ~32GB VRAM on Tiny-ImageNet. Scale LR linearly vs ResNet batch 256.
+if args.dataset == 'tiny_imagenet' and args.model == 'densenet121':
+    batch_size = 128
+    learning_rate = 0.05
 
 if args.dataset == 'imagenet':
     kwargs = {'num_workers': 32, 'pin_memory': True}

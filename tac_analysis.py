@@ -325,7 +325,8 @@ def main():
         batch_size=args.batch_size,
         split='test',
         shuffle=True,
-        drop_last=False
+        drop_last=False,
+        data_transform=data_transform
     )
 
     # ======================

@@ -82,6 +82,10 @@ nohup.out
 auto_*.py
 *_old.py
 
+# Generated analysis outputs and GPT upload packs
+/gpt_upload_packs/
+/analysis-transfer-asr2/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
