@@ -177,18 +177,25 @@ def main():
         env["CUDA_VISIBLE_DEVICES"] = str(args.devices)
         env["POISONED_TRAIN_SET_ROOT"] = poisoned_root
         env["PYTHONUNBUFFERED"] = "1"
+        env["MPLBACKEND"] = "Agg"
+        env["QT_QPA_PLATFORM"] = "offscreen"
+        env.pop("DISPLAY", None)
+        run_cmd = cmd + [f"-devices={args.devices}"]
         log_name = path.name.replace("/", "_") + ".log"
         log_path = log_dir / log_name
         print(f"[{idx}/{len(tasks)}] {path}")
         print(f"  POISONED_TRAIN_SET_ROOT={poisoned_root}")
-        print("  " + " ".join(cmd))
+        print(f"  CUDA_VISIBLE_DEVICES={args.devices}")
+        print("  " + " ".join(run_cmd))
         print(f"  log: {log_path}")
         if args.dry_run:
             continue
         with log_path.open("w") as f:
             f.write(f"# cwd={repo}\n# POISONED_TRAIN_SET_ROOT={poisoned_root}\n# CUDA_VISIBLE_DEVICES={args.devices}\n")
-            f.write("# " + " ".join(cmd) + "\n\n")
-            rc = subprocess.run(cmd, cwd=repo, env=env, stdout=f, stderr=subprocess.STDOUT).returncode
+            f.write("# MPLBACKEND=Agg\n# QT_QPA_PLATFORM=offscreen\n# DISPLAY=<unset>\n")
+            f.write("# " + " ".join(run_cmd) + "\n")
+            f.write("# Output is streamed to the terminal so SentiNet progress is visible.\n")
+        rc = subprocess.run(run_cmd, cwd=repo, env=env).returncode
         if rc != 0:
             print(f"[error] failed with code {rc}: {path}")
             print(f"[error] see log: {log_path}")

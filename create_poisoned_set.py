@@ -573,11 +573,11 @@ if args.poison_type in ['basic', 'badnet', 'blend', 'clean_label', 'refool',
         # 说明：
         #   - 默认alpha列表（config.py）: [0.5, 0.2, 0.5, 0.3]
         #   - 如果指定-alpha=0.1，则结果: [0.6, 0.3, 0.6, 0.4] (每个值+0.1)
-        #   - 如果不指定或使用默认值0.2，则使用配置文件中的原始列表
+        #   - 如果使用默认值0.2，则结果: [0.7, 0.4, 0.7, 0.5]
         # 使用示例：
         #   python create_poisoned_set.py ... -alpha=0.1  # 结果: [0.6, 0.3, 0.6, 0.4]
         #   python create_poisoned_set.py ... -alpha=0.2  # 结果: [0.7, 0.4, 0.7, 0.5]
-        #   python create_poisoned_set.py ...            # 结果: [0.5, 0.2, 0.5, 0.3] (默认)
+        #   python create_poisoned_set.py ...            # 结果: [0.7, 0.4, 0.7, 0.5] (默认0.2)
        
         
         from poison_tool_box import adaptive_patch
@@ -586,17 +586,10 @@ if args.poison_type in ['basic', 'badnet', 'blend', 'clean_label', 'refool',
         default_alphas = config.adaptive_patch_train_trigger_alphas[args.dataset]
         
         # 对于adaptive_patch，alpha参数始终表示在默认alpha列表基础上的偏移量
-        # 如果用户未指定-alpha参数（使用argparse默认值0.2），则使用原始默认列表
-        # 如果用户指定了-alpha参数（包括-alpha=0.2），则在默认列表基础上加上这个偏移量
-        if args.alpha == default_args.parser_default['alpha']:
-            # 用户未指定alpha参数，使用默认列表
-            alphas = default_alphas
-            print(f"[Adaptive Patch] 未指定alpha偏移量，使用默认Alpha值列表: {alphas}")
-        else:
-            # 用户指定了alpha偏移量，在默认列表基础上加上这个值
-            alphas = [alpha + args.alpha for alpha in default_alphas]
-            print(f"[Adaptive Patch] 默认Alpha列表: {default_alphas}")
-            print(f"[Adaptive Patch] 添加alpha偏移量={args.alpha}后: {alphas}")
+        # 例如 -alpha=0.2 会得到 [0.7, 0.4, 0.7, 0.5]
+        alphas = [alpha + args.alpha for alpha in default_alphas]
+        print(f"[Adaptive Patch] 默认Alpha列表: {default_alphas}")
+        print(f"[Adaptive Patch] 添加alpha偏移量={args.alpha}后: {alphas}")
         # ========== [Adaptive Patch Alpha参数修改] 结束 ==========
         poison_generator = adaptive_patch.poison_generator(img_size=img_size, dataset=train_set,
                                                            poison_rate=args.poison_rate,
