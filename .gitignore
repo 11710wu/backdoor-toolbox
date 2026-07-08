@@ -30,6 +30,8 @@ poisoned_train_set3/*
 !poisoned_train_set3/.dummy
 poisoned_train_set4/*
 !poisoned_train_set4/.dummy
+poisoned_train_set5/*
+!poisoned_train_set5/.dummy
 UPGD-nonormalized/*
 !UPGD-nonormalized/.dummy
 alltoone/*

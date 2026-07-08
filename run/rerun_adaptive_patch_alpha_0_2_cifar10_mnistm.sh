@@ -1,4 +1,10 @@
 #!/usr/bin/env bash
+#
+# Adaptive-Patch alpha=0.2 rerun — Script 1/5 (GPU0)
+# Workload: 2 datasets x 3 models x 3 pr/cover = 18 result dirs (~18h @ 1h/dir)
+#
+# Suggested launch:
+#   DEVICES=0 bash run/rerun_adaptive_patch_alpha_0_2_cifar10_mnistm.sh
 
 set +e
 
@@ -120,7 +126,7 @@ safe_cleanup_old_alpha() {
     done
   done
 
-  echo "Matched ${#paths[@]} directories:"
+  echo "Matched ${#paths[@]} directories (expected 18):"
   printf '  %s\n' "${paths[@]}"
 
   if [ "$CLEAN_OLD" != "1" ]; then
@@ -146,8 +152,9 @@ base_args() {
 }
 
 echo "============================================================"
-echo "Adaptive-Patch alpha=0.2 rerun: CIFAR-10 + MNIST-M"
+echo "Adaptive-Patch alpha=0.2 rerun: CIFAR-10 + MNIST-M (1/5)"
 echo "============================================================"
+echo "workload     : 18 result dirs (~18 GPU-hours @ 1h/dir)"
 echo "python       : ${PYTHON_BIN}"
 echo "datasets     : ${DATASET_LIST[*]}"
 echo "models       : ${MODEL_LIST[*]}"

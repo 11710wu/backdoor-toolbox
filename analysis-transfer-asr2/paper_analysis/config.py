@@ -59,7 +59,13 @@ RESULT_SOURCES = [
         "result_group": "noise_acc",
         "root": NOISE_REPO_ROOT / "poisoned_train_set" / "cifar10",
         "dataset": "cifar10",
-        "description": "CIFAR-10 input-noise difficulty experiments",
+        "description": "CIFAR-10 ResNet18 input-noise difficulty experiments",
+    },
+    {
+        "result_group": "noise_acc",
+        "root": NOISE_REPO_ROOT / "poisoned_train_set1" / "cifar10",
+        "dataset": "cifar10",
+        "description": "CIFAR-10 SmallCNN input-noise experiments (separated from ResNet18 noise)",
     },
 ]
 
