@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-# CIFAR10 ResNet50 architecture experiment.
+# CIFAR10 ResNet50 architecture experiment (legacy single script).
+# Prefer the 8-way split: run/run_resnet50_arch_01_basic.sh ... _08_upgd.sh
+# or: bash run/run_resnet50_arch_all_8.sh
 # Grid: 8 attacks x 2 poison rates x 3 strengths, matching the SmallCNN set4 grid.
 
 set -e

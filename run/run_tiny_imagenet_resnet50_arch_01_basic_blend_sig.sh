@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Tiny-ImageNet ResNet50 architecture experiment, shard 1/3.
+# Tiny-ImageNet ResNet50 architecture experiment, legacy shard 1/3.
+# Prefer the 8-way split: run/run_resnet50_arch_01_basic.sh ... _08_upgd.sh
 # Runs Basic, Blend and SIG. This script prepares the normalized clean model.
 
 set -e

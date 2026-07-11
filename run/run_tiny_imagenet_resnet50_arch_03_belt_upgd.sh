@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Tiny-ImageNet ResNet50 architecture experiment, shard 3/3.
+# Tiny-ImageNet ResNet50 architecture experiment, legacy shard 3/3.
+# Prefer the 8-way split: run/run_resnet50_arch_01_basic.sh ... _08_upgd.sh
 # Runs BELT and UPGD. This script prepares the raw-input clean model needed by UPGD.
 
 set -e

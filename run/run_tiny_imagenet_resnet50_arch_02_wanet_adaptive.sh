@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# Tiny-ImageNet ResNet50 architecture experiment, shard 2/3.
+# Tiny-ImageNet ResNet50 architecture experiment, legacy shard 2/3.
+# Prefer the 8-way split: run/run_resnet50_arch_01_basic.sh ... _08_upgd.sh
 # Runs WaNet, Adaptive-Patch and Adaptive-Blend.
 
 set -e
