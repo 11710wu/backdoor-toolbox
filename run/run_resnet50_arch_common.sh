@@ -35,6 +35,7 @@ RUN_QWEN_TRANSFER="${RUN_QWEN_TRANSFER:-1}"
 RUN_DEFENSES="${RUN_DEFENSES:-1}"
 FORCE_RECREATE_CLEAN="${FORCE_RECREATE_CLEAN:-0}"
 FORCE_RETRAIN_CLEAN="${FORCE_RETRAIN_CLEAN:-0}"
+FORCE_RETRAIN_UPGD_RAW_BASE="${FORCE_RETRAIN_UPGD_RAW_BASE:-0}"
 
 ATTACK_LIST="${ATTACK_LIST:?Set ATTACK_LIST, e.g. 'basic blend SIG'}"
 read -r -a ATTACKS <<< "$ATTACK_LIST"
@@ -267,12 +268,12 @@ if [ "$PREPARE_UPGD_RAW_BASE" = "1" ]; then
   run_command \
     "${PYTHON_BIN} create_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0" \
     "Ensure clean set/model dir exists for raw UPGD base"
-  if [ -f "$UPGD_CLEAN_MODEL_PATH" ]; then
-    echo "UPGD raw-input clean base already exists: ${UPGD_CLEAN_MODEL_PATH}"
-  else
+  if [ "$FORCE_RETRAIN_UPGD_RAW_BASE" = "1" ] || [ ! -f "$UPGD_CLEAN_MODEL_PATH" ]; then
     run_command \
       "${PYTHON_BIN} train_on_poisoned_set.py $(base_args) -poison_type=none -poison_rate=0.0 -no_normalize -model_path=${UPGD_CLEAN_MODEL_PATH}" \
       "Train raw-input clean ResNet50 model for UPGD"
+  else
+    echo "UPGD raw-input clean base already exists, skip training: ${UPGD_CLEAN_MODEL_PATH}"
   fi
 fi
 
