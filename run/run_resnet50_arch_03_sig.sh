@@ -1,27 +1,7 @@
 #!/usr/bin/env bash
 
-# ResNet50 architecture experiment, shard 3/8: SIG
-# CIFAR-10 (6) + Tiny-ImageNet (6) = 12 configs.
-
+# Legacy: SIG only. Prefer run_resnet50_arch_03_sig_wanet.sh
 set -e
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ATTACK="SIG"
-DEVICES="${DEVICES:-0}"
-export DEVICES
-
-run_one() {
-  local dataset="$1"
-  local rates="$2"
-  export DATASET="${dataset}"
-  export ATTACK_LIST="${ATTACK}"
-  export POISON_RATES="${rates}"
-  export PREPARE_CLEAN=0
-  export PREPARE_UPGD_RAW_BASE=0
-  export RUN_NAME="${RUN_NAME_PREFIX:-run_resnet50_arch_03_sig}_${dataset}"
-  export RUN_TITLE="ResNet50 architecture 03/8 SIG [${dataset}]"
-  bash "${SCRIPT_DIR}/run_resnet50_arch_common.sh"
-}
-
-run_one cifar10 "0.005 0.010"
-run_one tiny_imagenet "0.001 0.005"
+echo "[warn] ${BASH_SOURCE[0]} is legacy; redirecting to run_resnet50_arch_03_sig_wanet.sh (ATTACK_LIST=SIG)"
+ATTACK_LIST=SIG bash "${SCRIPT_DIR}/run_resnet50_arch_03_sig_wanet.sh"

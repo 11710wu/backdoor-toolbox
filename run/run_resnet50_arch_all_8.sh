@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
-# Launch all 8 ResNet50 architecture shards (one attack each).
-# Default: GPU 0..7. Override with GPU0=... GPU1=... or DEVICES_LIST="0 1 2 3 4 5 6 7".
+# Launch all ResNet50 architecture shards (5-way split).
+# Default GPUs: 0..4. Override: DEVICES_LIST="0 1 2 3 4"
 #
 # Usage:
 #   bash run/run_resnet50_arch_all_8.sh
 #   DRY_RUN=1 bash run/run_resnet50_arch_all_8.sh
-#   DEVICES_LIST="0 1 2 3" bash run/run_resnet50_arch_all_8.sh   # only first 4 shards
 
 set -e
 
@@ -17,15 +16,12 @@ cd "$REPO_ROOT"
 SHARDS=(
   run_resnet50_arch_01_basic.sh
   run_resnet50_arch_02_blend.sh
-  run_resnet50_arch_03_sig.sh
-  run_resnet50_arch_04_wanet.sh
-  run_resnet50_arch_05_adaptive_patch.sh
-  run_resnet50_arch_06_adaptive_blend.sh
-  run_resnet50_arch_07_belt.sh
-  run_resnet50_arch_08_upgd.sh
+  run_resnet50_arch_03_sig_wanet.sh
+  run_resnet50_arch_04_adaptive.sh
+  run_resnet50_arch_05_belt_upgd.sh
 )
 
-read -r -a DEVICES_ARR <<< "${DEVICES_LIST:-0 1 2 3 4 5 6 7}"
+read -r -a DEVICES_ARR <<< "${DEVICES_LIST:-0 1 2 3 4}"
 
 echo "Launching ${#SHARDS[@]} ResNet50 shards"
 echo "DEVICES_LIST=${DEVICES_ARR[*]}"
@@ -36,7 +32,7 @@ pids=()
 for i in "${!SHARDS[@]}"; do
   shard="${SHARDS[$i]}"
   if [ "$i" -ge "${#DEVICES_ARR[@]}" ]; then
-    echo "Skip ${shard}: no GPU assigned (DEVICES_LIST shorter than 8)"
+    echo "Skip ${shard}: no GPU assigned (DEVICES_LIST shorter than ${#SHARDS[@]})"
     continue
   fi
   gpu="${DEVICES_ARR[$i]}"

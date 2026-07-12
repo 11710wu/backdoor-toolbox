@@ -202,7 +202,8 @@ run_config_phase() {
     for rate in ${POISON_RATES}; do
       for strength in $(strength_values "$attack"); do
         args="$(attack_args "$attack" "$rate" "$strength")"
-        if [ "$attack" = "upgd" ] || [ "$attack" = "belt" ]; then
+        # create_poisoned_set.py 不接受 -no_normalize；只给 train/test/defense 加。
+        if { [ "$attack" = "upgd" ] || [ "$attack" = "belt" ]; } && [ "$script_name" != "create_poisoned_set.py" ]; then
           args="${args} -no_normalize"
         fi
         if [ "$script_name" = "create_poisoned_set.py" ] && [ "$attack" = "upgd" ]; then

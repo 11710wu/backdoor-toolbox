@@ -1,27 +1,7 @@
 #!/usr/bin/env bash
 
-# ResNet50 architecture experiment, shard 6/8: Adaptive-Blend
-# CIFAR-10 (6) + Tiny-ImageNet (6) = 12 configs.
-
+# Legacy: Adaptive-Blend only. Prefer run_resnet50_arch_04_adaptive.sh
 set -e
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ATTACK="adaptive_blend"
-DEVICES="${DEVICES:-0}"
-export DEVICES
-
-run_one() {
-  local dataset="$1"
-  local rates="$2"
-  export DATASET="${dataset}"
-  export ATTACK_LIST="${ATTACK}"
-  export POISON_RATES="${rates}"
-  export PREPARE_CLEAN=0
-  export PREPARE_UPGD_RAW_BASE=0
-  export RUN_NAME="${RUN_NAME_PREFIX:-run_resnet50_arch_06_adaptive_blend}_${dataset}"
-  export RUN_TITLE="ResNet50 architecture 06/8 Adaptive-Blend [${dataset}]"
-  bash "${SCRIPT_DIR}/run_resnet50_arch_common.sh"
-}
-
-run_one cifar10 "0.005 0.010"
-run_one tiny_imagenet "0.001 0.005"
+echo "[warn] ${BASH_SOURCE[0]} is legacy; redirecting to run_resnet50_arch_04_adaptive.sh (ATTACK_LIST=adaptive_blend)"
+ATTACK_LIST=adaptive_blend bash "${SCRIPT_DIR}/run_resnet50_arch_04_adaptive.sh"
