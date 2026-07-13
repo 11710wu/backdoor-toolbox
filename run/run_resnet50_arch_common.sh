@@ -19,7 +19,7 @@ if [ -z "${PYTHON_BIN:-}" ]; then
   fi
 fi
 
-DATASET="${DATASET:?Set DATASET to cifar10 or tiny_imagenet}"
+DATASET="${DATASET:-tiny_imagenet}"
 MODEL="resnet50"
 DEVICES="${DEVICES:-0}"
 DRY_RUN="${DRY_RUN:-0}"
@@ -43,15 +43,10 @@ read -r -a DEFENSES <<< "${DEFENSE_LIST:-SentiNet STRIP ScaleUp IBD_PSC}"
 
 export POISONED_TRAIN_SET_ROOT="${POISONED_TRAIN_SET_ROOT:-poisoned_train_set4}"
 
-if [ "$DATASET" = "cifar10" ]; then
-  ARCH_NAME="ResNet50_cifar10"
-  DEFAULT_POISON_RATES="0.005 0.010"
-  TARGET_PHASE_NAME="STL10 transfer testing"
-  TARGET_SCRIPT="test_stl10.py"
-  TARGET_EXTRA_PREFIX=""
-elif [ "$DATASET" = "tiny_imagenet" ]; then
+if [ "$DATASET" = "tiny_imagenet" ]; then
   ARCH_NAME="ResNet50_tiny_imagenet"
-  DEFAULT_POISON_RATES="0.001 0.005"
+  # Keep a single poison rate for the ResNet50 arch grid.
+  DEFAULT_POISON_RATES="0.005"
   TARGET_PHASE_NAME="ImageNetV2-tiny transfer testing"
   TARGET_SCRIPT="test_tiny_target_domain.py"
   TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-${REPO_ROOT}/data/imagenetv2-matched-frequency-tiny-organized}"
@@ -59,6 +54,7 @@ elif [ "$DATASET" = "tiny_imagenet" ]; then
   TARGET_EXTRA_PREFIX="-source_dataset=${DATASET} -target_domain_dir=${TARGET_DOMAIN_DIR}"
 else
   echo "Unsupported DATASET for ResNet50 architecture backfill: ${DATASET}" >&2
+  echo "This runner is Tiny-ImageNet only (cifar10 removed)." >&2
   exit 1
 fi
 

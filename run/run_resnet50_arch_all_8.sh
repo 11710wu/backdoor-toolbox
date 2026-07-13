@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# Launch all ResNet50 architecture shards (5-way split).
-# Default GPUs: 0..4. Override: DEVICES_LIST="0 1 2 3 4"
+# Launch all ResNet50 architecture shards (4-way split).
+# Tiny-ImageNet only, poison_rate=0.005.
+# Default GPUs: 0..3. Override: DEVICES_LIST="0 1 2 3"
 #
 # Usage:
 #   bash run/run_resnet50_arch_all_8.sh
@@ -14,14 +15,13 @@ REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "$REPO_ROOT"
 
 SHARDS=(
-  run_resnet50_arch_01_basic.sh
-  run_resnet50_arch_02_blend.sh
+  run_resnet50_arch_01_basic_blend.sh
   run_resnet50_arch_03_sig_wanet.sh
   run_resnet50_arch_04_adaptive.sh
   run_resnet50_arch_05_belt_upgd.sh
 )
 
-read -r -a DEVICES_ARR <<< "${DEVICES_LIST:-0 1 2 3 4}"
+read -r -a DEVICES_ARR <<< "${DEVICES_LIST:-0 1 2 3}"
 
 echo "Launching ${#SHARDS[@]} ResNet50 shards"
 echo "DEVICES_LIST=${DEVICES_ARR[*]}"
