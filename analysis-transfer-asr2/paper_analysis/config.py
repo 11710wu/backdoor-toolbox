@@ -90,6 +90,7 @@ ARCH_LABELS = {
     "ResNet34": "ResNet34",
     "ResNet50": "ResNet50",
     "SmallCNN": "SmallCNN",
+    "MicroCNN": "MicroCNN",
     "densenet121": "DenseNet121",
     "mobilenetv2": "MobileNetV2",
     "vgg19_bn": "VGG19-BN",

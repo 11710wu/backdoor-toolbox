@@ -345,6 +345,11 @@ def get_arch(args):
                     raise ValueError("small_cnn is only supported for dataset='cifar10'")
                 from utils import small_cnn
                 return small_cnn.SmallCNN_cifar10
+            elif args.model == 'micro_cnn':
+                if args.dataset != 'cifar10':
+                    raise ValueError("micro_cnn is only supported for dataset='cifar10'")
+                from utils import micro_cnn
+                return micro_cnn.MicroCNN_cifar10
             elif args.model == 'densenet121':
                 from utils import densenet
                 # 为不同数据集使用专门的模型函数
@@ -367,7 +372,7 @@ def get_arch(args):
                 raise ValueError(
                     f"Unsupported model: {args.model}. "
                     "Supported models: vgg19_bn, mobilenetv2, resnet18, resnet34, "
-                    "resnet50, small_cnn, densenet121"
+                    "resnet50, small_cnn, micro_cnn, densenet121"
                 )
         else:
             return config.arch[args.dataset]

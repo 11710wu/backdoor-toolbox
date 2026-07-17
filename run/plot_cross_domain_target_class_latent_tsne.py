@@ -159,6 +159,16 @@ def main() -> None:
     count_rows = []
     point_rows = []
 
+    # Source images: prefer saved clean_dir/data; fall back to torchvision CIFAR-10 train
+    # (same 50k order used when creating poisoned_train_set).
+    import torchvision
+
+    clean_data_dir = clean_dir / "data"
+    clean_label_path = clean_dir / "labels"
+    use_torchvision_source = not clean_data_dir.exists()
+    if use_torchvision_source:
+        print(f"[info] {clean_data_dir} missing; using torchvision CIFAR-10 train as source images")
+
     for panel_idx, spec in enumerate(selected_specs(args.attack)):
         attack_dir = poisoned_root / spec.dirname
         if not attack_dir.exists():
@@ -175,7 +185,15 @@ def main() -> None:
         source_clean_all, source_payload_all = [], []
         a_clean = a_poison = None
         if args.plot_mode == "cross_domain":
-            source_dataset = IMG_Dataset(clean_dir / "data", clean_dir / "labels", transforms=data_transform)
+            if use_torchvision_source:
+                source_dataset = torchvision.datasets.CIFAR10(
+                    root=str(REPO / "data" / "cifar10"),
+                    train=True,
+                    download=False,
+                    transform=data_transform,
+                )
+            else:
+                source_dataset = IMG_Dataset(str(clean_data_dir), str(clean_label_path), transforms=data_transform)
             source_clean_all, source_payload_all, _ = split_target_class_indices(attack_dir, spec)
             source_clean_idx = sample_list(source_clean_all, args.max_source_clean, args.seed + 100 + panel_idx)
             source_payload_idx = sample_list(source_payload_all, args.max_source_poison, args.seed + 200 + panel_idx)

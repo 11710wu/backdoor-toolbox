@@ -145,7 +145,12 @@ class SentiNet(BackdoorDefense):
             # 使用 'last' 让 find_mobilenet_layer 自动找到最后一个有意义的层
             # 或者可以指定具体的层，如 'features_16' 或 'features_17'
             layer_name = 'last'  # 自动选择最后一个有意义的层
-        elif 'smallcnn' in model_arch_name or 'small_cnn' in model_arch_name:
+        elif (
+            'smallcnn' in model_arch_name
+            or 'small_cnn' in model_arch_name
+            or 'microcnn' in model_arch_name
+            or 'micro_cnn' in model_arch_name
+        ):
             model_type = 'small_cnn'
             layer_name = 'last'
         else:
