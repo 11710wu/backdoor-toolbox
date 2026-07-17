@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 
-# CIFAR-10 ResNet18 noise symmetry patch.
+# CIFAR-10 ResNet18-only noise symmetry patch.
 #
-# Goal: align the noise grid (pr=0.005/0.01) with baseline-matched configs.
+# This script does NOT run SmallCNN. SmallCNN noise symmetry (if needed later)
+# should use a separate script and poisoned_train_set1.
+#
+# Goal: align the ResNet18 noise grid (pr=0.005/0.01) with baseline-matched configs.
 #
 # Phase A - delete asymmetric configs (36 dirs = 3 configs x 12 noise conditions):
 #   - WaNet      pr=0.005, s=1.0,  cover=0.01
@@ -38,13 +41,30 @@ cd "${REPO_ROOT}"
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
 DATASET="cifar10"
-MODEL="resnet18"
-ARCH_NAME="ResNet18_cifar10"
+MODEL="${MODEL:-resnet18}"
+ARCH_NAME="${ARCH_NAME:-ResNet18_cifar10}"
+RUN_SMALLCNN="${RUN_SMALLCNN:-0}"
 TRANSFER_SCRIPT="test_stl10.py"
 DEVICES="${DEVICES:-0}"
 INPUT_NOISE_SEED="${INPUT_NOISE_SEED:-2333}"
 SIG_UPGD_LABEL_MODE="${SIG_UPGD_LABEL_MODE:-clean}"
 OUTPUT_ROOT="${OUTPUT_ROOT:-poisoned_train_set/${DATASET}}"
+
+if [ "$RUN_SMALLCNN" = "1" ]; then
+  echo "RUN_SMALLCNN=1 is not supported by this script." >&2
+  echo "Use a dedicated SmallCNN noise script when needed." >&2
+  exit 1
+fi
+
+if [ "$MODEL" != "resnet18" ] || [ "$ARCH_NAME" != "ResNet18_cifar10" ]; then
+  echo "This script is ResNet18-only. Got MODEL=${MODEL}, ARCH_NAME=${ARCH_NAME}" >&2
+  exit 1
+fi
+
+if [[ "${OUTPUT_ROOT}" == *poisoned_train_set1* ]]; then
+  echo "Refusing to write ResNet18 noise results into poisoned_train_set1." >&2
+  exit 1
+fi
 
 DRY_RUN="${DRY_RUN:-0}"
 RUN_DELETE="${RUN_DELETE:-1}"
@@ -281,10 +301,12 @@ phase_supplement_missing_configs() {
 }
 
 echo "============================================================"
-echo "CIFAR-10 ResNet18 noise symmetry patch"
+echo "CIFAR-10 ResNet18-only noise symmetry patch"
 echo "============================================================"
 echo "repo root     : ${REPO_ROOT}"
+echo "model/arch    : ${MODEL} / ${ARCH_NAME}"
 echo "output root   : ${OUTPUT_ROOT}"
+echo "smallcnn      : disabled (RUN_SMALLCNN=${RUN_SMALLCNN})"
 echo "devices       : ${DEVICES}"
 echo "noise types   : ${NOISE_TYPE_LIST[*]}"
 echo "noise levels  : ${NOISE_LEVEL_LIST[*]}"

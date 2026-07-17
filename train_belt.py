@@ -14,6 +14,11 @@ from utils import supervisor, tools
 from poison_tool_box.belt import CenterLoss
 
 
+def _checkpoint_path_with_suffix(model_path, suffix):
+    root, ext = os.path.splitext(model_path)
+    return f"{root}_{suffix}{ext or '.pt'}"
+
+
 def train_belt_models(args, arch, num_classes, epochs, batch_size, learning_rate,
                       momentum, weight_decay, poison_set_dir, belt_loader_full,
                       test_set_loader, poison_transform, kwargs):
@@ -82,9 +87,14 @@ def train_aug_model(model, train_loader, test_loader, poison_transform,
     # 使用 CosineAnnealingLR，T_max 设置为实际训练轮数 epochs
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=0)
 
-    best_performance = 0.0
+    best_performance = float('-inf')
+    best_clean_acc = None
+    best_asr = None
+    best_epoch = None
+    best_model_path = _checkpoint_path_with_suffix(model_path, 'best')
     last_clean_acc = 0.0
     last_asr = 0.0
+    last_epoch = 0
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -125,12 +135,19 @@ def train_aug_model(model, train_loader, test_loader, poison_transform,
             # 保存最后一个测试的结果
             last_clean_acc = clean_acc
             last_asr = asr
+            last_epoch = epoch
 
             current_performance = clean_acc + asr
             if current_performance > best_performance:
                 best_performance = current_performance
-                torch.save(model.module.state_dict(), model_path)
-                print(f"  [Saved] Clean ACC: {clean_acc:.4f}, ASR: {asr:.4f}")
+                best_clean_acc = clean_acc
+                best_asr = asr
+                best_epoch = epoch
+                torch.save(model.module.state_dict(), best_model_path)
+                print(f"  [Saved best] Epoch: {epoch}, Clean ACC: {clean_acc:.4f}, ASR: {asr:.4f}")
+
+    torch.save(model.module.state_dict(), model_path)
+    print(f"  [Saved final] Epoch: {last_epoch}, Clean ACC: {last_clean_acc:.4f}, ASR: {last_asr:.4f}")
 
     # 保存训练结果（使用最后一个测试的结果）
     import json
@@ -152,6 +169,16 @@ def train_aug_model(model, train_loader, test_loader, poison_transform,
         'epochs': epochs,
         'clean_acc': last_clean_acc,
         'asr': last_asr,
+        'checkpoint_selection': 'final_epoch',
+        'model_path': model_path,
+        'final_epoch': last_epoch,
+        'final_clean_acc': last_clean_acc,
+        'final_asr': last_asr,
+        'best_model_path': best_model_path,
+        'best_epoch': best_epoch,
+        'best_clean_acc': best_clean_acc,
+        'best_asr': best_asr,
+        'best_selection_metric': best_performance,
         'timestamp': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
@@ -171,7 +198,14 @@ def train_do_model(model, train_loader, test_loader, poison_transform,
     # 使用 CosineAnnealingLR，T_max 设置为实际训练轮数 epochs
     scheduler = CosineAnnealingLR(optimizer, T_max=epochs, eta_min=0)
     
-    best_performance = 0.0
+    best_performance = float('-inf')
+    best_clean_acc = None
+    best_asr = None
+    best_epoch = None
+    best_model_path = _checkpoint_path_with_suffix(model_path, 'best')
+    last_clean_acc = 0.0
+    last_asr = 0.0
+    last_epoch = 0
     
     for epoch in range(1, epochs + 1):
         model.train()
@@ -200,13 +234,22 @@ def train_do_model(model, train_loader, test_loader, poison_transform,
             test_result = tools.test(model=model, test_loader=test_loader, poison_test=True,
                                    poison_transform=poison_transform, num_classes=num_classes)
             clean_acc, asr = test_result
+
+            last_clean_acc = clean_acc
+            last_asr = asr
+            last_epoch = epoch
             
             current_performance = clean_acc + asr
             if current_performance > best_performance:
                 best_performance = current_performance
                 best_clean_acc = clean_acc
                 best_asr = asr
-                torch.save(model.module.state_dict(), model_path)
-                print(f"  [Saved] Clean ACC: {clean_acc:.4f}, ASR: {asr:.4f}")
+                best_epoch = epoch
+                torch.save(model.module.state_dict(), best_model_path)
+                print(f"  [Saved best] Epoch: {epoch}, Clean ACC: {clean_acc:.4f}, ASR: {asr:.4f}")
+
+    torch.save(model.module.state_dict(), model_path)
+    print(f"  [Saved final] Epoch: {last_epoch}, Clean ACC: {last_clean_acc:.4f}, ASR: {last_asr:.4f}")
     
     print(f"do_model 训练完成，模型保存至: {model_path}")
+    print(f"do_model best checkpoint 保存至: {best_model_path}")
