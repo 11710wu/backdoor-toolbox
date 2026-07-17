@@ -206,8 +206,8 @@ is_complete_dir() {
   [ -f "${dir}/poison_indices" ] || return 1
   [ -f "${dir}/${model_file}" ] || return 1
   [ -f "${dir}/train_results_seed=2333.json" ] || return 1
-  [ -f "${dir}/test_results_seed=2333.json" ] || return 1
-  [ -f "${dir}/test_stl10_results.txt" ] || return 1
+  compgen -G "${dir}/test_results_seed=2333*.json" >/dev/null || return 1
+  compgen -G "${dir}/test_stl10_results*.txt" >/dev/null || return 1
   [ -f "${dir}/sentinet_defense_results.json" ] || return 1
   [ -f "${dir}/strip_defense_results.json" ] || return 1
   [ -f "${dir}/scaleup_defense_results.json" ] || return 1
@@ -223,8 +223,8 @@ phase_done() {
   case "$phase" in
     create) [ -f "${dir}/labels" ] && [ -f "${dir}/poison_indices" ] ;;
     train) [ -f "${dir}/${model_file}" ] && [ -f "${dir}/train_results_seed=2333.json" ] ;;
-    source) [ -f "${dir}/test_results_seed=2333.json" ] ;;
-    transfer) [ -f "${dir}/test_stl10_results.txt" ] ;;
+    source) compgen -G "${dir}/test_results_seed=2333*.json" >/dev/null ;;
+    transfer) compgen -G "${dir}/test_stl10_results*.txt" >/dev/null ;;
     defense:SentiNet) [ -f "${dir}/sentinet_defense_results.json" ] ;;
     defense:STRIP) [ -f "${dir}/strip_defense_results.json" ] ;;
     defense:ScaleUp) [ -f "${dir}/scaleup_defense_results.json" ] ;;
