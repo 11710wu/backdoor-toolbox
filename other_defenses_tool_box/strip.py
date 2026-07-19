@@ -20,7 +20,7 @@ from matplotlib import pyplot as plt
 class STRIP(BackdoorDefense):
     name: str = 'strip'
 
-    def __init__(self, args, strip_alpha: float = 0.5, N: int = 64, defense_fpr: float = 0.05, batch_size=128):
+    def __init__(self, args, strip_alpha: float = 0.5, N: int = 64, defense_fpr: float = 0.05, batch_size=None):
         super().__init__(args)
         self.args = args
 
@@ -30,6 +30,15 @@ class STRIP(BackdoorDefense):
         self.folder_path = 'other_defenses_tool_box/results/STRIP'
         if not os.path.exists(self.folder_path):
             os.mkdir(self.folder_path)
+
+        # Only Tiny-ImageNet + ResNet50 needs a smaller batch; other setups are fine at 128.
+        if batch_size is None:
+            model_name = str(getattr(args, 'model', '') or '').lower()
+            if getattr(args, 'dataset', None) == 'tiny_imagenet' and model_name == 'resnet50':
+                batch_size = 64
+            else:
+                batch_size = 128
+        self.batch_size = batch_size
         
         # ========== [修复] STRIP 的 train_loader 必须使用与 test_loader 相同的 transform ==========
         # 问题：BELT/UPGD 不使用归一化，但 generate_dataloader 默认使用归一化
@@ -48,8 +57,9 @@ class STRIP(BackdoorDefense):
         args = self.args
         
         # ========== [修改] 先用验证集计算阈值 ==========
-        # 使用验证集（2000张）计算阈值
-        val_set_loader = generate_dataloader(dataset=self.dataset, dataset_path=config.data_dir, batch_size=100, split='valid', data_transform=self.data_transform, shuffle=False, drop_last=False)
+        # 使用验证集（2000张）计算阈值；不得大于 train_loader batch（Tiny+ResNet50=64）
+        val_bs = min(100, self.batch_size)
+        val_set_loader = generate_dataloader(dataset=self.dataset, dataset_path=config.data_dir, batch_size=val_bs, split='valid', data_transform=self.data_transform, shuffle=False, drop_last=False)
         
         val_clean_entropy = []
         for _input, _label in tqdm(val_set_loader, desc="计算验证集熵值"):
@@ -61,8 +71,8 @@ class STRIP(BackdoorDefense):
         threshold_high = np.inf
         # ========== [修改结束] ==========
         
-        # 使用测试集（8000张）进行检测
-        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=self.data_transform, shuffle=False)
+        # 使用测试集（8000张）进行检测；仅 Tiny+ResNet50 用 self.batch_size=64，其余仍为默认 128
+        test_set_loader = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, batch_size=self.batch_size, split='test', data_transform=self.data_transform, shuffle=False)
         test_set_loader_no_normalize = generate_dataloader(dataset=args.dataset, dataset_path=config.data_dir, split='test', data_transform=torchvision.transforms.ToTensor(), shuffle=False)
 
         clean_entropy = []
