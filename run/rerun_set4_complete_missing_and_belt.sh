@@ -47,11 +47,15 @@ RUN_BELT="${RUN_BELT:-1}"
 RUN_EXISTING_MISSING="${RUN_EXISTING_MISSING:-1}"
 RUN_QWEN="${RUN_QWEN:-1}"
 DEFENSE_LIST="${DEFENSE_LIST:-SentiNet STRIP ScaleUp IBD_PSC}"
+# Comma/space-separated arch name substrings to skip in non-BELT backfill
+# (e.g. "ResNet50" skips ResNet50_cifar10 and ResNet50_tiny_imagenet).
+ARCH_EXCLUDE="${ARCH_EXCLUDE:-}"
 TARGET_DOMAIN_DIR="${TARGET_DOMAIN_DIR:-${REPO_ROOT}/data/imagenetv2-matched-frequency-tiny-organized}"
 QWEN_TARGET_DOMAIN_DIR="${QWEN_TARGET_DOMAIN_DIR:-${REPO_ROOT}/data/tiny-target-domain-qwen-full-organized}"
 LOG_DIR="${LOG_DIR:-logs}"
 mkdir -p "$LOG_DIR"
 ERROR_LOG="${ERROR_LOG:-${LOG_DIR}/rerun_set4_complete_missing_and_belt_$(date +%Y%m%d_%H%M%S).log}"
+export ARCH_EXCLUDE
 
 case "$PHASE" in
   all|source|test|transfer|target|qwen|defense|defenses|belt)
@@ -191,9 +195,13 @@ target_domain = sys.argv[6]
 qwen_domain = sys.argv[7]
 
 py = os.environ.get("PYTHON_BIN", "python")
+arch_exclude = [x.strip() for x in re.split(r"[, ]+", os.environ.get("ARCH_EXCLUDE", "")) if x.strip()]
 
 def shell_join(parts):
     return " ".join(shlex.quote(str(p)) for p in parts)
+
+def arch_excluded(arch):
+    return any(tok in arch for tok in arch_exclude)
 
 def model_from_arch(arch):
     mapping = {
@@ -277,6 +285,8 @@ for dataset_dir in sorted(root.glob("*")):
         if "_arch=" not in name:
             continue
         arch = name.rsplit("_arch=", 1)[1]
+        if arch_excluded(arch):
+            continue
         model = model_from_arch(arch)
         parsed = parse_attack_args(name)
         if model is None or parsed is None:
@@ -334,6 +344,7 @@ PY
 summarize_missing() {
   "$PYTHON_BIN" - "$REPO_ROOT" "$POISONED_TRAIN_SET_ROOT" "$RUN_QWEN" "$DEFENSE_LIST" <<'PY'
 import glob
+import os
 import re
 import sys
 from collections import Counter, defaultdict
@@ -343,6 +354,7 @@ repo = Path(sys.argv[1]).resolve()
 root = repo / sys.argv[2]
 run_qwen = sys.argv[3] == "1"
 defenses = sys.argv[4].split()
+arch_exclude = [x.strip() for x in re.split(r"[, ]+", os.environ.get("ARCH_EXCLUDE", "")) if x.strip()]
 
 def supported(name):
     if name.startswith(("belt_", "none_", "upgd_raw_base_")):
@@ -363,6 +375,8 @@ for dataset_dir in sorted(root.glob("*")):
         if not d.is_dir() or not supported(d.name):
             continue
         arch = d.name.rsplit("_arch=", 1)[1]
+        if any(tok in arch for tok in arch_exclude):
+            continue
         misses = []
         if not glob.glob(str(d / "test_results_seed=2333*.json")):
             misses.append("source")
@@ -414,6 +428,7 @@ echo "run BELT              : ${RUN_BELT}"
 echo "run existing missing  : ${RUN_EXISTING_MISSING}"
 echo "run qwen              : ${RUN_QWEN}"
 echo "defenses              : ${DEFENSE_LIST}"
+echo "arch exclude          : ${ARCH_EXCLUDE:-"(none)"}"
 echo "dry run               : ${DRY_RUN}"
 echo "error log             : ${ERROR_LOG}"
 echo "============================================================"

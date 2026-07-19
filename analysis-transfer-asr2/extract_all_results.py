@@ -103,8 +103,7 @@ def _parse_defense_json(path: Path) -> Optional[Dict[str, float]]:
     try:
         d = json.loads(path.read_text(encoding='utf-8'))
         tpr = float(d.get('tpr', 0) or 0)
-        if tpr > 1:
-            tpr /= 100.0
+        tpr /= 100.0
         auc = float(d.get('auc', 0) or 0)
         return {"tpr": tpr, "auc": auc}
     except Exception:

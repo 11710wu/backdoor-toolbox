@@ -46,9 +46,15 @@ class IBD_PSC(BackdoorDefense):
         
         # ========== [Tiny ImageNet 支持] 根据数据集调整 batch_size ==========
         # Tiny ImageNet 有 200 个类别，图像尺寸为 64×64，需要减小 batch_size 以避免内存不足
+        # ResNet50 更深，init 里同 batch 会先后跑 poison+clean 两次 forward，100 会 OOM
         if self.dataset == 'tiny_imagenet':
-            test_batch_size = 100  # 减小 batch_size 以适应 200 类别的内存需求
-            val_batch_size = 100
+            model_name = str(getattr(args, 'model', '') or '').lower()
+            if model_name == 'resnet50':
+                test_batch_size = 64
+                val_batch_size = 64
+            else:
+                test_batch_size = 100
+                val_batch_size = 100
         else:
             test_batch_size = 200  # 其他数据集使用原始 batch_size
             val_batch_size = 200

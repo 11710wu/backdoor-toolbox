@@ -14,13 +14,19 @@
 #   alpha             : 0.100, 0.200, 0.300
 #
 # Phases:
-#   create, train, source, transfer, qwen, defense, all
+#   create, train, source, transfer, qwen, defense, eval, train_eval, all
+#
+#   eval       = source + transfer + qwen + defense (no create/train)
+#   train_eval = train + eval (no create; useful on a second machine)
+#   all        = create + train + eval
 #
 # Examples:
 #   DRY_RUN=1 bash run/rerun_set4_belt_final_checkpoint_full.sh
 #   PHASE=all PARALLEL=1 GPU_IDS="0 1 2 3" bash run/rerun_set4_belt_final_checkpoint_full.sh
 #   RUN_TINY_RESNET50=0 PHASE=all PARALLEL=1 GPU_IDS="0 1 2 3" bash run/rerun_set4_belt_final_checkpoint_full.sh
 #   PHASE=defense DEFENSE_LIST="SentiNet STRIP ScaleUp IBD_PSC" bash run/rerun_set4_belt_final_checkpoint_full.sh
+#   PHASE=train bash run/rerun_set4_belt_final_checkpoint_full.sh
+#   PHASE=eval bash run/rerun_set4_belt_final_checkpoint_full.sh
 
 set -euo pipefail
 
@@ -80,6 +86,19 @@ case "$PHASE" in
     RUN_QWEN_PHASE="$RUN_QWEN"
     RUN_DEFENSES=1
     ;;
+  train_eval)
+    RUN_TRAIN=1
+    RUN_SOURCE=1
+    RUN_TRANSFER=1
+    RUN_QWEN_PHASE="$RUN_QWEN"
+    RUN_DEFENSES=1
+    ;;
+  eval|evaluate)
+    RUN_SOURCE=1
+    RUN_TRANSFER=1
+    RUN_QWEN_PHASE="$RUN_QWEN"
+    RUN_DEFENSES=1
+    ;;
   create) RUN_CREATE=1 ;;
   train) RUN_TRAIN=1 ;;
   source|test) RUN_SOURCE=1 ;;
@@ -87,7 +106,7 @@ case "$PHASE" in
   qwen) RUN_QWEN_PHASE=1 ;;
   defense|defenses) RUN_DEFENSES=1 ;;
   *)
-    echo "Unsupported PHASE=${PHASE}. Use create|train|source|transfer|qwen|defense|all." >&2
+    echo "Unsupported PHASE=${PHASE}. Use create|train|source|transfer|qwen|defense|eval|train_eval|all." >&2
     exit 2
     ;;
 esac

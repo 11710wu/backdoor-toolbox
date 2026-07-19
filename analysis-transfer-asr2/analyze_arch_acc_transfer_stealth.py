@@ -86,6 +86,15 @@ def normalize_rate(value: Any) -> float:
     return out
 
 
+def normalize_percent_rate(value: Any) -> float:
+    if value is None:
+        return float("nan")
+    try:
+        return float(value) / 100.0
+    except (TypeError, ValueError):
+        return float("nan")
+
+
 def safe_float(value: Any) -> Optional[float]:
     try:
         return float(value)
@@ -232,9 +241,9 @@ def parse_defense(path: Path) -> Dict[str, float]:
     except (TypeError, ValueError):
         threshold = float("nan")
     return {
-        "tpr": normalize_rate(data.get("tpr")),
+        "tpr": normalize_percent_rate(data.get("tpr")),
         "auc": normalize_rate(data.get("auc")),
-        "fpr": normalize_rate(data.get("fpr")),
+        "fpr": normalize_percent_rate(data.get("fpr")),
         "threshold": threshold,
     }
 

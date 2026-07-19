@@ -24,6 +24,19 @@ def normalize_rate(value: object) -> float:
     return out
 
 
+def normalize_percent_rate(value: object) -> float:
+    """Convert a value stored explicitly as a percentage to the [0, 1] scale."""
+    if value is None:
+        return float("nan")
+    try:
+        out = float(value)
+    except (TypeError, ValueError):
+        return float("nan")
+    if math.isnan(out):
+        return float("nan")
+    return out / 100.0
+
+
 def compute_transfer_rate(transfer_asr: object, source_asr: object) -> float:
     """Legacy transfer score: transfer_asr^2 / source_asr."""
     transfer = normalize_rate(transfer_asr)

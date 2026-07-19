@@ -21,6 +21,7 @@ from metrics import (
     compute_transfer_rate,
     compute_transfer_retention_rate,
     compute_transferability,
+    normalize_percent_rate,
     normalize_rate,
     stealth_component,
 )
@@ -222,9 +223,11 @@ def parse_defense_file(path: Optional[Path]) -> Dict[str, float]:
     if not data:
         return {"tpr": float("nan"), "auc": float("nan"), "fpr": float("nan"), "threshold": float("nan")}
     return {
-        "tpr": normalize_rate(data.get("tpr")),
+        # Defense implementations persist TPR/FPR on a 0--100 percentage scale,
+        # including legitimate values below 1%.
+        "tpr": normalize_percent_rate(data.get("tpr")),
         "auc": normalize_rate(data.get("auc")),
-        "fpr": normalize_rate(data.get("fpr")),
+        "fpr": normalize_percent_rate(data.get("fpr")),
         "threshold": safe_float(data.get("threshold", data.get("threshold_low", float("nan")))),
     }
 

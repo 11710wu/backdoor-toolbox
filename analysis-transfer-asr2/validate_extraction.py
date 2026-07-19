@@ -62,8 +62,7 @@ def _parse_defense(path):
         with open(path, 'r', encoding='utf-8') as f:
             d = json.load(f)
         tpr = float(d.get('tpr', 0) or 0)
-        if tpr > 1:
-            tpr /= 100.0
+        tpr /= 100.0
         auc = float(d.get('auc', 0) or 0)
         return tpr, auc
     except Exception:

@@ -229,7 +229,8 @@ elif args.defense == 'STRIP':
         strip_alpha=1.0,
         N=100,
         defense_fpr=0.1,  # 5%分位数
-        batch_size=128,
+        # None: strip.py 对 Tiny+ResNet50 自动用 64，其它仍 128
+        batch_size=None,
     )
     defense.detect()
 elif args.defense == 'FP':
