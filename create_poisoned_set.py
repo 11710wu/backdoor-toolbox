@@ -77,6 +77,8 @@ parser.add_argument('-input_noise_seed', type=int, required=False, default=2333,
 # 设备选择，与 train_on_poisoned_set.py / test_model.py 保持一致
 parser.add_argument('-devices', type=str, default='0',
                     help='可见 GPU 设备编号，例如 \"0\" 或 \"0,1\"')
+parser.add_argument('-sample_cap', type=int, default=None,
+                    help='SYN smoke-only source-train cap; omitted for formal 50k')
 
 args = parser.parse_args()
 
@@ -120,7 +122,7 @@ class InputNoiseDataset(torch.utils.data.Dataset):
 # =============================================================================
 # 随机种子 / 可复现性（工程说明）
 # -----------------------------------------------------------------------------
-# 本脚本使用 `tools.setup_seed(0)`（固定种子）来保证“生成投毒数据集”可复现。
+# 本脚本使用 `tools.setup_seed(2333)`（项目默认固定种子）来保证“生成投毒数据集”可复现。
 #
 # 对 UPGD 来说，我们同样固定：
 # - cfg.seed = config.poison_seed：生成 delta 的随机性（DataLoader shuffle / python random 等）
@@ -245,6 +247,17 @@ else:
         ])
         train_set = datasets.CIFAR10(os.path.join(data_dir, 'cifar10'), train=True,
                                      download=True, transform=data_transform)
+        img_size = 32
+        num_classes = 10
+
+    elif args.dataset == 'syn':
+        from utils.syn_svhn import SynSVHNNpyDataset
+        data_transform = transforms.Compose([transforms.ToTensor()])
+        train_set = SynSVHNNpyDataset(config.syn_dir, 'syn_train_50k', transform=data_transform)
+        if args.sample_cap is not None:
+            if args.sample_cap <= 0 or args.sample_cap > len(train_set):
+                raise ValueError(f"Invalid SYN sample_cap={args.sample_cap}")
+            train_set = torch.utils.data.Subset(train_set, range(args.sample_cap))
         img_size = 32
         num_classes = 10
 
@@ -462,7 +475,7 @@ if args.poison_type in ['basic', 'badnet', 'blend', 'clean_label', 'refool',
             'alpha': belt_alpha,
             'pattern_x': 2,
             'pattern_y': 8,
-            'seed': 2333,
+            'seed': 0,
         }
         belt_trigger_path = os.path.join(poison_set_dir, 'belt_trigger.pt')
         torch.save(belt_trigger_data, belt_trigger_path)
@@ -777,6 +790,9 @@ elif args.poison_type == 'upgd':
     elif args.dataset == 'mnistm':
         mean = (0.46, 0.46, 0.46)
         std = (0.23, 0.23, 0.23)
+    elif args.dataset == 'syn':
+        mean = (0.4631518318780673, 0.4627967308517113, 0.46310701156556255)
+        std = (0.3004204872573654, 0.3001427057790942, 0.3004339234651967)
     else:
         raise NotImplementedError(f"UPGD 暂不支持的数据集: {args.dataset}")
 

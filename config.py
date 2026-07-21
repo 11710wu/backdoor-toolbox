@@ -22,6 +22,8 @@ tiny_target_domain_dir = './data/tiny-target-domain' # FLUX generated target dom
 mnist_dir = './data/mnist' # MNIST dataset directory
 # MNIST-M: MNIST 的彩色版本，用于跨域测试
 mnistm_dir = './data/MNIST-M' # MNIST-M dataset directory (contains train.npy and test.npy)
+syn_dir = './data_syn'
+svhn_dir = './data_svhn'
 # ========== [MNIST 支持] 结束 ==========
 
 target_class = {
@@ -33,6 +35,7 @@ target_class = {
     'tiny_imagenet': 0,  # [Tiny ImageNet 支持] 默认目标类为 0
     'mnist': 0,  # [MNIST 支持] 默认目标类为 0
     'mnistm': 2,  # [MNIST-M 支持] 默认目标类为 0
+    'syn': 0,
 }
 
 # default target class (without loss of generality)
@@ -43,6 +46,12 @@ record_poison_seed = True
 record_model_arch = True  # 启用模型架构记录，输出目录将包含模型架构名称（如 DenseNet121）
 
 trigger_default = {
+    'syn': {
+        'none': 'none', 'adaptive_blend': 'hellokitty_32.png',
+        'adaptive_patch': 'none', 'basic': 'badnet_patch_32.png',
+        'badnet': 'badnet_patch_32.png', 'blend': 'hellokitty_32.png',
+        'SIG': 'none', 'WaNet': 'none', 'upgd': 'none', 'belt': 'none',
+    },
     'cifar10': {
         'none' : 'none',
         'adaptive_blend': 'hellokitty_32.png',
@@ -209,6 +218,7 @@ arch = {
     # 'mnistm': resnet.ResNet18,                # ResNet-18
     # 'mnistm': vgg.vgg19_bn,                   # VGG-19-BN
     'mnistm': mobilenetv2.mobilenetv2,          # MobileNetV2 [默认]
+    'syn': resnet.ResNet18_syn,
     # ========== [MNIST-M 支持] 结束 ==========
     
     'ember': ember_nn.EmberNN,
@@ -224,6 +234,7 @@ arch = {
 
 # adapitve-patch triggers for different datasets
 adaptive_patch_train_trigger_names = {
+    'syn': ['phoenix_corner_32.png', 'firefox_corner_32.png', 'badnet_patch4_32.png', 'trojan_square_32.png'],
     'cifar10': [
         'phoenix_corner_32.png',
         'firefox_corner_32.png',
@@ -259,6 +270,7 @@ adaptive_patch_train_trigger_names = {
 }
 
 adaptive_patch_train_trigger_alphas = {
+    'syn': [0.5, 0.2, 0.5, 0.3],
     'cifar10': [
         0.5,
         0.2,
@@ -292,6 +304,7 @@ adaptive_patch_train_trigger_alphas = {
 }
 
 adaptive_patch_test_trigger_names = {
+    'syn': ['phoenix_corner2_32.png', 'badnet_patch4_32.png'],
     'cifar10': [
         'phoenix_corner2_32.png',
         'badnet_patch4_32.png',
@@ -316,6 +329,7 @@ adaptive_patch_test_trigger_names = {
 }
 
 adaptive_patch_test_trigger_alphas = {
+    'syn': [1, 1],
     'cifar10': [
         1,
         1,

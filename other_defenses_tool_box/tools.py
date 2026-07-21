@@ -48,6 +48,28 @@ def tanh_func(x: torch.Tensor) -> torch.Tensor:
     return (x.tanh() + 1) * 0.5
 
 def generate_dataloader(dataset='cifar10', dataset_path='./data/', batch_size=128, split='train', shuffle=True, drop_last=False, data_transform=None):
+    if dataset == 'syn':
+        from utils.syn_svhn import SynSVHNNpyDataset
+        if data_transform is None:
+            mean = (0.4631518318780673, 0.4627967308517113, 0.46310701156556255)
+            std = (0.3004204872573654, 0.3001427057790942, 0.3004339234651967)
+            data_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+        if split == 'train':
+            data = SynSVHNNpyDataset(config.syn_dir, 'syn_train_50k', transform=data_transform)
+        elif split in ('std_test', 'full_test'):
+            data = SynSVHNNpyDataset(config.syn_dir, 'syn_test_full', transform=data_transform)
+        elif split in ('valid', 'val'):
+            data = IMG_Dataset(data_dir=os.path.join('clean_set', 'syn', 'clean_split', 'data'),
+                               label_path=os.path.join('clean_set', 'syn', 'clean_split', 'clean_labels'),
+                               transforms=data_transform)
+        elif split == 'test':
+            data = IMG_Dataset(data_dir=os.path.join('clean_set', 'syn', 'test_split', 'data'),
+                               label_path=os.path.join('clean_set', 'syn', 'test_split', 'labels'),
+                               transforms=data_transform)
+        else:
+            raise ValueError(f'Unsupported SYN split: {split}')
+        return DataLoader(data, batch_size=batch_size, shuffle=shuffle, drop_last=drop_last,
+                          num_workers=4, pin_memory=True)
     if dataset == 'cifar10':
         if data_transform is None:
             data_transform = transforms.Compose([

@@ -46,6 +46,12 @@ elif args.dataset == 'cifar10':
                                  download=True, transform=data_transform)
     img_size = 32
     num_classes = 10
+elif args.dataset == 'syn':
+    from utils.syn_svhn import SynSVHNNpyDataset
+    data_transform = transforms.Compose([transforms.ToTensor()])
+    clean_set = SynSVHNNpyDataset(config.syn_dir, 'syn_test_full', transform=data_transform)
+    img_size = 32
+    num_classes = 10
 elif args.dataset == 'imagenette':
 
     data_transform = transforms.Compose([

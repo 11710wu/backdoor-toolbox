@@ -56,6 +56,8 @@ clean_set/gtsrb/*
 !clean_set/gtsrb/.dummy
 clean_set/imagenette/*
 !clean_set/imagenette/.dummy
+clean_set/syn/*
+!clean_set/syn/.dummy
 
 logs/*
 !logs/.dummy
@@ -211,5 +213,7 @@ clean_train_set/
 clean_models/
 
 __pycache__/
+data_syn/
+data_svhn/
 data
 data/

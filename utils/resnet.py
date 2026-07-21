@@ -236,6 +236,12 @@ def ResNet18_cifar10(num_classes=10):
     return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
 
 
+def ResNet18_syn(num_classes=10):
+    """CIFAR-style ResNet-18 for 3x32x32 SYN digits."""
+    print(f"[MODEL] Creating ResNet18_SYN with {num_classes} classes")
+    return ResNet(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
+
+
 def ResNet18_narrow(num_classes=10):
     return ResNet_narrow(BasicBlock, [2, 2, 2, 2], num_classes=num_classes)
 

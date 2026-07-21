@@ -41,6 +41,8 @@ parser.add_argument('-defense', type=str, required=True,
 parser.add_argument('-devices', type=str, default='0')
 parser.add_argument('-log', default=False, action='store_true')
 parser.add_argument('-seed', type=int, required=False, default=default_args.seed)
+parser.add_argument('-sample_cap', type=int, default=None,
+                    help='SYN poison-set scope; smoke testing only')
 # WaNet specific parameters
 parser.add_argument('-s', type=float, required=False, default=None, help='WaNet s parameter (distortion intensity)')
 parser.add_argument('-k', type=int, required=False, default=None, help='WaNet k parameter (noise grid resolution)')
@@ -67,6 +69,7 @@ parser.add_argument('-input_noise_level', type=float, required=False, default=0.
 parser.add_argument('-input_noise_seed', type=int, required=False, default=2333,
                     help='输入噪声随机种子；防御阶段仅用于路径一致性')
 args = parser.parse_args()
+args.poison_seed = config.poison_seed
 # ===== 修改开始（新增辅助函数与结果标注） =====
 
 def _format_numeric(value: float) -> str:
@@ -234,7 +237,7 @@ elif args.defense == 'STRIP':
         args,
         strip_alpha=1.0,
         N=100,
-        defense_fpr=0.1,  # 5%分位数
+        defense_fpr=0.1,  # 10% quantile
         # None: strip.py 对 Tiny+ResNet50 自动用 64，其它仍 128
         batch_size=None,
     )
