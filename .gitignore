@@ -65,7 +65,8 @@ clean_set/imagenette/*
 !clean_set/imagenette/.dummy
 target_domain_splits/*
 !target_domain_splits/.dummy
-
+clean_set/syn/*
+!clean_set/syn/.dummy
 logs/*
 !logs/.dummy
 
@@ -87,6 +88,14 @@ auto_*.py
 # Generated analysis outputs and GPT upload packs
 /gpt_upload_packs/
 /analysis-transfer-asr2/
+!/analysis-transfer-asr2/
+/analysis-transfer-asr2/*
+!/analysis-transfer-asr2/paper_analysis/
+/analysis-transfer-asr2/paper_analysis/*
+!/analysis-transfer-asr2/paper_analysis/syn_svhn_pilot/
+/analysis-transfer-asr2/paper_analysis/syn_svhn_pilot/*
+!/analysis-transfer-asr2/paper_analysis/syn_svhn_pilot/collect_syn_svhn_pilot.py
+!/analysis-transfer-asr2/paper_analysis/syn_svhn_pilot/plot_syn_svhn_pilot.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

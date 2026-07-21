@@ -87,6 +87,13 @@ def get_poisoned_train_set_root():
     return os.environ.get('POISONED_TRAIN_SET_ROOT', 'poisoned_train_set')
 
 
+def get_syn_scope_suffix(args):
+    cap = getattr(args, 'sample_cap', None)
+    if getattr(args, 'dataset', None) == 'syn' and cap is not None:
+        return f'_scope=smoke_n={int(cap)}'
+    return ''
+
+
 def get_dir_core(args, include_model_name=False, include_poison_seed=False):
     ratio = '%.3f' % args.poison_rate
     # ratio = '%.1f' % (args.poison_rate * 100) + '%'
@@ -151,6 +158,7 @@ def get_dir_core(args, include_model_name=False, include_poison_seed=False):
     else:
         dir_core = '%s_%s_%s' % (args.dataset, args.poison_type, ratio)
 
+    dir_core = f'{dir_core}{get_syn_scope_suffix(args)}'
     if include_model_name:
         dir_core = f'{dir_core}_{get_model_name(args)}'
     if include_poison_seed:
@@ -247,6 +255,7 @@ def get_poison_set_dir(args):
     else:
         poison_set_dir = '%s/%s/%s_%s' % (root, args.dataset, args.poison_type, ratio)
 
+    poison_set_dir = f'{poison_set_dir}{get_syn_scope_suffix(args)}'
     if config.record_poison_seed: poison_set_dir = f'{poison_set_dir}_poison_seed={config.poison_seed}'  # debug
     if config.record_model_arch:
         # 获取实际使用的模型架构名称
@@ -296,6 +305,8 @@ def get_arch(args):
                 # 为不同数据集使用专门的模型函数
                 if args.dataset == 'cifar10':
                     return vgg.vgg19_bn_cifar10
+                elif args.dataset == 'syn':
+                    return vgg.vgg19_bn_syn
                 elif args.dataset == 'tiny_imagenet':
                     return vgg.vgg19_bn_tiny_imagenet
                 elif args.dataset == 'mnistm':
@@ -307,6 +318,8 @@ def get_arch(args):
                 # 为不同数据集使用专门的模型函数
                 if args.dataset == 'cifar10':
                     return mobilenetv2.mobilenetv2_cifar10
+                elif args.dataset == 'syn':
+                    return mobilenetv2.mobilenetv2_syn
                 elif args.dataset == 'tiny_imagenet':
                     return mobilenetv2.mobilenetv2_tiny_imagenet
                 elif args.dataset == 'mnistm':
@@ -318,6 +331,8 @@ def get_arch(args):
                 # 为不同数据集使用专门的模型函数
                 if args.dataset == 'cifar10':
                     return resnet.ResNet18_cifar10
+                elif args.dataset == 'syn':
+                    return resnet.ResNet18_syn
                 elif args.dataset == 'tiny_imagenet':
                     return resnet.ResNet18_tiny_imagenet
                 elif args.dataset == 'mnistm':
@@ -822,6 +837,35 @@ def get_transforms(args):
             transforms.Normalize([-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225], [1 / 0.229, 1 / 0.224, 1 / 0.225])
         ])
 
+    elif args.dataset == 'syn':
+        mean = (0.4631518318780673, 0.4627967308517113, 0.46310701156556255)
+        std = (0.3004204872573654, 0.3001427057790942, 0.3004339234651967)
+        if args.poison_type == 'belt':
+            data_transform_aug = transforms.Compose([
+                transforms.RandomCrop(32, padding=4), transforms.ToTensor()
+            ])
+            data_transform = transforms.Compose([transforms.ToTensor()])
+            trigger_transform = transforms.Compose([transforms.ToTensor()])
+            normalizer = transforms.Compose([])
+            denormalizer = transforms.Compose([])
+        elif args.poison_type == 'upgd' or args.no_normalize:
+            data_transform_aug = transforms.Compose([
+                transforms.RandomCrop(32, padding=4), transforms.ToTensor()
+            ])
+            data_transform = transforms.Compose([transforms.ToTensor()])
+            trigger_transform = transforms.Compose([transforms.ToTensor()])
+            normalizer = transforms.Compose([])
+            denormalizer = transforms.Compose([])
+        else:
+            data_transform_aug = transforms.Compose([
+                transforms.RandomCrop(32, padding=4), transforms.ToTensor(), transforms.Normalize(mean, std)
+            ])
+            data_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+            trigger_transform = transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+            normalizer = transforms.Compose([transforms.Normalize(mean, std)])
+            denormalizer = transforms.Compose([
+                transforms.Normalize(tuple(-m / s for m, s in zip(mean, std)), tuple(1.0 / s for s in std))
+            ])
     elif args.dataset == 'ember':
         data_transform_aug = data_transform = trigger_transform = normalizer = denormalizer = None
     else:
@@ -856,7 +900,7 @@ def get_poison_transform(poison_type, dataset_name, target_class, source_class=1
             trigger_name = config.trigger_default[dataset_name][poison_type]
 
     # 根据数据集设置图像尺寸（用于触发器 resize）
-    if dataset_name in ['gtsrb', 'cifar10', 'cifar100']:
+    if dataset_name in ['gtsrb', 'cifar10', 'cifar100', 'syn']:
         img_size = 32
     elif dataset_name == 'tiny_imagenet':
         img_size = 64  # Tiny ImageNet 使用原始 64×64 尺寸
@@ -869,7 +913,15 @@ def get_poison_transform(poison_type, dataset_name, target_class, source_class=1
     else:
         raise NotImplementedError('<Undefined> Dataset = %s' % dataset_name)
 
-    if dataset_name == 'cifar10':
+    if dataset_name == 'syn':
+        mean = (0.4631518318780673, 0.4627967308517113, 0.46310701156556255)
+        std = (0.3004204872573654, 0.3001427057790942, 0.3004339234651967)
+        normalizer = transforms.Compose([transforms.Normalize(mean, std)])
+        denormalizer = transforms.Compose([
+            transforms.Normalize(tuple(-m / s for m, s in zip(mean, std)), tuple(1.0 / s for s in std))
+        ])
+        num_classes = 10
+    elif dataset_name == 'cifar10':
         normalizer = transforms.Compose([
             transforms.Normalize([0.4914, 0.4822, 0.4465], [0.247, 0.243, 0.261])
         ])
@@ -1003,7 +1055,10 @@ def get_poison_transform(poison_type, dataset_name, target_class, source_class=1
         # 归一化参数选择逻辑：
         # - 必须使用训练数据集（train_dataset）的归一化参数，而不是测试数据集（dataset_name）
         # - 因为模型是在训练数据集上训练的，测试数据会被归一化为训练数据集的归一化参数
-        if train_dataset == 'cifar10':
+        if train_dataset == 'syn':
+            mean = (0.4631518318780673, 0.4627967308517113, 0.46310701156556255)
+            std = (0.3004204872573654, 0.3001427057790942, 0.3004339234651967)
+        elif train_dataset == 'cifar10':
             mean = (0.4914, 0.4822, 0.4465)
             std = (0.247, 0.243, 0.261)
         elif train_dataset == 'gtsrb':

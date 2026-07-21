@@ -268,6 +268,12 @@ def mobilenetv2_cifar10(num_classes=10):
     print(f"[MODEL] Creating MobileNetV2_CIFAR10 with {num_classes} classes")
     return MobileNetV2(class_num=num_classes)
 
+
+def mobilenetv2_syn(num_classes=10):
+    """MobileNetV2 for 3x32x32 SYN digits."""
+    print(f"[MODEL] Creating MobileNetV2_SYN with {num_classes} classes")
+    return MobileNetV2(class_num=num_classes)
+
 def mobilenetv2_tiny_imagenet(num_classes=200):
     """
     MobileNetV2 for Tiny ImageNet (64x64 input, 200 classes)

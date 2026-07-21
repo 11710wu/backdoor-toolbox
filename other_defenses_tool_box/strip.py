@@ -4,7 +4,6 @@
 # from trojanvision.environ import env
 # from trojanzoo.utils import to_numpy
 
-from turtle import pos
 import torch, torchvision
 import numpy as np
 from sklearn import metrics
@@ -67,7 +66,8 @@ class STRIP(BackdoorDefense):
             val_clean_entropy.append(self.check(_input, _label))
         
         val_clean_entropy = torch.cat(val_clean_entropy).flatten().sort()[0]
-        threshold_low = float(val_clean_entropy[int(0.05 * len(val_clean_entropy))])  # 使用5%分位数
+        threshold_index = min(int(self.defense_fpr * len(val_clean_entropy)), len(val_clean_entropy) - 1)
+        threshold_low = float(val_clean_entropy[threshold_index])
         threshold_high = np.inf
         # ========== [修改结束] ==========
         
@@ -192,7 +192,7 @@ class STRIP(BackdoorDefense):
             'entropy_clean_median': float(clean_entropy.median()),  # 干净样本的熵中位数
             'entropy_poison_median': float(poison_entropy.median()),  # 中毒样本的熵中位数
             'threshold_low': float(threshold_low),  # 低阈值(低于此值判定为中毒)
-            'defense_fpr': 0.05,  # 实际使用的分位数（5%）
+            'defense_fpr': self.defense_fpr,
             'tpr': float(tpr_value),  # 中毒样本检测准确率（True Positive Rate）
             'fpr': float(fpr_value),  # 假阳性率（False Positive Rate）
             'auc': auc_value,  # Area Under Curve (ROC曲线下面积)

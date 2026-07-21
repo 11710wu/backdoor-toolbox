@@ -4,7 +4,6 @@
 # from trojanvision.environ import env
 # from trojanzoo.utils import to_numpy
 
-from turtle import pos
 import torch, torchvision
 import numpy as np
 from sklearn import metrics
@@ -38,7 +37,7 @@ class SentiNet(BackdoorDefense):
         # SentiNet 使用 GradCAM 计算梯度激活，理论上支持任何 CNN 模型
         # 添加 'tiny_imagenet' 支持（64×64, 200 classes，使用原始 64×64 尺寸）
         # 添加 'mnist' 支持（28×28, 10 classes，单通道转三通道）
-        assert args.dataset in ['cifar10', 'gtsrb', 'tiny_imagenet', 'mnist', 'mnistm']
+        assert args.dataset in ['cifar10', 'gtsrb', 'tiny_imagenet', 'mnist', 'mnistm', 'syn']
         # ========== [Tiny ImageNet 支持] 结束 ==========
 
         self.defense_fpr = defense_fpr
@@ -68,7 +67,8 @@ class SentiNet(BackdoorDefense):
                                             data_transform=self.data_transform,
                                             shuffle=True,
                                             drop_last=False)
-        clean_subset, val_subset, _ = torch.utils.data.random_split(clean_loader.dataset, [self.N, 400, len(clean_loader.dataset) - self.N - 400])
+        clean_subset, val_subset, _ = torch.utils.data.random_split(
+            clean_loader.dataset, [self.N, 400, len(clean_loader.dataset) - self.N - 400])
         clean_loader = torch.utils.data.DataLoader(clean_subset, batch_size=100, shuffle=False, drop_last=False, num_workers=4, pin_memory=True)
         val_loader = torch.utils.data.DataLoader(val_subset, batch_size=1, shuffle=True, drop_last=False, num_workers=4, pin_memory=True)
         
@@ -97,7 +97,7 @@ class SentiNet(BackdoorDefense):
             input_size = (64, 64)
         elif args.dataset == 'mnist' or args.dataset == 'mnistm':
             input_size = (28, 28)
-        elif args.dataset in ['cifar10', 'gtsrb']:
+        elif args.dataset in ['cifar10', 'gtsrb', 'syn']:
             input_size = (32, 32)
         else:
             input_size = (224, 224)
@@ -252,7 +252,7 @@ class SentiNet(BackdoorDefense):
                 res = minimize(loss_func, 2, method='cobyla')
                 d_thr += math.sqrt(res.fun)
                 cnt += 1
-        d_thr /= cnt
+        d_thr = d_thr / cnt if cnt else 0.0
         
         # Determine y_plus
         x2 = 0

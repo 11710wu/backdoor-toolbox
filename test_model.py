@@ -51,6 +51,8 @@ parser.add_argument('-no_normalize', default=False, action='store_true')
 parser.add_argument('-no_aug', default=False, action='store_true')
 parser.add_argument('-devices', type=str, default='0')
 parser.add_argument('-seed', type=int, required=False, default=default_args.seed)
+parser.add_argument('-sample_cap', type=int, default=None)
+parser.add_argument('-test_sample_cap', type=int, default=None)
 # ========== [WaNet参数修改] 开始 ==========
 # WaNet攻击专用参数
 parser.add_argument('-s', type=float, default=0.5,
@@ -83,6 +85,9 @@ parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
                     help='BELT cover samples 的 mask 比例（默认 0.2）')
 # ========== [BELT 参数] 结束 ==========
 args = parser.parse_args()
+args.poison_seed = config.poison_seed
+if args.test_sample_cap is not None and (args.test_sample_cap <= 0 or args.dataset != 'syn' or args.sample_cap is None):
+    raise ValueError('test_sample_cap requires -sample_cap for SYN smoke isolation')
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "%s" % args.devices
 if args.trigger is None:
@@ -153,6 +158,13 @@ elif args.dataset == 'mnistm':
     epochs = 50  # 与训练配置一致
     learning_rate = 0.01
     batch_size = 128
+elif args.dataset == 'syn':
+    num_classes = 10
+    momentum = 0.9
+    weight_decay = 5e-4
+    epochs = 200
+    learning_rate = 0.1
+    batch_size = 128
 # ========== [MNIST-M 支持] 结束 ==========
     
 elif args.dataset == 'imagenet':
@@ -188,7 +200,24 @@ model = model.cuda()
 print("Evaluating model '{}'...".format(model_path))
 
 # Set Up Test Set for Debug & Evaluation
-if args.dataset != 'imagenet':
+if args.dataset == 'syn':
+    from utils.syn_svhn import SynSVHNNpyDataset
+    test_set = SynSVHNNpyDataset(config.syn_dir, 'syn_test_full', transform=data_transform)
+    if args.test_sample_cap is not None:
+        test_set = torch.utils.data.Subset(test_set, range(min(args.test_sample_cap, len(test_set))))
+    test_set_loader = torch.utils.data.DataLoader(test_set, batch_size=batch_size, shuffle=False,
+                                                  worker_init_fn=tools.worker_init, **kwargs)
+    is_normalized = False if args.poison_type in ('upgd', 'belt') else not args.no_normalize
+    poison_transform = supervisor.get_poison_transform(
+        poison_type=args.poison_type, dataset_name='syn', target_class=config.target_class['syn'],
+        trigger_transform=trigger_transform, is_normalized_input=is_normalized,
+        alpha=args.alpha, trigger_name=args.trigger, args=args)
+    if args.poison_type == 'none':
+        poison_transform = None
+    original_s = None
+    original_delta = None
+
+elif args.dataset != 'imagenet':
     test_set_dir = os.path.join('clean_set', args.dataset, 'test_split')
     test_set_img_dir = os.path.join(test_set_dir, 'data')
     test_set_label_path = os.path.join(test_set_dir, 'labels')
@@ -290,7 +319,13 @@ if args.poison_type == 'TaCT' or args.poison_type == 'SleeperAgent':
 else:
     source_classes = None
 
-clean_acc, asr = tools.test(model=model, test_loader=test_set_loader, poison_test=True, poison_transform=poison_transform, num_classes=num_classes, source_classes=source_classes, all_to_all=('all_to_all' in args.poison_type))
+source_counts = None
+if args.dataset == 'syn':
+    from utils.evaluation import evaluate_clean_and_asr
+    source_counts = evaluate_clean_and_asr(model, test_set_loader, poison_transform, config.target_class['syn'])
+    clean_acc, asr = source_counts['clean_acc'], source_counts['asr']
+else:
+    clean_acc, asr = tools.test(model=model, test_loader=test_set_loader, poison_test=True, poison_transform=poison_transform, num_classes=num_classes, source_classes=source_classes, all_to_all=('all_to_all' in args.poison_type))
 
 # ========== [结果保存] 保存测试结果到JSON文件 ==========
 results = {
@@ -304,6 +339,16 @@ results = {
     'asr': float(asr) if asr is not None else None,
     'model_path': model_path,
 }
+if source_counts is not None:
+    results.update(source_counts)
+    results.update({
+        'source_clean_correct': source_counts['clean_correct'],
+        'source_clean_total': source_counts['clean_total'],
+        'source_clean_acc': source_counts['clean_acc'],
+        'source_asr_success': source_counts['asr_success'],
+        'source_asr_eligible': source_counts['asr_eligible'],
+        'source_asr': source_counts['asr'],
+    })
 
 # ========== [修改] 添加攻击特定参数，并记录实际测试时使用的参数值 ==========
 if args.poison_type == 'SIG':

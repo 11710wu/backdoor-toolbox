@@ -9,7 +9,8 @@ import torch.nn.init as init
 
 __all__ = [
     'VGG', 'vgg11', 'vgg11_bn', 'vgg13', 'vgg13_bn', 'vgg16', 'vgg16_bn',
-    'vgg19_bn', 'vgg19', 'vgg19_bn_cifar10', 'vgg19_bn_tiny_imagenet', 'vgg19_bn_mnist', 'vgg19_bn_mnistm',
+    'vgg19_bn', 'vgg19', 'vgg19_bn_cifar10', 'vgg19_bn_syn',
+    'vgg19_bn_tiny_imagenet', 'vgg19_bn_mnist', 'vgg19_bn_mnistm',
 ]
 
 
@@ -221,6 +222,12 @@ def vgg19_bn_cifar10(num_classes=10):
     Note: Same architecture as standard vgg19_bn, explicitly named for consistency with other datasets.
     """
     print(f"[MODEL] Creating VGG19_BN_CIFAR10 with {num_classes} classes")
+    return VGG(make_layers(cfg['E'], batch_norm=True), num_classes=num_classes)
+
+
+def vgg19_bn_syn(num_classes=10):
+    """VGG19-BN for 3x32x32 SYN digits."""
+    print(f"[MODEL] Creating VGG19_BN_SYN with {num_classes} classes")
     return VGG(make_layers(cfg['E'], batch_norm=True), num_classes=num_classes)
 
 

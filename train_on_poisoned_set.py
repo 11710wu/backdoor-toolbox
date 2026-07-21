@@ -37,6 +37,10 @@ parser.add_argument('-no_normalize', default=False, action='store_true')
 parser.add_argument('-devices', type=str, default='0')
 parser.add_argument('-log', default=False, action='store_true')
 parser.add_argument('-seed', type=int, required=False, default=default_args.seed)
+parser.add_argument('-sample_cap', type=int, default=None)
+parser.add_argument('-test_sample_cap', type=int, default=None)
+parser.add_argument('-epochs_override', type=int, default=None,
+                    help='SYN smoke-only epoch override')
 # ========== [ABI/Grond 权重抑制] 开始 ==========
 # 工程说明：
 # - 这是你提到的 Grond 核心训练流程 Step B/C：epoch 末按权重计算 UCLC，筛出“显眼包通道”，再把该通道权重重置为层均值。
@@ -93,6 +97,8 @@ import torch
 from utils import supervisor, tools
 from lipschitzness_pruning import CLP
 
+args.poison_seed = config.poison_seed
+
 
 # NOTE: apply_abi_weight_suppression 已停用，保留以备参考；当前训练流程仅在 UPGD 且未 --no_clp 时调用 lipschitzness_pruning.CLP
 # def apply_abi_weight_suppression(model: torch.nn.Module, u: float = 3.0):
@@ -115,7 +121,8 @@ else:
     model_path = os.path.join('poisoned_train_set', 'ember', args.ember_options, 'backdoored_model.pt')
 
 
-# tools.setup_seed(args.seed)
+if args.dataset == 'syn':
+    tools.setup_seed(args.seed)
 
 if args.log:
     out_path = 'logs'
@@ -199,6 +206,14 @@ elif args.dataset == 'mnistm':
     epochs = 50  # 训练 30 个 epoch
     learning_rate = 0.01  # 初始学习率降低到 0.01（避免梯度爆炸）
     batch_size = 128
+elif args.dataset == 'syn':
+    num_classes = 10
+    arch = supervisor.get_arch(args)
+    momentum = 0.9
+    weight_decay = 5e-4
+    epochs = 200
+    learning_rate = 0.1
+    batch_size = 128
 # ========== [MNIST-M 支持] 结束 ==========
 
 
@@ -244,6 +259,13 @@ elif args.dataset == 'mnist' or args.dataset == 'mnistm':
 
 else:
     kwargs = {'num_workers': 4, 'pin_memory': True}
+
+if args.epochs_override is not None:
+    if args.dataset != 'syn' or args.sample_cap is None or args.epochs_override <= 0:
+        raise ValueError('epochs_override is only valid for SYN smoke runs')
+    epochs = args.epochs_override
+if args.test_sample_cap is not None and (args.test_sample_cap <= 0 or args.dataset != 'syn' or args.sample_cap is None):
+    raise ValueError('test_sample_cap requires a scoped SYN smoke run')
 
 # Set Up Poisoned Set
 
@@ -319,7 +341,24 @@ else:
         batch_size=batch_size, shuffle=True, worker_init_fn=tools.worker_init, **kwargs)
 
 
-if args.dataset != 'ember' and args.dataset != 'imagenet':
+if args.dataset == 'syn':
+    from utils.syn_svhn import SynSVHNNpyDataset
+    test_set = SynSVHNNpyDataset(config.syn_dir, 'syn_test_full', transform=data_transform)
+    if args.test_sample_cap is not None:
+        test_set = torch.utils.data.Subset(test_set, range(min(args.test_sample_cap, len(test_set))))
+    if args.poison_type in ('upgd', 'belt'):
+        is_normalized = False
+    else:
+        is_normalized = not args.no_normalize
+    poison_transform = supervisor.get_poison_transform(
+        poison_type=args.poison_type, dataset_name='syn', target_class=config.target_class['syn'],
+        trigger_transform=trigger_transform, is_normalized_input=is_normalized,
+        alpha=args.alpha if args.test_alpha is None else args.test_alpha,
+        trigger_name=args.trigger, args=args)
+    test_set_loader = torch.utils.data.DataLoader(
+        test_set, batch_size=batch_size, shuffle=False, worker_init_fn=tools.worker_init, **kwargs)
+
+elif args.dataset != 'ember' and args.dataset != 'imagenet':
     # Set Up Test Set for Debug & Evaluation
     test_set_dir = os.path.join('clean_set', args.dataset, 'test_split')
     test_set_img_dir = os.path.join(test_set_dir, 'data')
@@ -459,7 +498,6 @@ if args.dataset != 'ember':
 else:
     model = arch()
 
-
 # Check if need to resume from the checkpoint
 if os.path.exists(os.path.join(poison_set_dir, "meta_info_{}".format(supervisor.get_model_name(args)))):
     meta_info = torch.load(os.path.join(poison_set_dir, "meta_info_{}".format(supervisor.get_model_name(args))))
@@ -510,7 +548,7 @@ if args.dataset == 'imagenet':
     print('<time : %f minutes>' % ( (time.time() - st) / 60 ))
 """
 
-for epoch in range(1, epochs+1):  # train backdoored base model
+for epoch in range(1, epochs + 1):  # train backdoored base model
     start_time = time.perf_counter()
 
     # Skip to the checkpointed epoch
@@ -581,8 +619,7 @@ for epoch in range(1, epochs+1):  # train backdoored base model
             # ========== [结果保存] 结束 ==========
             
             torch.save(model.module.state_dict(), model_path)
-    else:
-
+    elif args.dataset == 'ember':
         tools.test_ember(model=model, test_loader=test_set_loader,
                              backdoor_test_loader=backdoor_test_set_loader)
         torch.save(model.module.state_dict(), model_path)
@@ -596,10 +633,17 @@ for epoch in range(1, epochs+1):  # train backdoored base model
     if args.poison_type == 'upgd':
         print(f'[CLP] Applying weight suppression (epoch {epoch}, u={args.abi_u})...')
         CLP(model, float(args.abi_u))
-
-
+        if args.dataset == 'syn' and epoch == epochs:
+            final_clean_acc, final_asr = tools.test(
+                model=model, test_loader=test_set_loader, poison_test=True,
+                poison_transform=poison_transform, num_classes=num_classes,
+                source_classes=source_classes, all_to_all=all_to_all,
+            )
 
 torch.save(model.module.state_dict(), model_path)
+
+if args.dataset == 'syn' and ('final_clean_acc' not in locals() or final_clean_acc is None):
+    raise RuntimeError('SYN training reached completion without a final source evaluation')
 
 # ========== [结果保存] 保存最终训练结果到JSON文件 ==========
 if args.dataset != 'ember':

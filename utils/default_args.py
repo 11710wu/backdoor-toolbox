@@ -2,7 +2,7 @@ parser_choices = {
 
     # ========== [Tiny ImageNet 支持] 添加 tiny_imagenet 数据集选项 ==========
     # 数据集列表: 添加 'tiny_imagenet' 到支持的数据集列表
-    'dataset': ['gtsrb', 'cifar10', 'cifar100', 'imagenette', 'ember', 'imagenet', 'tiny_imagenet', 'mnist', 'mnistm'],
+    'dataset': ['gtsrb', 'cifar10', 'cifar100', 'imagenette', 'ember', 'imagenet', 'tiny_imagenet', 'mnist', 'mnistm', 'syn'],
     # ========== [Tiny ImageNet 支持] 结束 ==========
     'poison_type': [  # Poisoning attacks
         'basic', 'badnet', 'blend', 'dynamic', 'clean_label', 'TaCT', 'SIG', 'WaNet', 'refool', 'ISSBA',
