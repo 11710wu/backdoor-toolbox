@@ -29,7 +29,8 @@ DEFENSES = {
 }
 
 
-def experiment_args(spec, strength, poison_type=None, poison_rate=POISON_RATE):
+def experiment_args(spec, strength, poison_type=None, poison_rate=POISON_RATE,
+                    model="resnet18", devices="0"):
     values = {
         "dataset": "syn", "poison_type": poison_type or spec["poison_type"],
         "poison_rate": poison_rate, "cover_rate": spec.get("cover_rate", 0.0),
@@ -39,7 +40,7 @@ def experiment_args(spec, strength, poison_type=None, poison_rate=POISON_RATE):
         "upgd_steps": spec.get("upgd_steps", 100),
         "upgd_steps_multiplier": spec.get("upgd_steps_multiplier", 5),
         "mask_rate": spec.get("mask_rate", 0.2), "label_mode": spec.get("label_mode", "clean"),
-        "model": "resnet18", "poison_seed": POISON_SEED,
+        "model": model, "devices": str(devices), "poison_seed": POISON_SEED,
         "sample_cap": None, "test_alpha": None, "no_normalize": spec.get("no_normalize", False),
     }
     values[spec["strength_name"]] = strength
@@ -56,6 +57,7 @@ def cli_args(args):
         ("delta", args.delta), ("f", args.f), ("eps", args.eps),
         ("constraint", args.constraint), ("upgd_steps", args.upgd_steps),
         ("upgd_steps_multiplier", args.upgd_steps_multiplier), ("mask_rate", args.mask_rate),
+        ("devices", args.devices),
     ]
     result = []
     for name, value in pairs:
@@ -148,8 +150,10 @@ def result_paths(args):
     return poison_dir, checkpoint, source, poison_dir / f"test_svhn_results_seed={TRAINING_SEED}.json"
 
 
-def run_configuration(attack, spec, strength, root, failure_csv, clean_checkpoint, dry_run):
-    args = experiment_args(spec, strength)
+def run_configuration(attack, spec, strength, root, failure_csv, clean_checkpoint, dry_run,
+                      model="resnet18", devices="0", poison_rate=POISON_RATE):
+    args = experiment_args(spec, strength, poison_rate=poison_rate,
+                           model=model, devices=devices)
     poison_dir, checkpoint, source_json, target_json = result_paths(args)
     log_dir = root / "logs" / attack / f"{spec['strength_name']}={strength:g}"
     common = cli_args(args)
@@ -181,12 +185,14 @@ def run_configuration(attack, spec, strength, root, failure_csv, clean_checkpoin
     return checkpoint.exists() or dry_run
 
 
-def ensure_clean_model(root, failure_csv, dry_run, no_normalize=False):
+def ensure_clean_model(root, failure_csv, dry_run, no_normalize=False,
+                       model="resnet18", devices="0"):
     spec = {
         "poison_type": "none", "strength_name": "alpha", "alpha": 0.0,
         "no_normalize": no_normalize,
     }
-    args = experiment_args(spec, 0.0, poison_type="none", poison_rate=0.0)
+    args = experiment_args(spec, 0.0, poison_type="none", poison_rate=0.0,
+                           model=model, devices=devices)
     poison_dir, checkpoint, source_json, target_json = result_paths(args)
     log_dir = root / "logs" / "clean"
     common = cli_args(args)

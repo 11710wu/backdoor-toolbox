@@ -56,6 +56,9 @@ def main():
     if args.trigger is None:
         args.trigger = config.trigger_default['syn'][args.poison_type]
     tools.setup_seed(args.seed)
+    torch.use_deterministic_algorithms(False)
+    torch.backends.cudnn.enabled = True
+    torch.backends.cudnn.deterministic = False
     _, data_transform, trigger_transform, _, _ = supervisor.get_transforms(args)
     target_set = SynSVHNNpyDataset(config.svhn_dir, 'svhn_test_10k', transform=data_transform)
     if args.target_sample_cap is not None:
