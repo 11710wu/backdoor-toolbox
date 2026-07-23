@@ -129,6 +129,9 @@ else:
 
 if args.dataset == 'syn':
     tools.setup_seed(args.seed)
+    torch.use_deterministic_algorithms(False)
+    torch.backends.cudnn.enabled = True
+    torch.backends.cudnn.deterministic = False
 
 if args.log:
     out_path = 'logs'

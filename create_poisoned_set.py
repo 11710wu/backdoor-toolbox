@@ -85,6 +85,10 @@ args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = "%s" % args.devices
 
 tools.setup_seed(2333)
+if args.dataset == 'syn':
+    torch.use_deterministic_algorithms(False)
+    torch.backends.cudnn.enabled = True
+    torch.backends.cudnn.deterministic = False
 
 
 class InputNoiseDataset(torch.utils.data.Dataset):
