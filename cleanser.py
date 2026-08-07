@@ -1,4 +1,5 @@
 import torch
+import json
 import os, sys
 from torchvision import transforms
 import argparse
@@ -52,6 +53,20 @@ parser.add_argument('-delta', type=float, default=30,
 parser.add_argument('-f', type=float, default=6,
                     help='SIG攻击f参数 (默认6)')
 # ========== [SIG参数修改] 结束 ==========
+# UPGD path-lookup args (same as other_defense / create_poisoned_set)
+parser.add_argument('-eps', type=float, required=False, default=8.0,
+                    help='UPGD eps used for poison-set/model path lookup')
+parser.add_argument('-constraint', type=str, required=False, default='Linf',
+                    choices=['Linf', 'L2'],
+                    help='UPGD constraint used for poison-set/model path lookup')
+parser.add_argument('-upgd_steps', type=int, required=False, default=100,
+                    help='UPGD steps used for poison-set/model path lookup')
+parser.add_argument('-upgd_steps_multiplier', type=int, required=False, default=5,
+                    help='UPGD steps_multiplier used for poison-set/model path lookup')
+parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
+                    help='BELT mask_rate used for poison-set/model path lookup')
+parser.add_argument('-spectre_jobs', type=int, required=False, default=4,
+                    help='Max concurrent Julia SPECTRE filter jobs (CPU-RAM bound; default 4)')
 
 args = parser.parse_args()
 
@@ -85,6 +100,8 @@ elif args.dataset == 'gtsrb':
     num_classes = 43
 elif args.dataset == 'imagenette':
     num_classes = 10
+elif args.dataset == 'tiny_imagenet':
+    num_classes = 200
 else:
     raise NotImplementedError('<Undefined Dataset> Dataset = %s' % args.dataset)
 
@@ -93,25 +110,38 @@ poison_set_dir = supervisor.get_poison_set_dir(args)
 
 
 # poisoned set
-# 只有 Tiny-ImageNet 使用 'imgs' 目录，其他数据集使用 'data' 目录
-if args.dataset == 'tiny_imagenet':
-    poisoned_set_img_dir = os.path.join(poison_set_dir, 'imgs')
-else:
-    poisoned_set_img_dir = os.path.join(poison_set_dir, 'data')
+# New poison sets are tensor files (`data` for most datasets and `imgs` for
+# Tiny-ImageNet), while old poison sets may use a directory of PNG files.
+# Prefer the current convention but retain compatibility with either name.
+data_names = ('imgs', 'data') if args.dataset == 'tiny_imagenet' else ('data', 'imgs')
+poisoned_set_img_dir = next(
+    (os.path.join(poison_set_dir, name)
+     for name in data_names
+     if os.path.exists(os.path.join(poison_set_dir, name))),
+    None,
+)
+if poisoned_set_img_dir is None:
+    raise FileNotFoundError(
+        f"Poisoned training images are missing from {poison_set_dir!r}; "
+        f"expected one of {data_names}. Recreate the matching poisoned set first."
+    )
 poisoned_set_label_path = os.path.join(poison_set_dir, 'labels')
 poisoned_set = tools.IMG_Dataset(data_dir=poisoned_set_img_dir,
                                  label_path=poisoned_set_label_path, transforms=data_transform)
 # oracle knowledge of poison indices for evaluating detectors
 if args.poison_type != 'none':
-    poison_indices = torch.load(os.path.join(poison_set_dir, 'poison_indices'))
+    poison_indices = torch.load(os.path.join(poison_set_dir, 'poison_indices'), weights_only=False)
 else: poison_indices = []
 
-# small clean split at hand for defensive usage
-clean_set_dir = os.path.join('clean_set', args.dataset, 'clean_split')
-clean_set_img_dir = os.path.join(clean_set_dir, 'data')
-clean_set_label_path = os.path.join(clean_set_dir, 'clean_labels')
-clean_set = tools.IMG_Dataset(data_dir=clean_set_img_dir,
-                              label_path=clean_set_label_path, transforms=data_transform)
+# Only SCAn and Strip consume the small trusted clean split. AC, SS, and
+# SPECTRE should not fail merely because this unrelated input is absent.
+clean_set = None
+if args.cleanser in ('SCAn', 'Strip'):
+    clean_set_dir = os.path.join('clean_set', args.dataset, 'clean_split')
+    clean_set_img_dir = os.path.join(clean_set_dir, 'data')
+    clean_set_label_path = os.path.join(clean_set_dir, 'clean_labels')
+    clean_set = tools.IMG_Dataset(data_dir=clean_set_img_dir,
+                                  label_path=clean_set_label_path, transforms=data_transform)
 
 
 model_list = []
@@ -132,36 +162,45 @@ else:
     model_list.append(path)
     alias_list.append(supervisor.get_model_name(args))
 
+# BELT checkpoints are saved as {arch}_belt_aug_model_seed={seed}.pt (train_belt.py),
+# not the default get_model_name() path used by other attacks.
+if args.poison_type == 'belt':
+    remapped_model_list = []
+    for path in model_list:
+        if os.path.isfile(path):
+            remapped_model_list.append(path)
+            continue
+        model_dir = os.path.dirname(path)
+        base_name = os.path.basename(path).replace('.pt', '').replace('.pth', '')
+        belt_aug = os.path.join(model_dir, f"{base_name}_belt_aug_model_seed={args.seed}.pt")
+        if os.path.isfile(belt_aug):
+            print(f"[BELT] using aug model: {belt_aug}")
+            remapped_model_list.append(belt_aug)
+        else:
+            remapped_model_list.append(path)
+    model_list = remapped_model_list
+
 
 def insepct_suspicious_indices(suspicious_indices, poison_indices, poisoned_set):
     if args.poison_type != 'none':
-        true_positive  = 0
-        num_positive   = len(poison_indices)
-        false_positive = 0
+        suspicious_set = {int(i) for i in suspicious_indices}
+        poison_set = {int(i) for i in poison_indices}
+        true_positive = len(suspicious_set & poison_set)
+        false_positive = len(suspicious_set - poison_set)
+        num_positive = len(poison_set)
         num_negative   = len(poisoned_set) - num_positive
 
-        suspicious_indices.sort()
-        poison_indices.sort()
-
-        pt = 0
-        for pid in suspicious_indices:
-            while poison_indices[pt] < pid and pt + 1 < num_positive: pt += 1
-            if poison_indices[pt] == pid:
-                true_positive += 1
-            else:
-                false_positive += 1
-
         if not cleansed: print('<Overall Performance Evaluation with %s>' % path)
-        tpr = true_positive / num_positive
-        fpr = false_positive / num_negative
+        tpr = true_positive / num_positive if num_positive > 0 else 0.0
+        fpr = false_positive / num_negative if num_negative > 0 else 0.0
         if not cleansed: print('Elimination Rate = %d/%d = %f' % (true_positive, num_positive, tpr))
         if not cleansed: print('Sacrifice Rate = %d/%d = %f' % (false_positive, num_negative, fpr))
         return tpr, fpr
     else:
         print('<Test Cleanser on Clean Dataset with %s>' % path)
-        false_positive = len(suspicious_indices)
+        false_positive = len({int(i) for i in suspicious_indices})
         num_negative = len(poisoned_set)
-        fpr = false_positive / num_negative
+        fpr = false_positive / num_negative if num_negative > 0 else 0.0
         print('Sacrifice Rate = %d/%d = %f' % (false_positive, num_negative, fpr))
         return 0, fpr
 
@@ -173,7 +212,7 @@ best_path = None
 
 if cleansed: # if the cleansed indices already exist
     print("Already cleansed!")
-    remain_indices = torch.load(save_path)
+    remain_indices = torch.load(save_path, weights_only=False)
     suspicious_indices = list(set(range(0,len(poisoned_set))) - set(remain_indices))
     suspicious_indices.sort()
     
@@ -210,11 +249,8 @@ else:
         suspicious_indices = confusion_training.cleanser(args = args, inspection_set=inspection_set, clean_set_indices = median_sample_indices,
                                     model=inference_model, num_classes=num_classes)
 
-        remain_indices = []
-        for i in range(len(poisoned_set)):
-            if i not in suspicious_indices:
-                remain_indices.append(i)
-        remain_indices.sort()
+        suspicious_set = {int(i) for i in suspicious_indices}
+        remain_indices = sorted(set(range(len(poisoned_set))) - suspicious_set)
 
         tpr, fpr = insepct_suspicious_indices(suspicious_indices, poison_indices, poisoned_set)
         if tpr > best_recall:
@@ -233,11 +269,10 @@ else:
         for (vid, path) in enumerate(model_list): # for both backdoor models with and without augmentation
             # base model for poison detection
             model = arch(num_classes=num_classes)
-            if os.path.exists(path):
-                ckpt = torch.load(path)
-                model.load_state_dict(ckpt)
-            else:
-                print(f"Model {path} not exists!")
+            if not os.path.isfile(path):
+                raise FileNotFoundError(f"Base model checkpoint does not exist: {path}")
+            ckpt = torch.load(path, map_location='cpu')
+            model.load_state_dict(ckpt)
             model = nn.DataParallel(model)
             model = model.cuda()
             model.eval()
@@ -272,26 +307,40 @@ else:
                 defense = SAVE_REP(args, model=model)
                 defense.output(base_path=base_path, alias=alias_list[vid])
                 
-                # Execute julia code
+                # Execute julia code with limited concurrency.
+                # Original code spawned one Julia process per class at once; Tiny-ImageNet
+                # (200 classes) can exceed 100GB host RAM. Cap with -spectre_jobs (default 4).
                 import subprocess
-                os.chdir('cleansers_tool_box/spectre')
-                procs = []
-                for i in range(num_classes):
-                    folder_path = 'output'
-                    name = f'{supervisor.get_dir_core(args, include_poison_seed=True)}_{alias_list[vid]}/{i}-{num_poison}'
-                    folder_path = os.path.join(folder_path, name)
-                    if os.path.exists(os.path.join(folder_path, 'opnorm.npy')):
-                        # print(os.path.join(folder_path, 'opnorm.npy'), 'already exists!')
-                        continue
+                from concurrent.futures import ThreadPoolExecutor, as_completed
 
+                os.chdir('cleansers_tool_box/spectre')
+                julia_jobs = []
+                for i in range(num_classes):
+                    name = f'{supervisor.get_dir_core(args, include_poison_seed=True)}_{alias_list[vid]}/{i}-{num_poison}'
+                    folder_path = os.path.join('output', name)
+                    if os.path.exists(os.path.join(folder_path, 'opnorm.npy')):
+                        continue
+                    julia_jobs.append((i, name, folder_path))
+
+                def _run_spectre_julia(job):
+                    i, name, folder_path = job
                     cmd = ['julia', '--project=.', 'run_filters.jl', name]
-                    outfile = open(os.path.join(folder_path, 'log.txt'), "w")
-                    # errfile = open('/dev/null', "a")
-                    errfile = open(os.path.join(folder_path, 'err.txt'), "w")
-                    procs.append(subprocess.Popen(cmd, stdout=outfile, stderr=errfile))
-                    # print("Running for class", i)
-                for p in procs:
-                    p.wait()
+                    log_path = os.path.join(folder_path, 'log.txt')
+                    err_path = os.path.join(folder_path, 'err.txt')
+                    with open(log_path, 'w') as outfile, open(err_path, 'w') as errfile:
+                        completed = subprocess.run(cmd, stdout=outfile, stderr=errfile)
+                    if completed.returncode != 0:
+                        raise RuntimeError(
+                            f'SPECTRE Julia failed for class {i} (rc={completed.returncode}): {err_path}'
+                        )
+                    return i
+
+                max_jobs = max(1, int(args.spectre_jobs))
+                print(f'[SPECTRE] {len(julia_jobs)} Julia jobs, max concurrent={max_jobs}', flush=True)
+                with ThreadPoolExecutor(max_workers=max_jobs) as executor:
+                    futures = [executor.submit(_run_spectre_julia, job) for job in julia_jobs]
+                    for fut in as_completed(futures):
+                        fut.result()
                 os.chdir('../../')
                 
                 # Load julia results
@@ -326,11 +375,8 @@ else:
                 raise NotImplementedError('Unimplemented Cleanser')
 
 
-            remain_indices = []
-            for i in range(len(poisoned_set)):
-                if i not in suspicious_indices:
-                    remain_indices.append(i)
-            remain_indices.sort()
+            suspicious_set = {int(i) for i in suspicious_indices}
+            remain_indices = sorted(set(range(len(poisoned_set))) - suspicious_set)
 
             tpr, fpr = insepct_suspicious_indices(suspicious_indices, poison_indices, poisoned_set)
             if tpr > best_recall:
@@ -358,3 +404,51 @@ if args.poison_type != 'none':
 else:
     num_negative = len(poisoned_set)
     print('Best Sacrifice Rate = %d/%d = %f' % (int(best_fpr * num_negative), num_negative, best_fpr))
+
+
+# AC, SS, and SPECTRE are training-set poison cleansers in the original
+# toolbox. Save their existing suspicious-index evaluation without changing
+# the algorithms or converting them into test-time input detectors.
+cleanser_result_files = {
+    'AC': 'ac_cleanser_results.json',
+    'SS': 'ss_cleanser_results.json',
+    'SPECTRE': 'spectre_cleanser_results.json',
+}
+result_file = cleanser_result_files.get(args.cleanser)
+if result_file is not None:
+    remain_set = {int(i) for i in best_remain_indices}
+    suspicious_set = set(range(len(poisoned_set))) - remain_set
+    poison_set = {int(i) for i in poison_indices}
+    true_positive = len(suspicious_set & poison_set)
+    false_positive = len(suspicious_set - poison_set)
+    num_positive = len(poison_set)
+    num_negative = len(poisoned_set) - num_positive
+
+    tpr_rate = true_positive / num_positive if num_positive > 0 else 0.0
+    fpr_rate = false_positive / num_negative if num_negative > 0 else 0.0
+    results = {
+        'defense_method': args.cleanser,
+        'evaluation_type': 'training_set_poison_cleanser',
+        'dataset': args.dataset,
+        'num_samples': len(poisoned_set),
+        'num_poison': num_positive,
+        'num_clean': num_negative,
+        'num_suspicious': len(suspicious_set),
+        'true_positive': true_positive,
+        'false_positive': false_positive,
+        # Keep the common detector JSON convention: TPR/FPR are percentages.
+        'tpr': float(tpr_rate * 100.0),
+        'fpr': float(fpr_rate * 100.0),
+        # Preserve the native cleanser rates printed by this script.
+        'tpr_rate': float(tpr_rate),
+        'fpr_rate': float(fpr_rate),
+        # The original cleanser returns a hard suspicious-index set, not a
+        # continuous score for every sample, so AUROC is not defined here.
+        'auc': None,
+        'best_model_path': best_path,
+        'cleansed_indices_path': save_path,
+    }
+    result_path = os.path.join(poison_set_dir, result_file)
+    with open(result_path, 'w') as f:
+        json.dump(results, f, indent=4)
+    print('[Save] cleanser results: %s' % result_path)

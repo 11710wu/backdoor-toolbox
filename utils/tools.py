@@ -30,7 +30,7 @@ class IMG_Dataset(Dataset):
         # 旧版本：路径指向一个目录（data/），例如 'clean_set/cifar10/clean_split/data'
         # 改进：通过检查路径是文件还是目录来判断，而不是仅检查字符串 'data'
         if os.path.isfile(data_dir):  # 新版本：imgs 文件
-            self.img_set = torch.load(data_dir)
+            self.img_set = torch.load(data_dir, weights_only=False)
         elif os.path.isdir(data_dir):  # 旧版本：data/ 目录
             self.img_set = None
         else:
@@ -42,7 +42,7 @@ class IMG_Dataset(Dataset):
                 # 可能是旧版本
                 self.img_set = None
         # ========== [数据格式判断] 结束 ==========
-        self.gt = torch.load(label_path)
+        self.gt = torch.load(label_path, weights_only=False)
         self.transforms = transforms
         # ========== [修复] 保持与 CIFAR-10 一致的处理方式 ==========
         # 对于新版本（imgs 文件），数据是 tensor，需要：
@@ -412,10 +412,10 @@ def unpack_poisoned_train_set(args, batch_size=128, shuffle=False, data_transfor
 
     poisoned_set_loader = torch.utils.data.DataLoader(poisoned_set, batch_size=batch_size, shuffle=shuffle, num_workers=4, pin_memory=True)
 
-    poison_indices = torch.load(poison_indices_path)
+    poison_indices = torch.load(poison_indices_path, weights_only=False)
     
     if args.poison_type == 'adaptive' or args.poison_type == 'TaCT':
-        cover_indices = torch.load(cover_indices_path)
+        cover_indices = torch.load(cover_indices_path, weights_only=False)
         return poison_set_dir, poisoned_set_loader, poison_indices, cover_indices
     
     return poison_set_dir, poisoned_set_loader, poison_indices, []

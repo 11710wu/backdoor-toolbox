@@ -38,6 +38,11 @@ class BackdoorDefense():
             self.num_classes = 10
             self.input_channel = 3
             self.shape = torch.Size([3, 224, 224])
+        elif args.dataset == 'tiny_imagenet':
+            self.img_size = 64
+            self.num_classes = 200
+            self.input_channel = 3
+            self.shape = torch.Size([3, 64, 64])
         else:
             print('<Undefined> Dataset = %s' % args.dataset)
             exit(0)
@@ -70,7 +75,19 @@ class SAVE_REP(BackdoorDefense):
     def output(self, base_path='cleansers_tool_box/spectre/output', alias=None):
         # get inspection loader and set
         poison_set_dir, inspection_split_loader, poison_indices, cover_indices = unpack_poisoned_train_set(self.args, batch_size=128, shuffle=False)
-        poison_indices += cover_indices
+        # Belt/adaptive attacks may save indices as numpy arrays; `+=` is element-wise
+        # on ndarray and crashes on dtype/shape. Use set-union of int indices instead.
+        def _as_int_list(indices):
+            if indices is None:
+                return []
+            if torch.is_tensor(indices):
+                indices = indices.detach().cpu().numpy()
+            arr = np.asarray(indices).ravel()
+            if arr.size == 0:
+                return []
+            return [int(x) for x in arr.tolist()]
+
+        poison_indices = sorted(set(_as_int_list(poison_indices)) | set(_as_int_list(cover_indices)))
         non_poison_indices = list(set(list(range(len(inspection_split_loader.dataset)))) - set(poison_indices))
         inspection_set = inspection_split_loader.dataset
 

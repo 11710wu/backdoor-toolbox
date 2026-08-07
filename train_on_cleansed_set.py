@@ -53,6 +53,8 @@ parser.add_argument('-delta', type=float, default=30,
                     help='SIG攻击delta参数，会自动除以255 (默认30，即30/255)')
 parser.add_argument('-f', type=float, default=6,
                     help='SIG攻击f参数 (默认6)')
+parser.add_argument('-mask_rate', type=float, required=False, default=0.2,
+                    help='BELT mask_rate used for poison-set/model path lookup')
 # ========== [SIG参数修改] 结束 ==========
 # ========== [模型选择参数] 开始 ==========
 parser.add_argument('-model', type=str, required=False, default=None,
@@ -141,6 +143,15 @@ elif args.dataset == 'gtsrb':
     epochs = 100
     learning_rate = 0.1
 
+elif args.dataset == 'tiny_imagenet':
+    num_classes = 200
+    data_transform_aug, data_transform_no_aug, trigger_transform, _, _ = supervisor.get_transforms(args)
+    momentum = 0.9
+    weight_decay = 5e-4
+    epochs = 200
+    learning_rate = 0.1
+    batch_size = 256
+
 elif args.dataset == 'mnist':
     num_classes = 10
     data_transform_aug = transforms.Compose([
@@ -179,11 +190,18 @@ else:
 
 if args.dataset != 'ember':
     poison_set_dir = supervisor.get_poison_set_dir(args)
-    # 只有 Tiny-ImageNet 使用 'imgs' 目录，其他数据集使用 'data' 目录
-    if args.dataset == 'tiny_imagenet':
-        poisoned_set_img_dir = os.path.join(poison_set_dir, 'imgs')
-    else:
-        poisoned_set_img_dir = os.path.join(poison_set_dir, 'data')
+    data_names = ('imgs', 'data') if args.dataset == 'tiny_imagenet' else ('data', 'imgs')
+    poisoned_set_img_dir = next(
+        (os.path.join(poison_set_dir, name)
+         for name in data_names
+         if os.path.exists(os.path.join(poison_set_dir, name))),
+        None,
+    )
+    if poisoned_set_img_dir is None:
+        raise FileNotFoundError(
+            f"Poisoned training images are missing from {poison_set_dir!r}; "
+            f"expected one of {data_names}."
+        )
     poisoned_set_label_path = os.path.join(poison_set_dir, 'labels')
     poisoned_set = tools.IMG_Dataset(data_dir=poisoned_set_img_dir,
                                          label_path=poisoned_set_label_path, transforms=data_transform_aug)
@@ -237,9 +255,14 @@ if args.dataset != 'ember':
         batch_size=batch_size, shuffle=False, worker_init_fn=tools.worker_init, **kwargs)
 
     # Poison Transform for Testing
+    # UPGD/BELT keep raw [0,1] inputs (no Normalize), matching train_on_poisoned_set.py.
+    if args.poison_type in ('upgd', 'belt'):
+        is_normalized = False
+    else:
+        is_normalized = not args.no_normalize
     poison_transform = supervisor.get_poison_transform(poison_type=args.poison_type, dataset_name=args.dataset,
                                                        target_class=config.target_class[args.dataset], trigger_transform=trigger_transform,
-                                                       is_normalized_input=True,
+                                                       is_normalized_input=is_normalized,
                                                        alpha=args.alpha if args.test_alpha is None else args.test_alpha,
                                                        trigger_name=args.trigger, args=args)
 

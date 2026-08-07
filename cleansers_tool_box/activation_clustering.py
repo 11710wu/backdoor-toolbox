@@ -66,8 +66,10 @@ def cleanser(inspection_set, model, num_classes, args, clusters=2):
         threshold = 0.25
     elif args.dataset == 'imagenette':
         threshold = 0 # place holder, not used
+    elif args.dataset == 'tiny_imagenet':
+        threshold = 0 # place holder, not used
     else:
-        raise NotImplementedError('dataset %s is not supported' % args.datasets)
+        raise NotImplementedError('dataset %s is not supported' % args.dataset)
 
     for target_class in range(num_classes):
 
