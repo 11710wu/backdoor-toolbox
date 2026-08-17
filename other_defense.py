@@ -178,7 +178,7 @@ else:
 args.test_poison_dir = supervisor.get_poison_set_dir(args)
 # ===== 修改结束（记录训练/测试目录并覆盖测试强度） =====
 
-# tools.setup_seed(args.seed)
+tools.setup_seed(args.seed)
 os.environ["CUDA_VISIBLE_DEVICES"] = "%s" % args.devices
 if args.log:
     # out_path = 'other_defenses_tool_box/logs'

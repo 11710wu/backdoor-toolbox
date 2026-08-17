@@ -99,7 +99,7 @@ if args.dataset == 'imagenet':
 else:
     kwargs = {'num_workers': 4, 'pin_memory': True}
 
-# tools.setup_seed(args.seed)
+tools.setup_seed(args.seed)
 
 data_transform_aug, data_transform, trigger_transform, normalizer, denormalizer = supervisor.get_transforms(args)
 
@@ -377,13 +377,15 @@ elif args.poison_type == 'WaNet':
         results['test_used_s'] = args.test_s  # 测试时实际使用的 s
     else:
         results['test_used_s'] = results['s']  # 测试时使用训练时的 s
-elif args.poison_type in ['blend', 'adaptive_blend', 'basic', 'clean_label']:
+elif args.poison_type in ['blend', 'adaptive_blend', 'adaptive_patch', 'basic', 'clean_label']:
     # Blend/BadNet 攻击：记录训练时的 alpha
     results['alpha'] = args.alpha  # 训练时的 alpha
     # 记录测试时实际使用的 alpha（如果使用了 test_alpha，则使用 test_alpha，否则使用训练时的 alpha）
     if args.test_alpha is not None:
         results['test_alpha'] = args.test_alpha
         results['test_used_alpha'] = args.test_alpha  # 测试时实际使用的 alpha
+        if args.poison_type == 'adaptive_patch':
+            results['test_used_alphas'] = [args.test_alpha, args.test_alpha]
     else:
         results['test_used_alpha'] = args.alpha  # 测试时使用训练时的 alpha
 # ========== [修改结束] ==========

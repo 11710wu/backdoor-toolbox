@@ -1272,11 +1272,21 @@ def get_poison_transform(poison_type, dataset_name, target_class, source_class=1
 
         elif poison_type == 'adaptive_patch':
             from poison_tool_box import adaptive_patch
-            poison_transform = adaptive_patch.poison_transform(img_size=img_size, test_trigger_names=
-            config.adaptive_patch_test_trigger_names[args.dataset],
-                                                               test_alphas=config.adaptive_patch_test_trigger_alphas[
-                                                                   args.dataset], target_class=target_class,
-                                                               denormalizer=denormalizer, normalizer=normalizer, )
+            test_trigger_names = config.adaptive_patch_test_trigger_names[args.dataset]
+            test_alphas = config.adaptive_patch_test_trigger_alphas[args.dataset]
+            if getattr(args, 'test_alpha', None) is not None:
+                # Adaptive-Patch uses multiple test triggers.  A requested test
+                # strength must therefore be applied to every trigger, rather
+                # than only being reflected in the output filename.
+                test_alphas = [float(args.test_alpha)] * len(test_trigger_names)
+            poison_transform = adaptive_patch.poison_transform(
+                img_size=img_size,
+                test_trigger_names=test_trigger_names,
+                test_alphas=test_alphas,
+                target_class=target_class,
+                denormalizer=denormalizer,
+                normalizer=normalizer,
+            )
 
         elif poison_type == 'adaptive_k_way':
             from poison_tool_box import adaptive_k_way

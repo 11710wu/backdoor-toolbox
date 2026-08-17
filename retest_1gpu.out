@@ -1,0 +1,18 @@
+nohup: ignoring input
+Single-GPU portion: 14 folders x 6 evaluations = 84 jobs
+GPU: 0
+[GPU 0] cifar10 poisoned_train_set/adaptive_patch_0.010_alpha=0.300_cover=0.020_poison_seed=2333_arch=ResNet18_cifar10 (test alpha=0.8)
+[GPU 0] cifar10 poisoned_train_set3/adaptive_patch_0.005_alpha=0.000_cover=0.005_poison_seed=2333_arch=ResNet18_cifar10 (test alpha=0.5)
+[GPU 0] cifar10 poisoned_train_set/adaptive_patch_0.010_alpha=0.000_cover=0.020_poison_seed=2333_arch=mobilenetv2_cifar10 (test alpha=0.5)
+[GPU 0] cifar10 poisoned_train_set/adaptive_patch_0.050_alpha=0.400_cover=0.100_poison_seed=2333_arch=mobilenetv2_cifar10 (test alpha=0.9)
+[GPU 0] cifar10 poisoned_train_set/adaptive_patch_0.005_alpha=0.200_cover=0.010_poison_seed=2333_arch=vgg19_bn_cifar10 (test alpha=0.7)
+[GPU 0] cifar10 poisoned_train_set/adaptive_patch_0.050_alpha=0.100_cover=0.100_poison_seed=2333_arch=vgg19_bn_cifar10 (test alpha=0.6)
+[GPU 0] cifar10 poisoned_train_set3/adaptive_patch_0.005_alpha=0.000_cover=0.050_poison_seed=2333_arch=vgg19_bn_cifar10 (test alpha=0.5)
+[GPU 0] tiny_imagenet poisoned_train_set/adaptive_patch_0.010_alpha=0.300_cover=0.020_poison_seed=2333_arch=ResNet18_tiny_imagenet (test alpha=0.8)
+[GPU 0] tiny_imagenet poisoned_train_set3/adaptive_patch_0.005_alpha=0.000_cover=0.005_poison_seed=2333_arch=ResNet18_tiny_imagenet (test alpha=0.5)
+[GPU 0] tiny_imagenet poisoned_train_set/adaptive_patch_0.010_alpha=0.000_cover=0.020_poison_seed=2333_arch=mobilenetv2_tiny_imagenet (test alpha=0.5)
+[GPU 0] tiny_imagenet poisoned_train_set/adaptive_patch_0.050_alpha=0.400_cover=0.100_poison_seed=2333_arch=mobilenetv2_tiny_imagenet (test alpha=0.9)
+[GPU 0] tiny_imagenet poisoned_train_set/adaptive_patch_0.005_alpha=0.200_cover=0.010_poison_seed=2333_arch=vgg19_bn_tiny_imagenet (test alpha=0.7)
+[GPU 0] tiny_imagenet poisoned_train_set/adaptive_patch_0.050_alpha=0.100_cover=0.100_poison_seed=2333_arch=vgg19_bn_tiny_imagenet (test alpha=0.6)
+[GPU 0] tiny_imagenet poisoned_train_set3/adaptive_patch_0.005_alpha=0.000_cover=0.050_poison_seed=2333_arch=vgg19_bn_tiny_imagenet (test alpha=0.5)
+All 14 single-GPU configuration folders completed successfully.
