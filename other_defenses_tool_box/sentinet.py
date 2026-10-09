@@ -350,20 +350,20 @@ class SentiNet(BackdoorDefense):
                 c_label = c_label.cuda()
                 
                 # Oracle (approximate) knowledge to the trigger position
-                # ========== [修复] basic 攻击应该和 badnet 一样使用固定位置 ==========
-                # basic 攻击和 badnet 攻击都是局部 patch 攻击，位置在右下角
-                # 应该使用固定位置而不是 gradcam_mask
-                if args.poison_type == 'badnet' or args.poison_type == 'badnet_all_to_all' or args.poison_type == 'basic':
-                    dx = dy = 5
-                    posx = self.img_size - dx
-                    posy = self.img_size - dy
-                    
-                    adv_input[:, :, posx:posx+dx, posy:posy+dy] = poison_input[0, :, posx:posx+dx, posy:posy+dy]
-                    # 修复：确保随机tensor在正确的设备上
-                    device = inert_input.device
-                    inert_input[:, :, posx:posx+dx, posy:posy+dy] = self.normalizer(torch.rand((inert_input.shape[0], 3, dx, dy), device=device))
-                    # inert_input[:, :, posx:posx+dx, posy:posy+dy] = self.random_img[:, posx:posx+dx, posy:posy+dy]
-                elif args.poison_type == 'TaCT' or args.poison_type == 'trojan':
+                # Historical BadNets/basic special handling is intentionally
+                # retained below as comments. These attacks now use the same
+                # Grad-CAM branch as the other attacks.
+                # if args.poison_type == 'badnet' or args.poison_type == 'badnet_all_to_all' or args.poison_type == 'basic':
+                #     dx = dy = 5
+                #     posx = self.img_size - dx
+                #     posy = self.img_size - dy
+                #
+                #     adv_input[:, :, posx:posx+dx, posy:posy+dy] = poison_input[0, :, posx:posx+dx, posy:posy+dy]
+                #     device = inert_input.device
+                #     inert_input[:, :, posx:posx+dx, posy:posy+dy] = self.normalizer(torch.rand((inert_input.shape[0], 3, dx, dy), device=device))
+                #     inert_input[:, :, posx:posx+dx, posy:posy+dy] = self.random_img[:, posx:posx+dx, posy:posy+dy]
+
+                if args.poison_type == 'TaCT' or args.poison_type == 'trojan':
                     dx = dy = 16
                     posx = self.img_size - dx
                     posy = self.img_size - dy
@@ -373,7 +373,16 @@ class SentiNet(BackdoorDefense):
                     device = inert_input.device
                     inert_input[:, :, posx:posx+dx, posy:posy+dy] = self.normalizer(torch.rand((inert_input.shape[0], 3, dx, dy), device=device))
                     # inert_input[:, :, posx:posx+dx, posy:posy+dy] = self.random_img[:, posx:posx+dx, posy:posy+dy]
-                elif args.poison_type == 'dynamic' or args.poison_type == 'adaptive_patch':
+                # Historical Adaptive-Patch special handling is intentionally
+                # retained below as comments. Adaptive-Patch now falls through
+                # to the common Grad-CAM branch; dynamic keeps this behavior.
+                # elif args.poison_type == 'dynamic' or args.poison_type == 'adaptive_patch':
+                #     trigger_mask = ((poison_input - _input).abs() > 1e-4)[0].cuda()
+                #     adv_input[:, trigger_mask] = poison_input[0, trigger_mask]
+                #     device = inert_input.device
+                #     inert_input[:, trigger_mask] = self.normalizer(torch.rand(inert_input.shape, device=device))[:, trigger_mask]
+
+                elif args.poison_type == 'dynamic':
                     trigger_mask = ((poison_input - _input).abs() > 1e-4)[0].cuda()
                     # self.debug_save_img(poison_input)
                     # print(trigger_mask.sum())
